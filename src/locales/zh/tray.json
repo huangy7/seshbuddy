@@ -1,0 +1,8 @@
+{
+  "openMain": "打开主界面",
+  "noProfiles": "暂无配置",
+  "switchProfile": "修改配置",
+  "quit": "退出",
+  "updateAvailable": "有新版本 v{version}，点击查看",
+  "ignoreVersion": "忽略此版本"
+}

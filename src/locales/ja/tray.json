@@ -1,0 +1,8 @@
+{
+  "openMain": "SeshBuddy を開く",
+  "noProfiles": "プロファイルなし",
+  "switchProfile": "プロファイルを切り替え",
+  "quit": "終了",
+  "updateAvailable": "バージョン {version} があります — クリックで表示",
+  "ignoreVersion": "このバージョンを無視"
+}

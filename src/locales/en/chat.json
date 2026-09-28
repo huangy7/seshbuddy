@@ -1,0 +1,67 @@
+{
+  "selectionPill": {
+    "selected": "Selected",
+    "clearSelection": "Clear selection",
+    "selectAllMessages": "Select all messages",
+    "deselectAll": "Deselect all",
+    "plainText": "Plain text (.txt)",
+    "jsonData": "JSON data",
+    "rawJsonlStream": "Raw JSONL stream",
+    "pngLongImage": "PNG long image"
+  },
+  "imageFullscreen": {
+    "zoomOut": "Zoom out (-)",
+    "resetZoom": "Click to reset zoom (0)",
+    "fit": "Fit",
+    "zoomIn": "Zoom in (+)",
+    "fitToWindow": "Fit to window",
+    "copiedSvg": "SVG source copied",
+    "copySvg": "Copy SVG source",
+    "downloadSvg": "Download SVG file"
+  },
+  "imagePart": {
+    "downloadImage": "Download image"
+  },
+  "messageHeader": {
+    "tokenInput": "Input (upstream): {count}",
+    "tokenOutput": "Output (downstream): {count}",
+    "tokenCacheRead": "Cache read: {count} ({rate}% hit)",
+    "tokenCacheWrite": "Cache write: {count}",
+    "modelTooltip": "Model: {model}",
+    "forkFromHere": "Continue from here (Fork)",
+    "identityResolving": "Resolving session identity",
+    "addBookmark": "Add bookmark",
+    "removeBookmark": "Remove bookmark",
+    "viewApiRequest": "View API request"
+  },
+  "toolGroup": {
+    "fullContentFailed": "Failed to load full content, showing preview",
+    "loadingFullContent": "Loading full content…",
+    "openSubagentInNewTab": "Open subagent in new tab"
+  },
+  "thinkingPart": {
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "thinkingProcess": "Thinking Process",
+    "wordCount": "{count} words"
+  },
+  "apiDetail": {
+    "notFound": "API request not found",
+    "request": "Request",
+    "response": "Response",
+    "body": "Body",
+    "headers": "Headers"
+  },
+  "svgCard": {
+    "defaultTitle": "Chart",
+    "switchToChart": "Switch to chart view",
+    "viewSource": "View SVG source",
+    "preview": "View larger image",
+    "downloadSvg": "Download SVG"
+  },
+  "avatar": {
+    "roleUser": "User",
+    "roleAssistant": "AI Assistant",
+    "providerTooltip": "Provider: {provider}"
+  }
+}

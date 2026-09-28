@@ -1,0 +1,111 @@
+{
+  "messageList": {
+    "summarySteps": "Abgeschlossene Schritte: {count}",
+    "summaryNotes": "Hinweise: {count}",
+    "summaryNotesOnly": "Prozesshinweise: {count}",
+    "summaryDuration": "Dauer: {duration}",
+    "emptyTitle": "Wie kann ich dir helfen?",
+    "emptyPinHint": "Startet mit {profile} · nach dem Senden fixiert",
+    "suggestionProfile": "Nutzerprofil aus meinen Gesprächen erstellen",
+    "suggestionSearch": "Gespräche mit „Refactoring“ suchen",
+    "suggestionWeekly": "Fortschritt dieser Woche zusammenfassen",
+    "profilePrompt": "Erstelle auf Basis meines gesamten Gesprächsverlaufs einen strukturierten Nutzerprofil-Bericht. Bitte mit folgenden Dimensionen:\n\n1. **Kernpersönlichkeit**: Leite aus meiner Fragestellung, meinen Schwerpunkten und meinen Formulierungsgewohnheiten 3-5 Kernmerkmale ab (z. B. ergebnisorientiert, detailgenau, sehr neugierig) und belege sie mit konkreten Aussagen aus den Gesprächen.\n\n2. **Kommunikationsstil und Vorlieben**: Analysiere, wie ich am liebsten kommuniziere — logikgetrieben oder divergent? Kurze Antworten oder tiefe Erklärungen? Gibt es implizite Vorlieben beim Antwortformat?\n\n3. **Fachgebiete und Tech-Stack**: Leite die technischen Gebiete, Toolchains und Fachkenntnisse ab, mit denen ich mich am häufigsten befasse, und schätze meinen Kenntnisstand je Gebiet ein.\n\n4. **Arbeitsgewohnheiten und Denkmuster**: Wie zerlege ich Probleme? Eher top-down oder bottom-up? Gibt es einen erkennbaren Entscheidungsstil oder blinde Flecken?\n\n5. **Geschätzte MBTI-Neigung**: Leite aus der Analyse meinen wahrscheinlichsten MBTI-Typ ab und gib je Dimension eine Tendenz und Konfidenz an.\n\n6. **Best Practices für die Zusammenarbeit mit KI**: Gib auf Basis des Profils 3-5 konkrete Hinweise, wie ich effizienter mit KI zusammenarbeiten kann.\n\nAnalysiere auf Basis der tatsächlichen Gesprächsinhalte und vermeide allgemeine, horoskopartige Beschreibungen. Ist eine Dimension datenarm, kennzeichne sie als „geringe Konfidenz“.",
+    "thinking": "Denkt nach…",
+    "thoughtFor": "Dachte {duration} nach",
+    "stopped": "Gestoppt",
+    "copyMarkdownTitle": "Gesamtes Markdown kopieren",
+    "usageTooltip": "Kontext gesamt {total} (neue Eingabe {input} · Cache-Lesen {cacheRead} · Cache-Schreiben {cacheWrite}) · Ausgabe {output}"
+  },
+  "input": {
+    "quickPhrases": "Schnellbausteine",
+    "slashTip": "↑↓ zum Auswählen · Enter zum Einfügen",
+    "noPhraseMatch": "Keine passenden Schnellbausteine",
+    "placeholder": "Frag etwas… (/ für Schnellbausteine)",
+    "usageTooltip": "Ausgabe-Tokens über alle Runden dieses Gesprächs",
+    "cumulative": "Kumuliert",
+    "stopTitle": "Generierung stoppen"
+  },
+  "quickPhrases": {
+    "empty": "Noch keine Schnellbausteine – unten einen neuen anlegen",
+    "edit": "Bearbeiten",
+    "create": "+ Neuer Schnellbaustein",
+    "editTitle": "Schnellbaustein bearbeiten",
+    "createTitle": "Neuer Schnellbaustein",
+    "namePlaceholder": "Name (z. B. gestrige Arbeit durchgehen)",
+    "contentPlaceholder": "Prompt-Inhalt; unterstützte Variablen: {variables}",
+    "deleteConfirm": "Schnellbaustein „{name}“ löschen?"
+  },
+  "history": {
+    "title": "Gesprächsverlauf",
+    "empty": "Noch kein Gesprächsverlauf",
+    "untitled": "(Ohne Titel)",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "last7Days": "Letzte 7 Tage",
+    "earlier": "Älter",
+    "deleteConversation": "Gespräch löschen",
+    "deleteTitle": "Löschen bestätigen",
+    "deleteConfirm": "Gespräch „{title}“ löschen?"
+  },
+  "phraseVariables": {
+    "today": "heute",
+    "yesterday": "gestern",
+    "thisMonday": "dieser Montag",
+    "thisFriday": "dieser Freitag",
+    "lastMonday": "letzter Montag",
+    "lastFriday": "letzter Freitag"
+  },
+  "cacheBackfill": {
+    "indexBuilding": "Volltextindex wird erstellt…",
+    "backfilling": "Cache wird aufgefüllt…",
+    "failed": "Cache-Auffüllen fehlgeschlagen: {error}",
+    "dismiss": "Verstanden",
+    "enableIndexHint": "Mit dem Volltextindex kann der Assistent den Text aller Gespräche durchsuchen",
+    "enableIndex": "Volltextindex aktivieren",
+    "ignore": "Ignorieren",
+    "pendingHint": "Gespräche ohne Text-Cache: {pending} (im Cache: {cached})",
+    "startBackfill": "Im Hintergrund auffüllen"
+  },
+  "modelPicker": {
+    "defaultModel": "Standardmodell",
+    "followConfig": "Konfiguration folgen",
+    "chipTitleSelected": "Aktuelles Modell: {label} ({id})",
+    "chipTitleFollow": "Aktuelles Modell: Konfiguration folgen ({hint})",
+    "mainModel": "Hauptmodell ({model})",
+    "noOverride": "In der aktuellen Konfiguration sind keine Modell-Overrides gesetzt"
+  },
+  "profilePicker": {
+    "lockedTitle": "Dieses Gespräch ist an dieses Profil gebunden – in einem neuen Gespräch wechselbar",
+    "switchTitle": "Modellprofil wechseln",
+    "select": "Profil auswählen",
+    "empty": "Keine Profile verfügbar"
+  },
+  "app": {
+    "newConversation": "Neue Unterhaltung",
+    "newConversationGlyph": "+",
+    "pinWindow": "Fenster anheften",
+    "unpinWindow": "Fenster lösen",
+    "engineMissing": "claude CLI wurde nicht gefunden. Bitte zuerst installieren, bevor du den Assistenten verwendest."
+  },
+  "activity": {
+    "list": "Gespräche auflisten",
+    "search": "Gesprächsinhalte durchsuchen",
+    "read": "Gesprächstext lesen",
+    "run": "Befehl ausführen",
+    "targetQuoted": "„{target}“",
+    "listing": "Gespräche werden aufgelistet…",
+    "searching": "Gesprächsinhalte werden durchsucht…",
+    "reading": "Gesprächstext wird gelesen…",
+    "running": "Befehl wird ausgeführt…",
+    "thinking": "Denkt nach…"
+  },
+  "error": {
+    "unknown": "Unbekannter Fehler",
+    "engineFailed": "Assistent-Engine fehlgeschlagen",
+    "listenerTimeout": "Zeitüberschreitung bei der Registrierung des Event-Listeners (3s)",
+    "listenerFailed": "Registrierung des Event-Listeners fehlgeschlagen: {error}",
+    "historyLoadFailed": "Verlauf konnte nicht geladen werden: {error}",
+    "cliMissing": "Claude CLI nicht erkannt. Bitte zuerst installieren und einrichten.",
+    "turnInProgress": "Die vorherige Antwort läuft noch. Bitte warten."
+  }
+}

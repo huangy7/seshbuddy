@@ -1,0 +1,67 @@
+{
+  "selectionPill": {
+    "selected": "已选",
+    "clearSelection": "清空所选",
+    "selectAllMessages": "全选所有消息",
+    "deselectAll": "取消全选",
+    "plainText": "纯文本 (.txt)",
+    "jsonData": "JSON 数据",
+    "rawJsonlStream": "JSONL 原始流",
+    "pngLongImage": "PNG 高清长图"
+  },
+  "imageFullscreen": {
+    "zoomOut": "缩小 (-)",
+    "resetZoom": "点击重置缩放 (0)",
+    "fit": "适应",
+    "zoomIn": "放大 (+)",
+    "fitToWindow": "自适应大小",
+    "copiedSvg": "已复制 SVG 源码",
+    "copySvg": "复制 SVG 源码",
+    "downloadSvg": "下载 SVG 文件"
+  },
+  "imagePart": {
+    "downloadImage": "下载图片"
+  },
+  "messageHeader": {
+    "tokenInput": "输入 (上行): {count}",
+    "tokenOutput": "输出 (下行): {count}",
+    "tokenCacheRead": "缓存读取: {count} ({rate}% 命中)",
+    "tokenCacheWrite": "缓存写入: {count}",
+    "modelTooltip": "Model: {model}",
+    "forkFromHere": "从这里继续 (Fork)",
+    "identityResolving": "正在解析会话身份",
+    "addBookmark": "添加书签",
+    "removeBookmark": "取消书签",
+    "viewApiRequest": "查看 API 请求"
+  },
+  "toolGroup": {
+    "fullContentFailed": "全文加载失败，当前显示预览",
+    "loadingFullContent": "正在加载全文…",
+    "openSubagentInNewTab": "在新标签页中打开子代理"
+  },
+  "thinkingPart": {
+    "collapse": "折叠",
+    "expand": "展开",
+    "thinkingProcess": "Thinking Process",
+    "wordCount": "{count} words"
+  },
+  "apiDetail": {
+    "notFound": "未找到对应的 API 请求",
+    "request": "请求",
+    "response": "响应",
+    "body": "Body",
+    "headers": "Headers"
+  },
+  "svgCard": {
+    "defaultTitle": "图表",
+    "switchToChart": "切换到图表展示",
+    "viewSource": "查看 SVG 源码",
+    "preview": "查看大图",
+    "downloadSvg": "下载 SVG"
+  },
+  "avatar": {
+    "roleUser": "User",
+    "roleAssistant": "AI Assistant",
+    "providerTooltip": "Provider: {provider}"
+  }
+}

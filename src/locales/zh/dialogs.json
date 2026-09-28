@@ -1,0 +1,153 @@
+{
+  "common": {
+    "close": "关闭",
+    "cancel": "取消",
+    "copied": "已复制",
+    "copyFailed": "复制失败",
+    "copyCommand": "复制命令",
+    "launchMode": "启动方式",
+    "terminal": "终端",
+    "agent": "Agent",
+    "apiProfile": "API 配置",
+    "apiProfilePlaceholder": "请选择 API 配置...",
+    "apiProfileEmpty": "暂无可用的 API 配置"
+  },
+  "newSession": {
+    "title": "新建对话",
+    "projectDir": "项目目录",
+    "browseTitle": "选择项目目录",
+    "projectPlaceholder": "请选择项目目录...",
+    "projectEmpty": "暂无最近使用的项目",
+    "browse": "浏览本地磁盘...",
+    "cliType": "CLI 类型",
+    "createInAgent": "在 Agent 中创建",
+    "createInTerminal": "在终端中创建"
+  },
+  "resumeSession": {
+    "title": "恢复会话",
+    "archiveNotice": "此会话已归档，恢复启动时会自动从快照解压源文件至本地磁盘。"
+  },
+  "input": {
+    "placeholder": "请输入名称...",
+    "confirm": "确定"
+  },
+  "exportSession": {
+    "title": "导出会话",
+    "scope": "导出范围",
+    "scopeAllTitle": "全部消息",
+    "scopeAllDesc": "导出完整的会话记录",
+    "scopeSelectionTitle": "选择部分消息",
+    "scopeSelectionDesc": "手动勾选要导出的消息，支持导出为图片",
+    "format": "导出格式",
+    "enterSelection": "进入选择"
+  },
+  "feedback": {
+    "title": "问题反馈与社区交流",
+    "subtitle": "SeshBuddy 是开源项目，所有反馈将直通 GitHub 社区追踪",
+    "bugTitle": "提交缺陷报告 (Bug Report)",
+    "bugDesc": "遇到报错、崩溃或界面渲染异常？前往 GitHub 提交缺陷报告",
+    "featureTitle": "提议新功能 (Feature Request)",
+    "featureDesc": "建议支持新的 AI CLI、会话分析能力或改进现有的界面交互体验",
+    "searchTitle": "查阅已有 Issues 与讨论",
+    "searchDesc": "搜索是否已有开发者提交过相同问题或已发布的临时解决方案",
+    "footerTip": "点击选项将在系统默认浏览器中打开 GitHub 页面",
+    "diagTitle": "### 运行环境诊断信息 (Environment Diagnostics)",
+    "diagApp": "- **应用版本 (App)**: {app} v{version} (Tauri v{tauri})",
+    "diagAppFallback": "- **应用版本 (App)**: {value}",
+    "diagUnknownEnv": "未知（非桌面运行环境）",
+    "diagOs": "- **操作系统 (OS)**: {osName} {osVersion} ({arch})",
+    "diagPlatform": "- **系统平台 (Platform)**: {platform}",
+    "diagKernel": "- **系统内核 (Kernel)**: {kernel}",
+    "diagCpu": "- **处理器 (CPU)**: {cpu} ({cores} 核心)",
+    "diagMemory": "- **物理内存 (Memory)**: {memory}",
+    "diagClis": "- **检测到的 AI CLI 状态**:",
+    "diagUserAgent": "- **浏览器内核 (User Agent)**: {userAgent}",
+    "diagTimestamp": "- **采样时间 (Timestamp)**: {timestamp}",
+    "cliInstalled": "已安装 ✓",
+    "cliMissing": "未检测到 ✗",
+    "cliHasSessions": " (含历史对话)",
+    "bugBody": "## 问题描述\n\n请详细描述您遇到的问题与复现步骤...\n\n## 预期行为\n\n请描述预期结果...\n\n---\n{diagnostics}",
+    "featureBody": "## 需求背景\n\n描述您希望解决的问题或业务场景...\n\n## 建议方案\n\n您希望 SeshBuddy 如何实现此功能...\n\n---\n{signature}"
+  },
+  "pricing": {
+    "title": "模型价格目录 (Pricing Catalog)",
+    "modelCount": "共 {count} 个模型",
+    "dataSource": "数据源:",
+    "lastUpdated": "最近更新:",
+    "builtinOffline": "内置离线",
+    "refreshTitle": "从 models.dev 刷新最新价格",
+    "refreshing": "刷新中...",
+    "refresh": "刷新价格",
+    "scopeUsed": "已用模型",
+    "scopeAll": "全量库",
+    "searchPlaceholder": "搜索模型或厂商...",
+    "clearSearch": "清空搜索",
+    "refreshFailed": "刷新失败: {error}",
+    "emptyTitle": "未找到匹配的模型",
+    "emptyHint": "请尝试修改搜索词或选择全部供应商",
+    "colModel": "模型名称",
+    "colProvider": "供应商",
+    "colInput": "输入 / 1M Tokens",
+    "colOutput": "输出 / 1M Tokens",
+    "colCacheWrite": "缓存写入 / 1M",
+    "colCacheRead": "缓存读取 / 1M",
+    "loadMore": "展开更多 (剩余 {count} 个)",
+    "footerCount": "显示 {shown} / {total} 个模型",
+    "footerHint": "费率单位为 USD / 1M Tokens · 自动智能匹配最优版本",
+    "providerAll": "全部厂商 ({count})",
+    "providerModelCount": "{count} 个",
+    "providerCurrentSession": "当前会话",
+    "provider": {
+      "anthropic": "Anthropic",
+      "openai": "OpenAI",
+      "google": "Google",
+      "deepseek": "DeepSeek",
+      "moonshot-kimi": "Moonshot / Kimi",
+      "zhipu": "Zhipu / 智谱 GLM",
+      "alibaba": "Alibaba / 通义千问",
+      "minimax": "MiniMax",
+      "stepfun": "StepFun / 阶跃星辰",
+      "baichuan": "Baichuan / 百川",
+      "bytedance": "ByteDance / 豆包",
+      "tencent": "Tencent / 腾讯混元",
+      "baidu": "Baidu / 百度千帆",
+      "siliconflow": "SiliconFlow",
+      "meta": "Meta",
+      "mistral": "Mistral",
+      "groq": "Groq",
+      "xai": "xAI"
+    }
+  },
+  "apiDebug": {
+    "title": "API 调试",
+    "titleWithCli": "{name} API 调试",
+    "minimize": "最小化",
+    "restore": "还原",
+    "maximize": "最大化",
+    "runningInBackground": "后台运行中"
+  },
+  "whatsNew": {
+    "badge": "新",
+    "confirm": "好的"
+  },
+  "deleteConfirm": {
+    "title": "删除确认",
+    "sessionMessage": "确定要删除以下对话吗？\n\n{title}\n\n原始文件将移至回收站；SeshBuddy 内的归档、快照和索引会同步删除。",
+    "projectMessage": "确定要删除以下项目的所有对话吗？\n\n{path}\n（共 {count} 个对话）\n\n原始文件将移至回收站；SeshBuddy 内的归档、快照和索引会同步删除。",
+    "batchTitle": "批量删除确认",
+    "batchMessage": "确定要删除选中的 {count} 个对话吗？\n\n原始文件将移至回收站；SeshBuddy 内的归档、快照和索引会同步删除。"
+  },
+  "diffTooLarge": {
+    "message": "文件过大（超过 1MB），无法预览 Diff"
+  },
+  "closeTerminal": {
+    "title": "关闭终端",
+    "message": "确定要关闭此终端会话？进程将被终止。"
+  },
+  "closeFile": {
+    "title": "关闭文件",
+    "message": "文件有未保存的修改，是否保存后关闭？",
+    "confirm": "保存并关闭",
+    "discard": "放弃修改"
+  }
+}

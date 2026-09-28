@@ -1,0 +1,153 @@
+{
+  "common": {
+    "close": "閉じる",
+    "cancel": "キャンセル",
+    "copied": "コピーしました",
+    "copyFailed": "コピーに失敗しました",
+    "copyCommand": "コマンドをコピー",
+    "launchMode": "起動方法",
+    "terminal": "ターミナル",
+    "agent": "Agent",
+    "apiProfile": "API プロファイル",
+    "apiProfilePlaceholder": "API プロファイルを選択...",
+    "apiProfileEmpty": "利用可能な API プロファイルがありません"
+  },
+  "newSession": {
+    "title": "新規セッション",
+    "projectDir": "プロジェクトディレクトリ",
+    "browseTitle": "プロジェクトディレクトリを選択",
+    "projectPlaceholder": "プロジェクトディレクトリを選択...",
+    "projectEmpty": "最近使ったプロジェクトはありません",
+    "browse": "ローカルディスクを参照...",
+    "cliType": "CLI の種類",
+    "createInAgent": "Agent で作成",
+    "createInTerminal": "ターミナルで作成"
+  },
+  "resumeSession": {
+    "title": "セッションを再開",
+    "archiveNotice": "このセッションはアーカイブ済みです。再開するとスナップショットからソースファイルをローカルディスクに展開します。"
+  },
+  "input": {
+    "placeholder": "名前を入力...",
+    "confirm": "OK"
+  },
+  "exportSession": {
+    "title": "セッションをエクスポート",
+    "scope": "エクスポート範囲",
+    "scopeAllTitle": "すべてのメッセージ",
+    "scopeAllDesc": "セッションの全記録をエクスポート",
+    "scopeSelectionTitle": "メッセージを選択",
+    "scopeSelectionDesc": "エクスポートするメッセージを手動で選択（画像エクスポートにも対応）",
+    "format": "エクスポート形式",
+    "enterSelection": "選択へ進む"
+  },
+  "feedback": {
+    "title": "フィードバックとコミュニティ",
+    "subtitle": "SeshBuddy はオープンソースです。すべてのフィードバックは GitHub コミュニティのトラッカーに直接届きます",
+    "bugTitle": "バグ報告を送信",
+    "bugDesc": "エラー、クラッシュ、表示の乱れがありますか？GitHub でバグを報告できます",
+    "featureTitle": "機能リクエストを送信",
+    "featureDesc": "新しい AI CLI、セッション分析、UI の改善を提案できます",
+    "searchTitle": "既存の Issue と議論を調べる",
+    "searchDesc": "同じ問題がすでに報告されていないか、回避策が公開されていないかを検索します",
+    "footerTip": "項目をクリックすると既定のブラウザーで GitHub ページが開きます",
+    "diagTitle": "### 実行環境の診断情報 (Environment Diagnostics)",
+    "diagApp": "- **アプリのバージョン (App)**: {app} v{version} (Tauri v{tauri})",
+    "diagAppFallback": "- **アプリのバージョン (App)**: {value}",
+    "diagUnknownEnv": "不明（デスクトップアプリ以外での実行）",
+    "diagOs": "- **オペレーティングシステム (OS)**: {osName} {osVersion} ({arch})",
+    "diagPlatform": "- **プラットフォーム (Platform)**: {platform}",
+    "diagKernel": "- **カーネル (Kernel)**: {kernel}",
+    "diagCpu": "- **プロセッサ (CPU)**: {cpu} ({cores} コア)",
+    "diagMemory": "- **メモリ (Memory)**: {memory}",
+    "diagClis": "- **検出された AI CLI の状態**:",
+    "diagUserAgent": "- **ブラウザーエンジン (User Agent)**: {userAgent}",
+    "diagTimestamp": "- **取得時刻 (Timestamp)**: {timestamp}",
+    "cliInstalled": "インストール済み ✓",
+    "cliMissing": "未検出 ✗",
+    "cliHasSessions": " (履歴あり)",
+    "bugBody": "## 問題の説明\n\n発生した問題と再現手順を詳しく記載してください...\n\n## 期待する動作\n\n期待する結果を記載してください...\n\n---\n{diagnostics}",
+    "featureBody": "## 背景\n\n解決したい問題や利用シーンを記載してください...\n\n## 提案する方法\n\nSeshBuddy でどのように実現してほしいかを記載してください...\n\n---\n{signature}"
+  },
+  "pricing": {
+    "title": "モデル料金カタログ (Pricing Catalog)",
+    "modelCount": "モデル: {count}",
+    "dataSource": "データソース:",
+    "lastUpdated": "最終更新:",
+    "builtinOffline": "同梱のオフラインデータ",
+    "refreshTitle": "models.dev から最新の料金を取得",
+    "refreshing": "更新中...",
+    "refresh": "料金を更新",
+    "scopeUsed": "使用済みモデル",
+    "scopeAll": "全カタログ",
+    "searchPlaceholder": "モデルまたは提供元を検索...",
+    "clearSearch": "検索をクリア",
+    "refreshFailed": "更新に失敗しました: {error}",
+    "emptyTitle": "一致するモデルがありません",
+    "emptyHint": "検索語を変更するか、すべての提供元を選択してください",
+    "colModel": "モデル名",
+    "colProvider": "提供元",
+    "colInput": "入力 / 1M Tokens",
+    "colOutput": "出力 / 1M Tokens",
+    "colCacheWrite": "キャッシュ書き込み / 1M",
+    "colCacheRead": "キャッシュ読み込み / 1M",
+    "loadMore": "さらに表示 (残り {count} 件)",
+    "footerCount": "{shown} / {total} 件のモデルを表示",
+    "footerHint": "料金は USD / 1M Tokens · 最適なバージョンを自動で照合",
+    "providerAll": "すべての提供元 ({count})",
+    "providerModelCount": "{count} 件",
+    "providerCurrentSession": "現在のセッション",
+    "provider": {
+      "anthropic": "Anthropic",
+      "openai": "OpenAI",
+      "google": "Google",
+      "deepseek": "DeepSeek",
+      "moonshot-kimi": "Moonshot / Kimi",
+      "zhipu": "Zhipu / 智谱 GLM",
+      "alibaba": "Alibaba / 通义千问",
+      "minimax": "MiniMax",
+      "stepfun": "StepFun / 阶跃星辰",
+      "baichuan": "Baichuan / 百川",
+      "bytedance": "ByteDance / 豆包",
+      "tencent": "Tencent / 腾讯混元",
+      "baidu": "Baidu / 百度千帆",
+      "siliconflow": "SiliconFlow",
+      "meta": "Meta",
+      "mistral": "Mistral",
+      "groq": "Groq",
+      "xai": "xAI"
+    }
+  },
+  "apiDebug": {
+    "title": "API デバッグ",
+    "titleWithCli": "{name} API デバッグ",
+    "minimize": "最小化",
+    "restore": "元に戻す",
+    "maximize": "最大化",
+    "runningInBackground": "バックグラウンドで実行中"
+  },
+  "whatsNew": {
+    "badge": "新着",
+    "confirm": "OK"
+  },
+  "deleteConfirm": {
+    "title": "削除の確認",
+    "sessionMessage": "以下の会話を削除しますか？\n\n{title}\n\n元のファイルはゴミ箱に移動されます。SeshBuddy 内のアーカイブ、スナップショット、インデックスも同時に削除されます。",
+    "projectMessage": "以下のプロジェクトのすべての会話を削除しますか？\n\n{path}\n（全 {count} 件の会話）\n\n元のファイルはゴミ箱に移動されます。SeshBuddy 内のアーカイブ、スナップショット、インデックスも同時に削除されます。",
+    "batchTitle": "一括削除の確認",
+    "batchMessage": "選択中の {count} 件の会話を削除しますか？\n\n元のファイルはゴミ箱に移動されます。SeshBuddy 内のアーカイブ、スナップショット、インデックスも同時に削除されます。"
+  },
+  "diffTooLarge": {
+    "message": "ファイルが大きすぎるため (1MB 超)、Diff をプレビューできません"
+  },
+  "closeTerminal": {
+    "title": "ターミナルを閉じる",
+    "message": "このターミナルセッションを閉じますか？プロセスは終了されます。"
+  },
+  "closeFile": {
+    "title": "ファイルを閉じる",
+    "message": "このファイルには未保存の変更があります。保存してから閉じますか？",
+    "confirm": "保存して閉じる",
+    "discard": "変更を破棄"
+  }
+}

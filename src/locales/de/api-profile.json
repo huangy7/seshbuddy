@@ -1,0 +1,344 @@
+{
+  "page": {
+    "title": "API-Profile",
+    "cliAriaLabel": "API-Profil-CLI",
+    "import": "Importieren",
+    "importTitle": "API-Profil-Backup importieren",
+    "importFromFile": "Aus Datei importieren…",
+    "importFromClipboard": "Aus der Zwischenablage importieren",
+    "export": "Exportieren",
+    "exportTitle": "API-Profil-Backup exportieren",
+    "exportToFile": "In Datei exportieren…",
+    "copyToClipboard": "In die Zwischenablage kopieren"
+  },
+  "proxyBanner": "Der API-Proxy ist aktiviert. Die Base-URL zeigt vorübergehend auf 127.0.0.1:{port} und wird beim Deaktivieren des Proxys automatisch wiederhergestellt.",
+  "nameRequired": "Der Profilname darf nicht leer sein",
+  "nameConflict": "Ein Profil mit diesem Namen existiert bereits; bitte einen anderen Namen verwenden",
+  "newProfileName": "Neues Profil",
+  "scope": {
+    "global": "Global"
+  },
+  "field": {
+    "mainModel": "Hauptmodell",
+    "timeout": "Timeout",
+    "traffic": "Traffic",
+    "reasoning": "Reasoning",
+    "token": "Token",
+    "effort": "Aufwand",
+    "beta": "Beta",
+    "key": "Schlüssel"
+  },
+  "cardHint": {
+    "claude": "Beim Speichern wird das Profil automatisch auf alle gebundenen Bereiche übertragen; andere settings.json-Felder wie hooks bleiben unverändert",
+    "codex": "Beim Speichern wird das Profil automatisch in die Codex-Konfigurationsdatei übernommen; der übrige Inhalt von config.toml / auth.json bleibt unverändert"
+  },
+  "connectionHint": {
+    "claude": "Dienst-Endpunkt, der mit der Claude-API kompatibel ist; darf nicht mit einem Schrägstrich enden",
+    "codex": "base_url des aktuellen Providers; darf nicht mit einem Schrägstrich enden"
+  },
+  "apiKeyPlaceholder": {
+    "claude": "sk-ant-... oder ein JWT-Token",
+    "codex": "sk-... oder ein JWT-Token"
+  },
+  "modelGroup": {
+    "others": "Sonstige"
+  },
+  "fetchModels": {
+    "missingKey": "Bitte zuerst einen API-Key eingeben",
+    "success": "Modelle abgerufen: {count} ({latency}ms)",
+    "failed": "Die Modellliste konnte nicht abgerufen werden"
+  },
+  "codexToml": {
+    "officialComment": "# Codex Official (offizieller ChatGPT-Authentifizierungsmodus)\n# Anmeldedaten werden in auth.json verwaltet\n# config.toml behält die offiziellen Standardeinstellungen\n"
+  },
+  "codexProvider": {
+    "title": "Codex-Provider",
+    "hint": "Das Modell wird in `model` geschrieben, die Base-URL in `model_providers.{provider}.base_url`."
+  },
+  "dialog": {
+    "importFailed": "Import fehlgeschlagen",
+    "common": {
+      "nameLabel": "Bereichsname",
+      "nameRequired": "Der Bereichsname darf nicht leer sein",
+      "nameReserved": "Der Name darf nicht 'global' sein",
+      "nameDuplicate": "Ein Bereich mit diesem Namen existiert bereits",
+      "projectDirsLabel": "Gebundene Projektverzeichnisse",
+      "browse": "Durchsuchen…",
+      "emptyProjects": "Keine gescannten Projektverzeichnisse vorhanden. Klicken Sie auf \"Durchsuchen…\", um manuell eines hinzuzufügen.",
+      "chooseDirTitle": "Projektverzeichnis auswählen",
+      "missingDirTitle": "Das lokale Verzeichnis existiert nicht mehr oder wurde entfernt",
+      "staleBadge": "Ungültig",
+      "pathMissing": "{path} (lokales Verzeichnis existiert nicht)",
+      "pathCopied": "Pfad kopiert",
+      "copyFullPath": "Vollständigen Pfad kopieren",
+      "dirMissingTitle": "Verzeichnis existiert nicht (klicken, um den Pfad zu kopieren)",
+      "openInFileManagerTitle": "Im Finder / Dateimanager öffnen",
+      "closeNotice": "Hinweis schließen",
+      "openFailed": "Öffnen fehlgeschlagen: {error}",
+      "openFailedMissing": "Öffnen fehlgeschlagen: Das lokale Verzeichnis existiert nicht mehr oder wurde entfernt (der Pfad wurde automatisch kopiert)",
+      "fileManagerUnavailable": "Der Dateimanager konnte nicht geöffnet werden"
+    },
+    "scopeCreate": {
+      "title": "Neuer Projektbereich",
+      "nameTip": "Wählen Sie unten ein Verzeichnis, um den Namen automatisch zu übernehmen",
+      "namePlaceholder": "z. B. Work, ProjectA (wird beim Auswählen eines Verzeichnisses automatisch gefüllt)",
+      "nameEmptyHint": "Geben Sie einen Bereichsnamen ein (oder wählen Sie ein Projektverzeichnis zum automatischen Ausfüllen)",
+      "creating": "Wird erstellt…",
+      "creatingButton": "Wird erstellt…",
+      "createFailed": "Erstellung fehlgeschlagen",
+      "detectTitle": "Vorhandene Konfiguration im Projekt gefunden",
+      "detecting": "Wird erkannt…",
+      "officialDefault": "(offizieller Standard)",
+      "matchedProfileTitle": "Identisch mit \"{name}\" in der Profilbibliothek",
+      "noMatch": "Keine Übereinstimmung",
+      "inconsistentWarning": "Die Verzeichnisse enthalten unterschiedliche Konfigurationen; beim Anwenden werden alle überschrieben",
+      "bindToProfile": "An das vorhandene Profil \"{name}\" binden",
+      "importAsNew": "Als neues Profil importieren und binden",
+      "ignoreForNow": "Ignorieren und später konfigurieren"
+    },
+    "scopeEdit": {
+      "title": "Projektbereich verwalten",
+      "namePlaceholder": "z. B. Work, ProjectA",
+      "nameEmptyHint": "Geben Sie einen Bereichsnamen ein",
+      "saving": "Wird gespeichert…",
+      "updateFailed": "Aktualisierung fehlgeschlagen"
+    },
+    "scopeDelete": {
+      "title": "Bereich löschen",
+      "message": "Bereich \"{name}\" löschen? Dadurch wird die Profilbindung des Bereichs entfernt, die Profile in der globalen Profilbibliothek bleiben jedoch erhalten und die Projektdateien werden nicht von der Festplatte entfernt.",
+      "cleanDisk": "Auch die von SeshBuddy in die Projektverzeichnisse geschriebene API-Konfiguration entfernen"
+    },
+    "importConflict": {
+      "title": "Importierte API-Profile prüfen",
+      "summary": "Gefundene Profile: {total}{conflicts}{scopes}.",
+      "summaryConflicts": ", Namenskonflikte: {count}",
+      "summaryScopes": ", Bereiche: {count}",
+      "batchLabel": "Alle Konflikte festlegen:",
+      "batchOverwrite": "Alle überschreiben",
+      "batchRename": "Alle umbenennen",
+      "batchSkip": "Alle überspringen",
+      "scopeSectionTitle": "Bereich wiederherstellen",
+      "boundTo": "→ Gebunden an \"{name}\"",
+      "colScope": "Bereich",
+      "colStatus": "Status",
+      "colAction": "Aktion",
+      "renamePlaceholder": "Neuer Name",
+      "confirm": "Import bestätigen",
+      "action": {
+        "overwrite": "Überschreiben",
+        "skip": "Überspringen",
+        "add": "Hinzufügen",
+        "addCopy": "Kopie hinzufügen"
+      },
+      "status": {
+        "existing": "Vorhanden",
+        "nameConflict": "Namenskonflikt",
+        "newScope": "Neuer Bereich",
+        "newProfile": "Neues Profil"
+      }
+    }
+  },
+  "exportClipboard": {
+    "message": "Das Backup enthält die vollständige API-Konfiguration aller CLIs einschließlich Klartext-Keys/-Tokens. Der Inhalt der Zwischenablage kann von anderen Anwendungen gelesen werden – bitte sorgfältig behandeln und zeitnah löschen.",
+    "ok": "Trotzdem kopieren"
+  },
+  "exportFile": {
+    "message": "Die Backup-Datei enthält die vollständige API-Konfiguration aller CLIs einschließlich Klartext-Keys/-Tokens. Bewahren Sie die exportierte JSON-Datei sicher auf.",
+    "title": "Warnung beim Exportieren des Backups",
+    "ok": "Trotzdem exportieren"
+  },
+  "importClipboard": {
+    "readFailed": "Die Zwischenablage konnte nicht gelesen werden: {error}",
+    "empty": "Die Zwischenablage ist leer; bitte zuerst ein Profil-Backup als JSON kopieren",
+    "emptyTitle": "Import nicht möglich",
+    "invalid": "Der Inhalt der Zwischenablage ist kein gültiges Profil-Backup: {error}"
+  },
+  "importFile": {
+    "invalidFormat": "Das Format der Backup-Datei ist ungültig",
+    "empty": "Die Backup-Datei enthält keine API-Profile",
+    "emptyTitle": "Datei ist leer"
+  },
+  "toast": {
+    "backupCopied": "Backup in die Zwischenablage kopiert",
+    "clipboardWriteFailed": "Schreiben in die Zwischenablage fehlgeschlagen",
+    "exported": "Backup exportiert",
+    "imported": "Profile aus dem Backup wiederhergestellt",
+    "profileDeleted": "Profil \"{name}\" gelöscht",
+    "profileRenamed": "Profil in \"{name}\" umbenannt",
+    "savedAndBound": "Profil gespeichert und an den Bereich gebunden",
+    "savedCascaded": "Profil gespeichert; Bereiche automatisch aktualisiert: {count}",
+    "saved": "Profil gespeichert",
+    "savedAndApplied": "Profil \"{name}\" gespeichert und angewendet",
+    "globalSwitched": "Globales Profil auf \"{name}\" umgestellt",
+    "scopeApplied": "Profil \"{name}\" auf Bereich \"{scope}\" angewendet",
+    "scopeInherited": "Bereich \"{scope}\" erbt wieder das globale Profil",
+    "scopeCreated": "Bereich \"{name}\" erstellt{action}",
+    "scopeUpdated": "Bereich \"{name}\" aktualisiert",
+    "scopeDeleted": "Bereich \"{name}\" gelöscht"
+  },
+  "scopeCreate": {
+    "boundSuffix": ", Profil \"{name}\" gebunden",
+    "importedSuffix": ", vorhandene Projektkonfiguration als \"{name}\" importiert und gebunden"
+  },
+  "error": {
+    "profileExists": "Profil \"{name}\" existiert bereits",
+    "scopeCreateFailed": "Der Bereich konnte nicht erstellt werden",
+    "scopeUpdateFailed": "Der Bereich konnte nicht aktualisiert werden",
+    "scopeDeleteFailed": "Der Bereich konnte nicht gelöscht werden"
+  },
+  "list": {
+    "sectionTitle": "Globale Profilbibliothek",
+    "autoWriteHint": "Wird nach der Aktivierung automatisch geschrieben",
+    "settingsChipTitle": "Klicken, um die native Konfigurationsdatei anzusehen und zu bearbeiten",
+    "popoverTitle": "Native Konfigurationsdatei",
+    "editTomlInApp": "TOML in der App bearbeiten",
+    "editJsonInApp": "JSON in der App bearbeiten",
+    "editTomlInAppDesc": "Die native Codex-Konfigurationsdatei direkt bearbeiten",
+    "editJsonInAppDesc": "Die native Claude-Konfigurationsdatei direkt bearbeiten",
+    "openInExplorer": "Im Explorer öffnen",
+    "openInFinder": "Im Finder öffnen",
+    "openInFileManager": "Im Dateimanager öffnen",
+    "openInFileManagerDesc": "Im System-Dateiverzeichnis anzeigen",
+    "copyPathDesc": "Den absoluten Pfad in die Zwischenablage kopieren",
+    "createProfile": "Neues Profil",
+    "emptyTitle": "Keine Profile verfügbar",
+    "emptyDesc": "Klicken Sie oben rechts auf \"Neues Profil\" oder oben auf \"Importieren\", um ein API-Profil hinzuzufügen.",
+    "officialBadge": "Offiziell",
+    "globalActive": "Global aktiv",
+    "globalActiveTitle": "Derzeit das global aktive Profil",
+    "cardTitleActive": "Derzeit global aktiv (zum Bearbeiten rechts auf ✏️ klicken)",
+    "cardTitleSetGlobal": "Klicken, um \"{name}\" als global aktives Profil festzulegen",
+    "scopeChipTitle": "Wird im Projektbereich \"{name}\" verwendet; zum Springen klicken",
+    "editProfile": "Profil bearbeiten",
+    "duplicateProfile": "Profil duplizieren",
+    "deleteProfile": "Profil löschen",
+    "defaultModel": "Standard ({model})",
+    "modelMapping": "Modellzuordnung:\n{lines}",
+    "customModelMapping": "Benutzerdefinierte Modellzuordnung",
+    "tooltipEndpoint": "Endpunkt: {value}",
+    "tooltipMainModel": "Hauptmodell: {value}",
+    "officialDefault": "Offizieller Standard",
+    "systemDefault": "Systemstandard",
+    "pathCopiedToast": "Vollständiger Pfad der Konfigurationsdatei in die Zwischenablage kopiert",
+    "openFailedNotCreated": "Öffnen fehlgeschlagen: Die Konfigurationsdatei oder das Verzeichnis wurde noch nicht erstellt (der Pfad wurde automatisch kopiert)"
+  },
+  "editorHeader": {
+    "back": "Zurück zur Bibliothek",
+    "untitled": "Profil bearbeiten",
+    "form": "Formular",
+    "tomlPreview": "TOML-Vorschau",
+    "jsonPreview": "JSON-Vorschau"
+  },
+  "deleteConfirm": {
+    "title": "Löschen bestätigen",
+    "message": "Profil \"{name}\" löschen? Dies kann nicht rückgängig gemacht werden."
+  },
+  "connection": {
+    "name": "Profilname",
+    "namePlaceholder": "z. B. deepseek, kimi, work-claude",
+    "nameHint": "Geben Sie dem Profil einen einprägsamen Namen für die Liste und die Bereiche",
+    "title": "Verbindung",
+    "apiKey": "API-Schlüssel",
+    "hide": "Ausblenden",
+    "show": "Anzeigen",
+    "baseUrl": "Anfrage-URL (Base URL)",
+    "effortLevel": "Effort Level (Denkaufwand)",
+    "effortPlaceholder": "Leer lassen für den Standard (z. B. medium)",
+    "commonOptions": "Häufige Optionen",
+    "currentCustom": "Aktueller benutzerdefinierter Wert",
+    "timeout": "API-Timeout (ms)",
+    "current": "Aktuell",
+    "reasoningEffort": "Reasoning-Aufwand",
+    "reasoningHint": "Gilt nur für neu gestartete oder fortgesetzte Codex-Sitzungen",
+    "useCodexDefault": "Codex-Standard verwenden",
+    "defaultOption": "Standard",
+    "newProfileInitial": "N",
+    "timeoutFormat": {
+      "ms": "≈ {value} ms",
+      "seconds": "≈ {value} s",
+      "minutes": "≈ {value} min",
+      "hours": "≈ {value} h"
+    }
+  },
+  "attribution": {
+    "title": "Git-Zuordnung",
+    "hint": "Wird in `attribution` in `settings.json` geschrieben. Beim Standard wird das Feld nicht geschrieben, bei deaktiviert explizit eine leere Zeichenkette.",
+    "mode": "Zuordnungsmodus",
+    "useClaudeCodeDefault": "Claude Code-Standard verwenden",
+    "custom": "Benutzerdefiniert",
+    "disabled": "Zuordnung deaktivieren",
+    "defaultHint": "Das Feld attribution wird nicht geschrieben; Claude Code verwendet sein eigenes Standardverhalten.",
+    "disabledHint": "Beim Speichern wird eine leere Zeichenkette geschrieben und die Commit-/PR-Zuordnung von Claude Code ausdrücklich deaktiviert.",
+    "commit": "Commit-Zuordnung",
+    "commitHint": "Text, der dem git commit hinzugefügt wird.",
+    "pr": "PR-Zuordnung",
+    "prHint": "Text, der der PR-Beschreibung hinzugefügt wird; leer lassen, um keine PR-Zuordnung zu schreiben."
+  },
+  "modelOverrides": {
+    "title": "Modellzuordnung",
+    "hint": "Anzeigenamen wirken nur auf das /model-Menü: Mit Auto markierte Zeilen folgen dem gewählten Modell, eine manuelle Änderung fixiert sie, Leeren schreibt nichts. 1M deklariert nur die Kontextfähigkeit.",
+    "autoTag": "Auto",
+    "autoTagTitle": "Folgt dem Gateway-Namen des gewählten Modells und wird beim Modellwechsel aktualisiert",
+    "restoreAuto": "Automatik wiederherstellen",
+    "restoreAutoTitle": "Zurück zur Übernahme des Gateway-Namens des gewählten Modells",
+    "typedPlaceholder": "Kein Anzeigename",
+    "fetchModels": "Modellliste abrufen",
+    "role": "Modellrolle",
+    "displayName": "Anzeigename",
+    "actualModel": "Tatsächlich angefragtes Modell",
+    "declare1m": "1M-Unterstützung deklarieren",
+    "displayPlaceholder": "z. B. DeepSeek V4 Pro",
+    "actualPlaceholder": "Tatsächlich aufgerufener Modellname",
+    "fallback": "Standard-Fallbackmodell",
+    "fallbackPlaceholder": "z. B. opus[1m] oder leer lassen",
+    "fallbackHint": "Wird nur verwendet, wenn eine Claude-Code-Anfrage nicht eindeutig der Rolle Sonnet, Opus oder Haiku zugeordnet werden kann; kann normalerweise leer bleiben."
+  },
+  "runtime": {
+    "title": "Claude Code-Laufzeitparameter",
+    "hint": "Wird in `env` in `settings.json` geschrieben; leer lassen für die Claude Code-Standardwerte",
+    "maxOutputTokens": "Max. Ausgabe-Tokens",
+    "maxOutputTokensHint": "Begrenzt die Ausgabe einer einzelnen Antwort",
+    "disableExperimentalBetas": "Experimentelle Betas deaktivieren",
+    "disableExperimentalBetasHint": "Schaltet experimentelle Beta-Funktionen ab",
+    "disableNonessentialTraffic": "Nicht notwendigen Traffic deaktivieren",
+    "disableNonessentialTrafficHint": "Reduziert Hintergrund- und unkritische Netzwerkanfragen",
+    "useClaudeDefault": "Claude-Standard verwenden"
+  },
+  "scopeAllocation": {
+    "title": "Projektbereiche",
+    "subtitle": "API-Profile je nach geöffnetem Verzeichnis automatisch wechseln",
+    "createScope": "Neuer Bereich",
+    "inheritGlobal": "Nicht konfiguriert / global erben",
+    "dirsCount": "Verzeichnisse: {count}",
+    "bindDirsTitle": "Klicken, um jetzt ein Projektverzeichnis zu binden",
+    "unboundDirs": "Kein Verzeichnis gebunden",
+    "manageDirsTitle": "Gebundene Verzeichnisse verwalten",
+    "createAndBind": "Profil erstellen und binden…",
+    "noDirsBound": "Keine Verzeichnisse gebunden",
+    "dirsTooltip": "Gebundene Verzeichnisse: {count}",
+    "emptyTitle": "Noch keine projektspezifischen Bereiche",
+    "emptyDesc": "Sobald Sie einen Bereich für ein bestimmtes Verzeichnis erstellen, wechselt SeshBuddy beim Betreten des Projekts automatisch zu diesem API-Profil und wendet es an.",
+    "statusExisting": "Konfiguration vorhanden",
+    "statusExistingTooltip": "Im Projektverzeichnis existiert bereits eine API-Konfiguration{detail}; sie ist derzeit nicht gebunden und erbt das globale Profil",
+    "statusExistingDetail": " ({detail})",
+    "statusDiverged": "Konfiguration abweichend",
+    "statusDivergedTooltip": "Die Konfiguration im Verzeichnis {detail} stimmt nicht mit dem gebundenen Profil überein (möglicherweise manuell geändert)",
+    "statusDirsInconsistent": "Verzeichnisse inkonsistent",
+    "statusDirsInconsistentTooltip": "{count} Verzeichnisse haben unterschiedliche Konfigurationen"
+  },
+  "rawEditor": {
+    "tomlTitle": "Native TOML-Konfigurationsdatei",
+    "jsonTitle": "Native JSON-Konfigurationsdatei",
+    "scopeProject": "Projekt",
+    "formatJsonTitle": "JSON formatieren",
+    "save": "Änderungen speichern",
+    "saved": "Gespeichert",
+    "saving": "Wird gespeichert…",
+    "loadFailed": "Konfiguration konnte nicht geladen werden: {error}",
+    "invalidJson": "Ungültiges JSON: {error}",
+    "formatInvalid": "Ungültiges JSON, Formatierung nicht möglich: {error}",
+    "saveFailed": "Speichern fehlgeschlagen: {error}",
+    "projectDirPath": "Projektverzeichnis/.claude/settings.json",
+    "projectConfigPath": "Projektkonfiguration"
+  }
+}

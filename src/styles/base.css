@@ -1,0 +1,89 @@
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: var(--leading-normal);
+}
+
+/* 灰度抗锯齿只在高分屏启用：2x 观感不变；1x 屏（Windows、macOS 外接屏）走平台默认 ClearType/次像素 */
+@media (min-resolution: 2dppx) {
+  html, body, #app {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Selection: 使用系统原生样式，不做定制 */
+
+/* Focus visible outline */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Remove default button styles */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+/* In-session search highlights */
+mark.search-highlight {
+  background: #fbbf24;
+  color: #1e293b;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+mark.search-highlight-active {
+  background: #f97316;
+  color: #ffffff;
+}
+[data-theme="dark"] mark.search-highlight {
+  background: #ca8a04;
+  color: #1e1e2e;
+}
+[data-theme="dark"] mark.search-highlight-active {
+  background: #ea580c;
+  color: #ffffff;
+}
+
+/* Canonical spin animation (referenced by scoped styles across components) */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

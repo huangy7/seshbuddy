@@ -1,0 +1,120 @@
+name: CI
+
+# 校验闸门：PR 与 main 分支推送都要跑。release.yml 只在打 tag 时触发，
+# 在此之前 1095 个前端用例与 523 个后端用例没有任何自动执行的机会。
+# 读数与判据（2026-09-27）：`npx vitest run` 102 文件 / 1095 用例；`cargo test --workspace` 523 通过。
+# 这两个数会随代码漂移，改测试时要一起改 —— 不带时点的数字会变成假话。
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  frontend:
+    name: 前端（类型检查 + 单测）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: install frontend dependencies
+        run: npm ci
+
+      # build:web = vue-tsc --noEmit && vite build，类型错误在这一步就会被拦住。
+      # 这个应用的产物很大（Monaco + Mermaid + KaTeX，主包 4MB+），默认约 2GB 的
+      # Node 堆上限在 CI runner 上会被打爆（SIGABRT / core dumped），必须显式放宽。
+      - name: typecheck and build
+        run: npm run build:web
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      # 入口守卫没匹配上时闸门会一声不响地退出 0，与「查过了、通过」在日志里无法区分。
+      # 断言成功标记，让空跑在 CI 上必定失败；脚本自身的 stderr 不经变量捕获，直接进日志。
+      - name: i18n gate
+        run: |
+          out=$(node scripts/check-i18n.mjs)
+          printf '%s\n' "$out"
+          printf '%s\n' "$out" | grep -qF "i18n 闸门通过"
+
+      - name: unit tests
+        run: npm test
+
+  backend:
+    name: 后端（编译检查 + 单测）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # build:proxy 由 npm 脚本驱动，Node 版本必须显式钉住：runner 镜像自带的
+      # node/npm 会随镜像更新静默漂移，脚本行为随之改变。这个 job 不跑 npm ci，
+      # 也不读取 npm 缓存，因此不开 cache。
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      # tauri crate 在 Linux 上链接 webkit2gtk / gtk，缺少这些开发包无法编译
+      - name: install linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      # tauri.conf.json 的 externalBin 声明了 binaries/seshbuddy-proxy，
+      # tauri-build 会在构建脚本阶段就校验该平台的二进制存在，缺了直接报
+      # "resource path ... doesn't exist"。seshbuddy-proxy 不在 src-tauri 的依赖里，
+      # 所以必须先摆放好 sidecar 再编译。命名与摆放的规则统一在
+      # scripts/stage-sidecar.mjs 里，这里不再硬编码 triple（runner 架构一变就会错）。
+      - name: stage proxy sidecar
+        run: npm run build:proxy
+
+      # 加 --all-targets 才会连测试代码一起检查，否则测试里的死代码与类型问题会漏过
+      - name: cargo check
+        run: cargo check --workspace --all-targets
+
+      - name: cargo test
+        run: cargo test --workspace
+
+  # 存在的唯一理由：`#[cfg(windows)]` / `#[cfg(target_os = "windows")]` 门控的代码
+  # 在 ubuntu / macOS 的主机构建里对编译器不可见，本仓开发机也编不出 Windows 目标
+  # （ring / zstd-sys / libz-sys 的 C 构建需要 Windows SDK 头文件，实测卡在
+  # `fatal error: 'assert.h' file not found`）。没有这个 job，那批代码没有任何
+  # 编译期症状可被观测。
+  windows:
+    name: Windows（编译检查）
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 与 backend job 同样钉住 Node 版本：build:proxy 由 npm 脚本驱动，runner 自带的
+      # node/npm 会随镜像漂移。本 job 同样不跑 npm ci、不读 npm 缓存，故不开 cache。
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      # backend job 的 libwebkit2gtk 那一步是 ubuntu 特有的，Windows 上不需要，故不照抄。
+      # 但 sidecar 摆放必须做：tauri.conf.json 的 externalBin 声明了
+      # binaries/seshbuddy-proxy，tauri-build 在构建脚本阶段就校验其存在，缺了直接报
+      # "resource path ... doesn't exist"。
+      - name: stage proxy sidecar
+        run: npm run build:proxy
+
+      # 与 backend job 同一条命令：加 --all-targets 才会连测试代码一起检查。
+      # 刻意不跑 cargo test —— 本 job 只承担编译检查，Windows 上跑不跑测试是另一个决定。
+      - name: cargo check
+        run: cargo check --workspace --all-targets

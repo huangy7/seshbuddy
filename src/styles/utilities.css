@@ -1,0 +1,115 @@
+@import "./base.css";
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Shared icon button: close / toolbar icon actions.
+   Default 28px; use .icon-btn--lg for 32px.
+   Components keep only positioning / radius / variant overrides. */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.icon-btn:hover:not(:disabled) {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+.icon-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.icon-btn--lg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Shared full-screen modal backdrop.
+   Base values live here; components add the class in their template and keep
+   only their own padding under a scoped `.modal-backdrop` rule (the scoped
+   attribute gives it higher specificity, so it wins over these global ones). */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(var(--overlay-blur));
+}
+/* Fullscreen state: the dialog covers the viewport, so the scrim and its blur
+   would only cost GPU behind an opaque window. */
+.modal-backdrop--maximized {
+  background: transparent;
+  backdrop-filter: none;
+}
+/* Minimized state: the dialog lives in #minimized-widgets; the overlay stays
+   in the DOM only to keep the transition, and must not swallow clicks. */
+.modal-backdrop--minimized {
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+/* Shared minimized widget card teleported into #minimized-widgets.
+   Base values live here; components keep only per-widget overrides under
+   their own root class (higher specificity via the scoped attribute,
+   so they win over these global rules). */
+.minimized-widget {
+  position: relative;
+  pointer-events: auto;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 12px 16px 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  z-index: 1000;
+}
+.minimized-widget:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16), 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+.minimized-icon {
+  color: var(--color-primary);
+  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--color-primary) 30%, transparent));
+}
+
+.minimized-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.minimized-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.minimized-status {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-top: 3px;
+}

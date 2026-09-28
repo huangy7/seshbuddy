@@ -1,0 +1,111 @@
+{
+  "messageList": {
+    "summarySteps": "操作完了: {count}",
+    "summaryNotes": "解説: {count}",
+    "summaryNotesOnly": "経過解説: {count}",
+    "summaryDuration": "所要時間 {duration}",
+    "emptyTitle": "何をお手伝いしましょうか？",
+    "emptyPinHint": "{profile} で会話を開始 · 送信後は固定",
+    "suggestionProfile": "会話からユーザープロフィールを生成",
+    "suggestionSearch": "「リファクタリング」を含む会話を検索",
+    "suggestionWeekly": "今週の作業進捗をまとめる",
+    "profilePrompt": "これまでの全会話履歴をもとに、構造化されたユーザープロフィール分析レポートを作成してください。以下の観点を含めてください：\n\n1. **核となる性格特性**：質問の仕方・関心・表現の癖から、核となる性格タグを 3〜5 個抽出し（例：結果志向、細部重視、好奇心が強いなど）、会話中の実際の発言を根拠として引用してください。\n\n2. **コミュニケーションのスタイルと好み**：論理志向か発散型か、簡潔な回答か深い説明かを分析し、回答フォーマットに対する暗黙の好みがあれば示してください。\n\n3. **専門領域と技術スタック**：最も多く関わる技術領域・ツールチェーン・専門知識の範囲を抽出し、各領域の習熟度を評価してください。\n\n4. **仕事の習慣と思考パターン**：問題をどう分解するか、トップダウンかボトムアップか、意思決定の傾向や思考の盲点があれば示してください。\n\n5. **MBTI 傾向の推定**：上記の分析から最も可能性の高い MBTI タイプを推定し、各次元の傾向と確信度を示してください。\n\n6. **AI との協働のベストプラクティス**：上記のプロフィールに基づき、AI とより効率的に協働するための具体的な提案を 3〜5 件挙げてください。\n\n実際の会話内容に基づいて分析し、星座占いのような漠然とした記述は避けてください。データが不足している観点は「低信頼度」と明記してください。",
+    "thinking": "考え中…",
+    "thoughtFor": "{duration} 考えました",
+    "stopped": "停止しました",
+    "copyMarkdownTitle": "Markdown 全文をコピー",
+    "usageTooltip": "コンテキスト合計 {total}（新規入力 {input} · キャッシュ読み込み {cacheRead} · キャッシュ書き込み {cacheWrite}）· 出力 {output}"
+  },
+  "input": {
+    "quickPhrases": "クイックフレーズ",
+    "slashTip": "↑↓ で選択 · Enter で挿入",
+    "noPhraseMatch": "一致するクイックフレーズがありません",
+    "placeholder": "何でも聞いてください…（/ でクイックフレーズ）",
+    "usageTooltip": "この会話の全ターンの出力トークン累計",
+    "cumulative": "累計",
+    "stopTitle": "生成を停止"
+  },
+  "quickPhrases": {
+    "empty": "クイックフレーズがまだありません。下から新規作成してください",
+    "edit": "編集",
+    "create": "＋ クイックフレーズを新規作成",
+    "editTitle": "クイックフレーズを編集",
+    "createTitle": "クイックフレーズを新規作成",
+    "namePlaceholder": "名前（例：昨日の作業の振り返り）",
+    "contentPlaceholder": "プロンプト内容。変数：{variables}",
+    "deleteConfirm": "クイックフレーズ「{name}」を削除しますか？"
+  },
+  "history": {
+    "title": "会話履歴",
+    "empty": "会話履歴はまだありません",
+    "untitled": "（無題）",
+    "today": "今日",
+    "yesterday": "昨日",
+    "last7Days": "過去 7 日間",
+    "earlier": "それ以前",
+    "deleteConversation": "会話を削除",
+    "deleteTitle": "削除の確認",
+    "deleteConfirm": "会話「{title}」を削除しますか？"
+  },
+  "phraseVariables": {
+    "today": "今日",
+    "yesterday": "昨日",
+    "thisMonday": "今週の月曜",
+    "thisFriday": "今週の金曜",
+    "lastMonday": "先週の月曜",
+    "lastFriday": "先週の金曜"
+  },
+  "cacheBackfill": {
+    "indexBuilding": "全文インデックスを作成中…",
+    "backfilling": "キャッシュを補完中…",
+    "failed": "キャッシュの補完に失敗しました：{error}",
+    "dismiss": "了解",
+    "enableIndexHint": "全文インデックスを有効にすると、アシスタントが全会話の本文を検索できます",
+    "enableIndex": "全文インデックスを有効化",
+    "ignore": "無視",
+    "pendingHint": "本文キャッシュ未取得の会話: {pending} 件（キャッシュ済み: {cached} 件）",
+    "startBackfill": "バックグラウンドで補完"
+  },
+  "modelPicker": {
+    "defaultModel": "デフォルトモデル",
+    "followConfig": "設定に従う",
+    "chipTitleSelected": "現在のモデル: {label} ({id})",
+    "chipTitleFollow": "現在のモデル: 設定に従う ({hint})",
+    "mainModel": "メインモデル ({model})",
+    "noOverride": "現在の設定にモデルの上書きはありません"
+  },
+  "profilePicker": {
+    "lockedTitle": "この会話はこのプロファイルに固定されています。新しい会話で切り替えできます",
+    "switchTitle": "モデルプロファイルを切り替え",
+    "select": "プロファイルを選択",
+    "empty": "利用可能なプロファイルがありません"
+  },
+  "app": {
+    "newConversation": "新しい会話",
+    "newConversationGlyph": "＋",
+    "pinWindow": "ウィンドウを最前面に固定",
+    "unpinWindow": "最前面の固定を解除",
+    "engineMissing": "claude CLI が見つかりません。インストールしてからアシスタントを使用してください。"
+  },
+  "activity": {
+    "list": "会話一覧を取得",
+    "search": "会話の内容を検索",
+    "read": "会話本文を読み取り",
+    "run": "コマンドを実行",
+    "targetQuoted": "「{target}」",
+    "listing": "会話一覧を取得中…",
+    "searching": "会話の内容を検索中…",
+    "reading": "会話本文を読み取り中…",
+    "running": "コマンドを実行中…",
+    "thinking": "考え中…"
+  },
+  "error": {
+    "unknown": "不明なエラー",
+    "engineFailed": "アシスタントエンジンの実行に失敗しました",
+    "listenerTimeout": "イベントリスナーの登録がタイムアウトしました（3s）",
+    "listenerFailed": "イベントリスナーの登録に失敗しました：{error}",
+    "historyLoadFailed": "履歴の読み込みに失敗しました：{error}",
+    "cliMissing": "Claude CLI が見つかりません。先にインストールと設定を完了してください",
+    "turnInProgress": "前の返信がまだ進行中です。しばらくお待ちください"
+  }
+}

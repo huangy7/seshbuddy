@@ -1,0 +1,159 @@
+{
+  "onboarding": {
+    "languageTitle": "选择语言",
+    "languageHint": "选择 SeshBuddy 的界面语言，之后也可以在设置中修改。",
+    "sourcesTitle": "选择会话来源",
+    "sourcesHint": "选择你想查看的 CLI 会话，之后也可以在设置中修改。",
+    "hasSessions": "已有会话",
+    "noSessions": "暂无会话",
+    "back": "返回",
+    "next": "继续",
+    "finish": "开始使用 SeshBuddy",
+    "saving": "正在保存…",
+    "statusErrorTitle": "无法检查引导状态",
+    "statusErrorHint": "可以重试，或使用默认设置继续。下次启动时会重新检查。",
+    "retry": "重试",
+    "continueDefault": "使用默认设置",
+    "saveError": "无法保存选择，请重试。"
+  },
+  "boot": {
+    "deepIndexing": "正在进行首次深度索引…",
+    "probingCli": "正在探测 CLI 运行环境…",
+    "syncingConfig": "正在同步项目配置…",
+    "scanning": "正在扫描会话与索引…",
+    "ready": "工作空间就绪",
+    "starting": "正在启动 SeshBuddy…",
+    "splashAria": "SeshBuddy 启动中",
+    "brandSubtitle": "AI Session Explorer & Workbench"
+  },
+  "about": {
+    "updateSettings": "更新设置",
+    "autoCheck": "自动检查更新",
+    "autoCheckHint": "开启后，应用会在后台定期检查新版本。",
+    "autoCheckEnabled": "已开启自动检查更新。",
+    "autoCheckDisabled": "已关闭自动检查更新。",
+    "changelog": "更新日志",
+    "currentVersion": "当前版本",
+    "changeCount": "{count} 项变更",
+    "showOlder": "显示更早版本 ({count})",
+    "checking": "正在检查更新…",
+    "checkingShort": "检查中…",
+    "checkNow": "检查更新",
+    "ready": "就绪，可以检查更新。",
+    "upToDate": "当前已是最新版本。",
+    "updateAvailable": "发现新版本 v{version}，点击「下载并安装」升级。",
+    "downloading": "正在下载安装包…",
+    "downloadingWithSize": "正在下载安装包… {downloaded} MB",
+    "downloadingWithProgress": "正在下载安装包… {percent}% ({downloaded} / {total} MB)",
+    "downloadingShort": "下载安装中…",
+    "downloadAndInstall": "下载并安装",
+    "installingQuit": "即将退出应用并开始安装，请稍候…",
+    "installingRestart": "安装完成后将自动重启应用，请稍候…",
+    "installing": "正在安装更新，请稍候…",
+    "viewReleaseNotes": "查看发布说明",
+    "hideNotes": "收起说明",
+    "feedback": "问题反馈",
+    "feedbackTitle": "问题反馈 (GitHub Issues)"
+  },
+  "dialog": {
+    "notice": "提示",
+    "error": "错误",
+    "forkFailed": "Fork 失败",
+    "forkSession": "Fork 会话",
+    "launchFailed": "启动失败",
+    "resumeFailed": "恢复失败",
+    "newSessionUnsupported": "{cli} 暂不支持从 SeshBuddy 新建对话，请在 {cli} 中创建。",
+    "renameSession": "重命名对话",
+    "renameTab": "重命名标签页",
+    "renameSessionDescription": "为该对话设置新的显示名称（留空保存恢复默认名称）",
+    "renameTabDescription": "为当前标签页设置自定义显示名称（留空保存恢复默认名称）",
+    "renamePlaceholder": "输入新名称，留空保存恢复默认...",
+    "save": "保存",
+    "cancelPermanent": "取消永久保留？",
+    "retentionImmediate": "当前设置会立即清理普通归档",
+    "retentionDays": "当前保留期为 {days} 天",
+    "retentionWarning": "原始对话文件已经不存在，且取消永久保留后此归档会立即符合清理条件（{retention}）。继续后，这个对话会在下一次清理时从历史中移除，无法继续查看。"
+  },
+  "ctxMenu": {
+    "select": "选中此对话",
+    "deselect": "取消选中",
+    "star": "星标",
+    "unstar": "取消星标",
+    "rename": "重命名",
+    "copy": "复制",
+    "copySessionId": "对话 ID",
+    "copySessionPath": "对话路径",
+    "resume": "恢复",
+    "blockFolder": "屏蔽所属文件夹",
+    "deleteSession": "删除此对话",
+    "newSession": "新建会话",
+    "selectProject": "全选此项目对话",
+    "deselectProject": "取消选中此项目对话",
+    "blockProjectFolder": "屏蔽此文件夹",
+    "deleteProjectSessions": "删除此项目的所有对话"
+  },
+  "session": {
+    "untitled": "未命名对话"
+  },
+  "filter": {
+    "ariaLabel": "消息类型过滤",
+    "count": "当前显示 {count} 条消息",
+    "user": "用户",
+    "assistant": "助手",
+    "thinking": "思考块"
+  },
+  "batch": {
+    "selected": "已选 {count} 个对话",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "export": "导出",
+    "exportTooltip": "批量导出",
+    "mergedExport": "合并导出",
+    "separateExport": "分别导出",
+    "delete": "删除",
+    "deleteTooltip": "批量删除",
+    "backHome": "返回首页",
+    "exitSelection": "退出多选",
+    "exportOutcome": {
+      "single": "会话已导出成功。",
+      "merged": "已合并导出 {count} 个会话。",
+      "separate": "已分别导出 {count} 个会话。"
+    }
+  },
+  "systemContextMenu": {
+    "registeredMacos": "右键菜单注册成功。请在 Finder 中右键文件夹，在「快速操作」或「服务」子菜单中查找 Claude Code。",
+    "registeredWindows": "右键菜单注册成功。现在可在资源管理器的“文件夹空白处右键”与“文件夹项右键”中启动 Claude Code；Windows 下默认使用 cmd 新窗口，不依赖 Windows Terminal。",
+    "unregistered": "右键菜单已取消注册。"
+  },
+  "sidebar": {
+    "ariaLabel": "右侧辅助栏",
+    "modeAriaLabel": "辅助栏模式",
+    "project": "项目",
+    "timeline": "时间线",
+    "collapse": "收起辅助栏",
+    "timelineEmpty": "打开一个历史对话后可用"
+  },
+  "update": {
+    "available": "发现新版本 v{version}，点击查看详情。"
+  },
+  "toast": {
+    "crashRecovery": "检测到程序异常重载，已为您自动恢复。"
+  },
+  "error": {
+    "renderTitle": "渲染错误",
+    "renderDetail": "{err}\n\n组件位置: {info}\n组件链: {chain}\n\n堆栈:\n{stack}",
+    "renderMessage": "发生渲染错误: {detail}\n\n建议重启应用或联系开发者。",
+    "unknownComponent": "未知"
+  },
+  "changelog": {
+    "v0_1_0": {
+      "multicli": "多 CLI 会话浏览：六种 CLI 的会话收在一棵树里",
+      "fulltextSearch": "全文检索：本地索引覆盖提问、回复、工具调用与代码块",
+      "proxy": "API 反向代理与流量检视：本地看清请求响应、耗时与 token 用量",
+      "editor": "Monaco 编辑器与 Git Diff：并排差异加语法高亮",
+      "assistant": "桌面助手：对着历史会话提问，回答标注来源",
+      "performance": "大会话性能：1 GB 会话打开不卡界面",
+      "updater": "应用内更新：经 GitHub Releases 分发"
+    }
+  }
+}

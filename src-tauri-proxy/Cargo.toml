@@ -1,0 +1,38 @@
+[package]
+name = "seshbuddy-proxy"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "seshbuddy-proxy"
+path = "src/main.rs"
+
+[dependencies]
+hyper = { version = "1", features = ["server", "http1"] }
+hyper-util = { version = "0.1", features = ["tokio", "server-auto", "http1"] }
+http-body-util = "0.1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["rustls-tls", "stream"] }
+rusqlite = { version = "0.32", features = ["bundled"] }
+clap = { version = "4", features = ["derive"] }
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+bytes = "1"
+anyhow = "1"
+futures-util = { version = "0.3", features = ["sink"] }
+tokio-stream = "0.1"
+tokio-tungstenite = "0.24"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tracing-rolling-file = { version = "0.1", features = ["non-blocking"] }
+tracing-appender = "0.2"
+dirs = "6"
+transcript-store = { path = "../transcript-store" }
+
+[dev-dependencies]
+tempfile = "3"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

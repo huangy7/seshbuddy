@@ -1,0 +1,153 @@
+{
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "copied": "Copied",
+    "copyFailed": "Copy failed",
+    "copyCommand": "Copy command",
+    "launchMode": "Launch mode",
+    "terminal": "Terminal",
+    "agent": "Agent",
+    "apiProfile": "API profile",
+    "apiProfilePlaceholder": "Select an API profile...",
+    "apiProfileEmpty": "No API profiles available"
+  },
+  "newSession": {
+    "title": "New Session",
+    "projectDir": "Project directory",
+    "browseTitle": "Select project directory",
+    "projectPlaceholder": "Select a project directory...",
+    "projectEmpty": "No recent projects",
+    "browse": "Browse local disk...",
+    "cliType": "CLI type",
+    "createInAgent": "Create in Agent",
+    "createInTerminal": "Create in Terminal"
+  },
+  "resumeSession": {
+    "title": "Resume Session",
+    "archiveNotice": "This session is archived. Resuming will extract the source files from the snapshot onto local disk."
+  },
+  "input": {
+    "placeholder": "Enter a name...",
+    "confirm": "OK"
+  },
+  "exportSession": {
+    "title": "Export Session",
+    "scope": "Export scope",
+    "scopeAllTitle": "All messages",
+    "scopeAllDesc": "Export the complete session transcript",
+    "scopeSelectionTitle": "Select messages",
+    "scopeSelectionDesc": "Pick the messages to export by hand; image export is supported",
+    "format": "Export format",
+    "enterSelection": "Select messages"
+  },
+  "feedback": {
+    "title": "Feedback & Community",
+    "subtitle": "SeshBuddy is open source — all feedback goes straight to the GitHub community tracker",
+    "bugTitle": "Submit a Bug Report",
+    "bugDesc": "Hit an error, a crash or a rendering glitch? File a bug report on GitHub",
+    "featureTitle": "Request a Feature",
+    "featureDesc": "Suggest a new AI CLI, new session analytics, or improvements to the interface",
+    "searchTitle": "Browse Existing Issues & Discussions",
+    "searchDesc": "Search whether another developer already reported the same problem or posted a workaround",
+    "footerTip": "Clicking an option opens the GitHub page in your default browser",
+    "diagTitle": "### Environment Diagnostics",
+    "diagApp": "- **App version**: {app} v{version} (Tauri v{tauri})",
+    "diagAppFallback": "- **App version**: {value}",
+    "diagUnknownEnv": "Unknown (not running in the desktop app)",
+    "diagOs": "- **OS**: {osName} {osVersion} ({arch})",
+    "diagPlatform": "- **Platform**: {platform}",
+    "diagKernel": "- **Kernel**: {kernel}",
+    "diagCpu": "- **CPU**: {cpu} ({cores} cores)",
+    "diagMemory": "- **Memory**: {memory}",
+    "diagClis": "- **Detected AI CLI status**:",
+    "diagUserAgent": "- **User Agent**: {userAgent}",
+    "diagTimestamp": "- **Timestamp**: {timestamp}",
+    "cliInstalled": "installed ✓",
+    "cliMissing": "not detected ✗",
+    "cliHasSessions": " (has session history)",
+    "bugBody": "## Problem description\n\nDescribe the problem you ran into and how to reproduce it...\n\n## Expected behavior\n\nDescribe the expected result...\n\n---\n{diagnostics}",
+    "featureBody": "## Background\n\nDescribe the problem or use case you want solved...\n\n## Proposed solution\n\nHow would you like SeshBuddy to implement this feature...\n\n---\n{signature}"
+  },
+  "pricing": {
+    "title": "Pricing Catalog",
+    "modelCount": "Models: {count}",
+    "dataSource": "Data source:",
+    "lastUpdated": "Last updated:",
+    "builtinOffline": "Bundled offline",
+    "refreshTitle": "Refresh the latest prices from models.dev",
+    "refreshing": "Refreshing...",
+    "refresh": "Refresh prices",
+    "scopeUsed": "Used models",
+    "scopeAll": "Full catalog",
+    "searchPlaceholder": "Search models or providers...",
+    "clearSearch": "Clear search",
+    "refreshFailed": "Refresh failed: {error}",
+    "emptyTitle": "No matching models",
+    "emptyHint": "Try a different search term or select all providers",
+    "colModel": "Model",
+    "colProvider": "Provider",
+    "colInput": "Input / 1M tokens",
+    "colOutput": "Output / 1M tokens",
+    "colCacheWrite": "Cache write / 1M",
+    "colCacheRead": "Cache read / 1M",
+    "loadMore": "Load more ({count} remaining)",
+    "footerCount": "Showing {shown} / {total} models",
+    "footerHint": "Rates are USD / 1M tokens · automatically matched to the best version",
+    "providerAll": "All providers ({count})",
+    "providerModelCount": "Models: {count}",
+    "providerCurrentSession": "Current session",
+    "provider": {
+      "anthropic": "Anthropic",
+      "openai": "OpenAI",
+      "google": "Google",
+      "deepseek": "DeepSeek",
+      "moonshot-kimi": "Moonshot / Kimi",
+      "zhipu": "Zhipu / 智谱 GLM",
+      "alibaba": "Alibaba / 通义千问",
+      "minimax": "MiniMax",
+      "stepfun": "StepFun / 阶跃星辰",
+      "baichuan": "Baichuan / 百川",
+      "bytedance": "ByteDance / 豆包",
+      "tencent": "Tencent / 腾讯混元",
+      "baidu": "Baidu / 百度千帆",
+      "siliconflow": "SiliconFlow",
+      "meta": "Meta",
+      "mistral": "Mistral",
+      "groq": "Groq",
+      "xai": "xAI"
+    }
+  },
+  "apiDebug": {
+    "title": "API Debug",
+    "titleWithCli": "{name} API Debug",
+    "minimize": "Minimize",
+    "restore": "Restore",
+    "maximize": "Maximize",
+    "runningInBackground": "Running in background"
+  },
+  "whatsNew": {
+    "badge": "NEW",
+    "confirm": "Got it"
+  },
+  "deleteConfirm": {
+    "title": "Delete confirmation",
+    "sessionMessage": "Delete the conversation below?\n\n{title}\n\nThe original file will be moved to the trash; archives, snapshots and indexes inside SeshBuddy are deleted as well.",
+    "projectMessage": "Delete all conversations in the project below?\n\n{path}\n({count} conversation in total)\n\nThe original files will be moved to the trash; archives, snapshots and indexes inside SeshBuddy are deleted as well. | Delete all conversations in the project below?\n\n{path}\n({count} conversations in total)\n\nThe original files will be moved to the trash; archives, snapshots and indexes inside SeshBuddy are deleted as well.",
+    "batchTitle": "Batch delete confirmation",
+    "batchMessage": "Delete the selected conversation?\n\nThe original files will be moved to the trash; archives, snapshots and indexes inside SeshBuddy are deleted as well. | Delete the {count} selected conversations?\n\nThe original files will be moved to the trash; archives, snapshots and indexes inside SeshBuddy are deleted as well."
+  },
+  "diffTooLarge": {
+    "message": "The file is too large (over 1MB) to preview the diff"
+  },
+  "closeTerminal": {
+    "title": "Close Terminal",
+    "message": "Close this terminal session? The process will be terminated."
+  },
+  "closeFile": {
+    "title": "Close File",
+    "message": "This file has unsaved changes. Save it before closing?",
+    "confirm": "Save and close",
+    "discard": "Discard changes"
+  }
+}

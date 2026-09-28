@@ -1,0 +1,403 @@
+{
+  "drift": [
+    {
+      "en": "{count} waiting for input",
+      "decision": "unify",
+      "target": {
+        "ja": "{count} 入力待ち",
+        "de": "Warten auf Eingabe: {count}"
+      },
+      "reason": "同一句源文案（2 个键的 zh 逐字相同：\"{count} 等待输入\"），分歧只在 ja/de：{session.dashboard.agentWaiting} = ja \"{count} 個が入力待ち\" / de \"Warten auf Eingabe: {count}\"；{session.agentDashboard.waitingCount} = ja \"{count} 入力待ち\" / de \"Warten auf Eingabe: {count}\"。zh 与 en 不动（R3：规则 9 只看 ja/de）。取 agentDashboard 侧：同一面板的状态标签 `session.agentDashboard.statusWaitingInput` 本身就是 `入力待ち`（实测），取它可让计数文案与状态标签一致。统一到 \"{count} 入力待ち\" / \"Warten auf Eingabe: {count}\"。 （T5 备注：本理由引用的 `session.agentDashboard.statusWaitingInput` 四语取值与 `session.agentPanel.statusWaitingInput` 逐字全等，已由 T5 并入后者（ja 实测仍为 `入力待ち`）；本条的结论与 target 不变。） （T6 合并备注：本组两键在统一后四语元组全等，已成为重复组，按去重裁决集合并——`session.dashboard.agentWaiting` 并入 `session.agentDashboard.waitingCount`（target 来源侧），调用点 `DashboardView.vue` 已改指。本条的 target 与结论不变。）"
+    },
+    {
+      "en": "Bookmarks",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"书签\" vs \"书签列表\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Cache write: {count}",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"cache 写: {count}\" vs \"缓存写入: {count}\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Clear",
+      "decision": "keep",
+      "target": {},
+      "reason": "同一 en「Clear」在三个上下文里**语义不同**（实测调用点）：session.projectPanel.clear 与 session.dashboard.clear 都挂在 `class=\"search-clear-btn\"` 上（清空搜索框，de 应为 Leeren），settings.index.clear 是删除搜索索引（de Löschen 正确）。不是「同一句源文案的译文没对齐」，而是同一英文词的两处不同含义；统一任一侧都会改错。组内**真正的不一致**只有 projectPanel/dashboard 这一对，已单列为 terminology 条目。 （T6 备注：那一对已按 terminology 条目统一为 de `Leeren` / ja `クリア`。T6 复核了调用点：ProjectPanel.vue:443-444 的 `class=\"search-clear-btn\"` 按钮 `:title=\"t('session.projectPanel.clear')\"`、`@click=\"filterText = ''\"`；DashboardView.vue:249 的 `class=\"search-clear-btn\"` 按钮 `{{ t(\"session.dashboard.clear\") }}`、`@click=\"emit('clearSearch')\"`——两者都只清空搜索框、不删数据。**统一后本组残余的 ja/de 分歧只来自 `settings.index.clear`**（ja `消去` / de `Löschen`；IndexSettings.vue:432 的 `btn-danger-outline` + trash-2 图标按钮 `@click=\"clearIndex\"`，真删除索引），不再是「整族」的分歧。本组留 `keep` 的依据因此可复核为：同一 en 词下的**两个不同产品动作**，两个 search-clear-btn 键与 settings.index.clear 不是同一句源文案。规则 9 会因 `settings.index.clear` 与另外两键的 ja/de 不同而命中该 en 值，故本条必须留在允许清单里。） （T6 合并备注：`session.dashboard.clear` 已并入 `session.projectPanel.clear`（target 来源侧），调用点 `DashboardView.vue` 已改指；本组因此只剩两键——`session.projectPanel.clear`（清空搜索框）与 `settings.index.clear`（真删除索引），残余的 ja/de 分歧仍只来自后者，`keep` 与允许清单归属不变。）"
+    },
+    {
+      "en": "Clear search",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"清除搜索\" vs \"清空搜索\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Collapse all",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"全部收起\" vs \"折叠全部\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Collapse sidebar",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"收起侧边栏\" vs \"收起辅助栏\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Confirm deletion",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"确认删除\" vs \"删除确认\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Copy command",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"复制指令\" vs \"复制命令\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Copy resume command",
+      "decision": "unify",
+      "target": {
+        "ja": "再開コマンドをコピー",
+        "de": "Fortsetzungsbefehl kopieren"
+      },
+      "reason": "同一句源文案（2 个键的 zh 逐字相同：\"复制恢复命令\"），分歧只在 ja/de：{app.copy.restoreCommand} = ja \"再開コマンドをコピー\" / de \"Fortsetzen-Befehl kopieren\"；{session.sessionHeader.copyResumeCommand} = ja \"再開コマンドをコピー\" / de \"Fortsetzungsbefehl kopieren\"。zh 与 en 不动（R3：规则 9 只看 ja/de）。de 复合名词的规范连写是 `Fortsetzungsbefehl`；`Fortsetzen-Befehl` 的连字符写法在 de 全仓只此一处（实测 grep -c → 1）。（T6 合并后备注：合并执行后 `app.copy.restoreCommand` 已不存在，HEAD 复测 `Fortsetzen-Befehl` 全仓 **0** 处、`Fortsetzungsbefehl` 1 处；本条的 target 与结论不变。）统一到 \"再開コマンドをコピー\" / \"Fortsetzungsbefehl kopieren\"。 （T6 合并备注：本组两键统一后四语元组全等，已成为重复组——`app.copy.restoreCommand` 并入 `session.sessionHeader.copyResumeCommand`（target 来源侧），调用点 `App.vue` 已改指。）"
+    },
+    {
+      "en": "Creating…",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"正在创建...\" vs \"创建中...\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Current",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"当前\" vs \"当前版本\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Deselect all",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"取消全选\" vs \"全不选\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Expand all",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"全部展开\" vs \"展开全部\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Export",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"导出备份\" vs \"导出\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Feedback",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"问题反馈\" vs \"反馈\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Fit",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"适应\" vs \"自适应\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Fit to window",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"自适应大小\" vs \"适应窗口 (Fit to Window)\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Got it",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"知道了\" vs \"好的\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Keep forever",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"永久保留\" vs \"设为永久保留\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Loading…",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"加载中...\" vs \"加载中…\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。本组留 `keep` 的依据是 zh 逐字不同（即两条不同的源文案）；T6 合并后本组 ja/de 已一致、分歧只剩 zh，故**规则 9 不会命中本组**（详见末尾合并备注）。 （T6 合并备注：本组原 3 键，ja/de 的分歧来自 `session.bookmarkList.loading`（ja `読み込み中...` / de `Wird geladen...`）——该键在 T6 的省略号项里被统一成与 `common.timelineView.loading` 逐字节相同，随即并入后者。故本组现在只剩 `common.timelineView.loading` 与 `common.breadcrumb.loading` 两键，**ja/de 已一致、分歧只剩 zh**，`--drift` 现标为 `ja/de分歧=n`；原句「ja/de 的差异是源文案差异的结果，不是译文没对齐」在 HEAD 已不成立，已改写为上面那句。本组仍是 `keep`（zh 不同即两条源文案），但**规则 9 不会再命中它**——Task 9 生成允许清单时按「keep 且 ja/de 确有分歧」过滤即可，这不是漏项。）"
+    },
+    {
+      "en": "Messages: {count}",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"当前显示 {count} 条消息\" vs \"{count} 条消息\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Model",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"模型\" vs \"模型名称\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Models: {count}",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"共 {count} 个模型\" vs \"{count} 个\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "New profile",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"新配置\" vs \"新建配置\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "New scope",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"新作用域\" vs \"新建作用域\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "New session",
+      "decision": "unify",
+      "target": {
+        "ja": "新しい会話",
+        "de": "Neue Unterhaltung"
+      },
+      "reason": "同一句源文案（2 个键的 zh 逐字相同：\"新建会话\"，en 也逐字相同：\"New session\"），分歧只在 ja/de：{app.ctxMenu.newSession} = ja \"新しい会話\" / de \"Neue Unterhaltung\"；{session.agentPanel.newSession} = ja \"新しいセッション\" / de \"Neue Sitzung\"。zh 与 en 不动（R3：规则 9 只看 ja/de）。**本条原裁 `keep`**（理由：同一 en 在两个上下文里各有各的术语，统一任一侧都会在另一侧引入不一致），**已被 Ruling 7a 推翻**：两条源语言都不支持「不同对象故译文应当区分」这个读法——该 en 值下的键 en 逐字都是 \"New session\"、zh 逐字都是 \"新建会话\"，源语言里没有任何区分「对话/会话」的痕迹，故取多数形态。 （T5 备注：本理由原引的 `session.tabBar.newSession` 与 `session.agentDashboard.newSession` 四语取值与 `session.agentPanel.newSession` 逐字全等，已由 T5 并入后者，组内成员由 4 个降为 2 个；**原引计数在 HEAD 已不成立**——T6 实测（改动前）de/session.json `Unterhaltung` 42 键 vs `Sitzung` 3 键、ja/session.json `会話` 45 键（46 处）vs `セッション` 3 键（合并执行后的 HEAD 复测：de `Unterhaltung` 42 键 vs `Sitzung` **2** 键、ja `会話` 45 键（46 处）vs `セッション` **2** 键）。本条的结论不依赖这两个计数：推翻 `keep` 的是 en/zh 逐字全等，不是多数方向。） （T6 合并备注：本组两键统一后四语元组全等，已成为重复组——`session.agentPanel.newSession` 并入 `app.ctxMenu.newSession`（共用域优先），调用点 `AgentPanel.vue`、`AgentDashboardView.vue` 已改指。）"
+    },
+    {
+      "en": "No profiles available",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"配置库暂无可用配置\" vs \"无可用配置\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Project",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"项目级\" vs \"项目\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Refreshing...",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"刷新中...\" vs \"正在刷新...\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Remove bookmark",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"取消书签\" vs \"移除书签\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Rename",
+      "decision": "unify",
+      "target": {
+        "ja": "名前を変更",
+        "de": "Umbenennen"
+      },
+      "reason": "同一句源文案（3 个键的 zh 逐字相同：\"重命名\"），分歧只在 ja/de：{api-profile.dialog.importConflict.action.rename} = ja \"リネーム\" / de \"Umbenennen\"；{app.ctxMenu.rename、session.agentPanel.rename} = ja \"名前を変更\" / de \"Umbenennen\"。zh 与 en 不动（R3：规则 9 只看 ja/de）。实测（`--term '名前を変更'` / `--term 'リネーム'`）：ja 全仓 `名前を変更` **5 键**（app.dialog.renameSession、app.dialog.renameTab、app.ctxMenu.rename、session.tabBar.rename、session.agentPanel.rename）vs `リネーム` **2 键**（api-profile.dialog.importConflict.batchRename、api-profile.dialog.importConflict.action.rename），取多数。统一到 \"名前を変更\" / \"Umbenennen\"。 （T5 备注：本理由引用的 `session.agentPanel.rename` 四语取值与 `app.ctxMenu.rename` 逐字全等，已由 T5 并入后者，组内成员因此少一个；实测 `--term '名前を変更'` 由 5 键降为 4 键（app.dialog.renameSession、app.dialog.renameTab、app.ctxMenu.rename、session.tabBar.rename），`--term 'リネーム'` 仍为 2 键，多数方向不变，本条的结论与 target 不变。T6 合并后备注：`api-profile.dialog.importConflict.action.rename` 已并入 `app.ctxMenu.rename`，HEAD 复测 `--term 'リネーム'` 为 **1 键**（只剩 `api-profile.dialog.importConflict.batchRename`），`--term '名前を変更'` 为 4 键。） （T6 合并备注：本组两键统一后四语元组全等，已成为重复组——`api-profile.dialog.importConflict.action.rename` 并入 `app.ctxMenu.rename`（共用域优先），调用点 `ProfileImportConflictDialog.vue` 与其测试已改指。）"
+    },
+    {
+      "en": "Request",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内既有原文为英文的键（zh === en：api-log.requestDetail.tabRequest）又有原文为中文的键（chat.apiDetail.request）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Requests: {count}",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"{count} 条\" vs \"{count} 条请求\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Response",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内既有原文为英文的键（zh === en：api-log.requestDetail.tabResponse）又有原文为中文的键（chat.apiDetail.response）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Saving…",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"正在保存...\" vs \"保存中...\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。本组留 `keep` 的依据是 zh 逐字不同（即两条不同的源文案）；T6 合并后本组 ja/de 已一致、分歧只剩 zh，故**规则 9 不会命中本组**（详见末尾合并备注）。 （T6 合并备注：本组原 3 键，ja/de 的分歧来自其中两键的 `...` 形态（`api-profile.dialog.scopeEdit.saving`、`api-profile.dialog.scopeEdit.savingButton`）；`scopeEdit.savingButton` 在省略号项统一后与 `api-profile.rawEditor.saving` 逐字节相同，随即并入后者。故本组现在只剩 `scopeEdit.saving`（zh `正在保存...`）与 `rawEditor.saving`（zh `保存中...`）两键，**ja/de 已一致、分歧只剩 zh**，`--drift` 现标为 `ja/de分歧=n`；原句「ja/de 的差异是源文案差异的结果，不是译文没对齐」在 HEAD 已不成立，已改写为上面那句。本组仍是 `keep`（zh 不同即两条源文案），但**规则 9 不会再命中它**——Task 9 生成允许清单时按「keep 且 ja/de 确有分歧」过滤即可，这不是漏项。）"
+    },
+    {
+      "en": "Scanning conversations on first launch, please wait…",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"首次启动正在扫描对话，请稍候...\" vs \"首次启动正在扫描会话，请稍候...\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Search all conversation content…",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"搜索所有对话内容…\" vs \"搜索所有会话内容...\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Searching…",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"搜索中…\" vs \"搜索中...\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Select messages",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"选择部分消息\" vs \"进入选择\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Split down",
+      "decision": "unify",
+      "target": {
+        "ja": "下に分割",
+        "de": "Nach unten teilen"
+      },
+      "reason": "同一句源文案（2 个键的 zh 逐字相同：\"向下分屏\"），分歧只在 ja/de：{session.tabBar.splitDown} = ja \"下に分割\" / de \"Nach unten teilen\"；{session.agentPanel.splitDown} = ja \"下に分割\" / de \"Unten teilen\"。zh 与 en 不动（R3：规则 9 只看 ja/de）。取 tabBar 侧的完整方向短语（`Nach unten teilen`）。统一到 \"下に分割\" / \"Nach unten teilen\"。 （T6 合并备注：本组两键统一后四语元组全等，已成为重复组——`session.agentPanel.splitDown` 并入 `session.tabBar.splitDown`（target 来源侧），调用点 `AgentPanel.vue` 已改指。）"
+    },
+    {
+      "en": "Split right",
+      "decision": "unify",
+      "target": {
+        "ja": "右に分割",
+        "de": "Nach rechts teilen"
+      },
+      "reason": "同一句源文案（2 个键的 zh 逐字相同：\"向右分屏\"），分歧只在 ja/de：{session.tabBar.splitRight} = ja \"右に分割\" / de \"Nach rechts teilen\"；{session.agentPanel.splitRight} = ja \"右に分割\" / de \"Rechts teilen\"。zh 与 en 不动（R3：规则 9 只看 ja/de）。取 tabBar 侧的完整方向短语（`Nach rechts teilen`），与 `Split down` 的 `Nach unten teilen` 同形。统一到 \"右に分割\" / \"Nach rechts teilen\"。 （T6 合并备注：本组两键统一后四语元组全等，已成为重复组——`session.agentPanel.splitRight` 并入 `session.tabBar.splitRight`（target 来源侧），调用点 `AgentPanel.vue` 已改指。）"
+    },
+    {
+      "en": "Splits: {count}",
+      "decision": "unify",
+      "target": {
+        "ja": "{count} 分割",
+        "de": "Teilungen: {count}"
+      },
+      "reason": "同一句源文案（2 个键的 zh 逐字相同：\"{count}分屏\"），分歧只在 ja/de：{session.tabBar.splitBadge} = ja \"{count} 分割\" / de \"Teilungen: {count}\"；{session.agentPanel.splitCount} = ja \"{count}分割\" / de \"Bereiche: {count}\"。zh 与 en 不动（R3：规则 9 只看 ja/de）。`Bereiche` 在 de 里已被「作用域 scope」占用（api-profile 的 summaryScopes / savedCascaded 等键），分屏改用它会造成同词两义；取 `Teilungen`。统一到 \"{count} 分割\" / \"Teilungen: {count}\"。 （T6 合并备注：本组两键统一后四语元组全等，已成为重复组——`session.agentPanel.splitCount` 并入 `session.tabBar.splitBadge`（target 来源侧），调用点 `AgentPanel.vue` 已改指。）"
+    },
+    {
+      "en": "The current CLI does not support system context menu integration yet.",
+      "decision": "unify",
+      "target": {
+        "ja": "現在の CLI はシステムのコンテキストメニュー連携に対応していません。",
+        "de": "Die aktuelle CLI unterstützt die Integration ins System-Kontextmenü noch nicht."
+      },
+      "reason": "同一句源文案（2 个键的 zh 逐字相同：\"当前 CLI 暂不支持系统右键菜单集成。\"），分歧只在 ja/de：{session.dialog.contextMenuUnsupported} = ja \"現在の CLI はシステムのコンテキストメニュー連携に対応していません。\" / de \"Die aktuelle CLI unterstützt die Integration in das System-Kontextmenü noch nicht.\"；{settings.integration.contextMenuUnsupported} = ja \"現在の CLI はシステムのコンテキストメニュー連携に対応していません。\" / de \"Die aktuelle CLI unterstützt die Integration ins System-Kontextmenü noch nicht.\"。zh 与 en 不动（R3：规则 9 只看 ja/de）。de 的两种写法**各 2 键（平手）**：`\\bins\\b` 2 键（settings.integration.contextMenuUnsupported、settings.archivedSessions.hint）vs `in das ` 2 键（session.dialog.contextMenuUnsupported、session.sessionHeader.archivedBadgeTitle）。（T6 合并后备注：上列 census 是统一前的实测；合并执行后的 HEAD 复测为 `\\bins\\b` **2 键** vs `in das ` **1 键**——`session.dialog.contextMenuUnsupported` 已并入 `settings.integration.contextMenuUnsupported`（其 de 在统一时已改为 `ins`），平手变为 2:1，与本条所取的 `ins` 方向一致。）取 `ins` 的依据：德语书面语里 `in das` 在辅音开头的名词前通常缩合为 `ins`，且本仓已有同构用法 `ins Archiv`（settings.archivedSessions.hint）。统一到 \"現在の CLI はシステムのコンテキストメニュー連携に対応していません。\" / \"Die aktuelle CLI unterstützt die Integration ins System-Kontextmenü noch nicht.\"。 （T6 合并备注：本组两键统一后四语元组全等，已成为重复组——`session.dialog.contextMenuUnsupported` 并入 `settings.integration.contextMenuUnsupported`（target 来源侧），调用点 `useSessions.ts` 已改指。）"
+    },
+    {
+      "en": "Thinking…",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内既有原文为英文的键（zh === en：assistant.messageList.thinking）又有原文为中文的键（assistant.activity.thinking）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Total tokens",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"总 tokens\" vs \"总 Tokens\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "unknown",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内既有原文为英文的键（zh === en：common.reqMessages.unknownToolName）又有原文为中文的键（app.error.unknownComponent）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Untitled session",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"未命名对话\" vs \"未命名会话\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "User",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内既有原文为英文的键（zh === en：chat.avatar.roleUser）又有原文为中文的键（app.filter.user、session.bookmarkList.roleUser）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。 （T5 备注：本理由引用的 `session.bookmarkList.roleUser` 四语取值与 `app.filter.user` 逐字全等，已由 T5 并入后者；本条「zh 不同即两条源文案」的判据仍由 chat.avatar.roleUser（zh=\"User\"）与 app.filter.user（zh=\"用户\"）成立，结论不变。）"
+    },
+    {
+      "en": "Zoom in",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"放大 (Zoom In)\" vs \"放大\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    },
+    {
+      "en": "Zoom out",
+      "decision": "keep",
+      "target": {},
+      "reason": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"缩小 (Zoom Out)\" vs \"缩小\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+    }
+  ],
+  "terminology": [
+    {
+      "concept": "System Prompt（技术术语，四语一律保留英文写法）",
+      "canonical": {
+        "ja": "System Prompt",
+        "de": "System-Prompt"
+      },
+      "keys": [
+        "api-log.diff.systemPromptChanged",
+        "api-log.diff.copiedSystemPrompt",
+        "common.reqMessages.systemPromptHeading"
+      ],
+      "reason": "census（`--term` 原始输出）：`--term 'System Prompt'` → **4 键**（api-log.messagesView.copySystemPromptTitle、api-log.messagesView.copiedSystemPrompt、api-log.diff.systemPromptChanged、api-log.diff.copiedSystemPrompt）；`--term 'System-Prompt'` → **2 键**（copySystemPromptTitle、copiedSystemPrompt 的 de）；`--term 'SYSTEM PROMPT'` → **1 键**（common.reqMessages.systemPromptHeading 的 en/zh；de 是连字符形态故不命中）；`--term 'システムプロンプト'` → **1 键**（同一 heading 的 ja）。\n\n形态分布：de 是 **2 : 2 平手**（`System-Prompt` 2 键 vs `System Prompt` 2 键；heading 的 `SYSTEM-PROMPT` 单独一档），ja 是 4 : 1（`System Prompt` 4 键 vs heading 的 `システムプロンプト`）。\n\n取 `System-Prompt` 的依据：它与本组 heading 的 de 形态 `=== SYSTEM-PROMPT ===` **同族（只差大小写）**，取它可让 de 的词形与标题形态一致；`System Prompt` 是英语语序的直接搬用。ja 取 `System Prompt`（4 键多数，且与 en 逐字一致）。\n\nkeys 是**需要改动的 3 键**：`api-log.diff.systemPromptChanged`（de 空格形态 → 连字符）、`api-log.diff.copiedSystemPrompt`（de 空格形态 `Neuestes System Prompt kopiert` → 连字符）、`common.reqMessages.systemPromptHeading`（ja `システムプロンプト` → 全大写 `SYSTEM PROMPT`；de 已是 `SYSTEM-PROMPT`）。另 2 键（api-log.messagesView.copySystemPromptTitle、api-log.messagesView.copiedSystemPrompt）的 de 已是连字符形态、ja 已是 `System Prompt`，**无需改动**，故不在 keys 里。\n\nheading 是纯文本导出里的全大写标题，**只统一词形、保留全大写风格**。zh 四键一律保留 `System Prompt`（不翻译），故 ja 的 `システムプロンプト` 是唯一离群。 （T6 备注：已按本项应用。改动后实测 `--term 'System Prompt'` 4 键（不变）、`--term 'System-Prompt'` **4 键**（改前 2 键）、`--term 'SYSTEM PROMPT'` 1 键、`--term 'SYSTEM-PROMPT'` 1 键、`--term 'システムプロンプト'` **0 键**（改前 1 键）：de 由 2:2 平手变为 4:0，ja 由 4:1 变为 5:0。）"
+    },
+    {
+      "concept": "profile（ja）",
+      "canonical": {
+        "ja": "プロファイル"
+      },
+      "keys": [
+        "assistant.profilePicker.lockedTitle",
+        "assistant.profilePicker.switchTitle",
+        "assistant.profilePicker.select",
+        "assistant.profilePicker.empty"
+      ],
+      "reason": "实测：api-profile.json 里 `プロファイル` 46 处，而 assistant.json 里同一个概念有 4 键译成 `設定`（其余 4 处 `設定` 是真的「设置/配置」义，不改）。**ja 是唯一离群**——zh 一律 `配置`、de 一律 `Profil`。这 4 键的 en 都含 profile（`this profile` / `model profile` / `Select profile` / `No profiles available`），故统一为 `プロファイル`。副作用：`assistant.profilePicker.empty` 与 `api-profile.list.emptyTitle` 的 ja 随之对齐（该漂移组仍因 zh 不同而保留 keep）。 （T5 备注：本理由原引「api-profile.json 里 `プロファイル` 46 处」，T6 在 HEAD 实测为 **45 键 / 48 处**（T5 的合并去掉了 2 处），结论不变。T6 已按本项改完这 4 键；改后 `--term 'プロファイル'` 全仓 54 键，assistant.json 里 `設定` 只剩 4 键，且都是「设置/配置」义——`modelPicker.followConfig`、`modelPicker.chipTitleFollow`、`modelPicker.noOverride`、`error.cliMissing`。）"
+    },
+    {
+      "concept": "省略号（... vs …）——逐键与该键 en 同形",
+      "canonical": {
+        "ja": "逐键与该键 en 同形：en 用 … 则 ja 用 …；en 用 ... 则 ja 用 ...",
+        "de": "逐键与该键 en 同形：en 用 … 则 de 用 …；en 用 ... 则 de 用 ..."
+      },
+      "keys": [],
+      "reason": "判据（机械派生，可复现）：`form(ja) !== form(en) || form(de) !== form(en)`，其中 `form(s)` = 该串出现的省略号形态（`…` / `...` / 两者 / 无）。实测 **25 键**，全部落在「en 用 … 而 ja/de 用 ...」这一向；反向（en 用 ... 而 ja/de 用 …）实测 0 键，en 自身同时含两种形态的键实测 0 个。（T5 备注：`api-log.trafficPanel.loadingMore` 已由 T5 并入 `session.bookmarkList.loading`，派生函数的输出因此由 25 键降为 24 键（即 T5 之后、T6 应用前的 `keys` 现状）；本条结论与 canonical 不变。另：本理由原引「en 含 `…` 的键 89 个」，T5 合并 128 键后 T6 实测为 **82** 个（提交 1 时点）、**合并执行后的 HEAD 为 80 个**（`Saving…`/`Loading…` 各少一个含 `…` 的 en 键），「含 `...` 的键 16 个」仍成立。） （T6 备注：**已应用**——24 键里 ja/de 共 **46 处**取值由 `...` 改为 `…`（24 键 × 2 语 = 48，减去 `api-profile.rawEditor.saving` 与 `api-profile.scopeAllocation.createAndBind` 的 de 本就是 `…` 两处）。应用后机械判据的输出为 **0 键**，故 `keys` 收敛为 `[]`——本项**没有剩余待改的键**，条目本身留作决策记录。收敛性由 `scripts/i18n-locale-scan.test.mjs` 的「省略号术语项的 keys 等于机械判据的输出」用例守着，其阳性对照已改为夹具（证明判据仍能报出分歧），不再依赖仓库里有残留。）\n\ncanonical 是**逐键**的（Ruling 13）：ja/de 的省略号形态与该键**自己的** en 形态一致，不是全局「一律改成 …」——en 是基准语言，且**自身两种形态都在用**（实测 en 含 `...` 的键 16 个、含 `…` 的键 **80** 个——T6 实测订正：原写 89，提交 2 的合并又去掉 2 个），全局目标会让 ja/de 与自己那一行的基准语言不一致。\n\n⚠️ **zh 侧同样存在 `...` 分歧**（如 zh 取值 `加载中...`）——zh 是原文逐字，**不改**，属原文差异，不在本任务范围。\n\n⚠️ **本项与漂移裁决正交**（Ruling 12）：keys 里有键落在被判 `keep` 的漂移组内（如 ①B 的 `Creating…`、`Saving…`）——漂移的 `keep` 管**措辞**，本项管**标点形态**。这类组仍因 zh 不同留在 `--drift` 且仍是 `keep`，T9 的允许清单不受影响。\n\n⚠️ **观察（不在本项解决）**：en 自身两种形态并用（16 键用 `...`、80 键用 `…`——T6 实测订正），若视为缺陷应另立条目；本条只把 ja/de 对齐到各自键的 en 形态。"
+    },
+    {
+      "concept": "Splits（de）",
+      "canonical": {
+        "de": "Teilungen"
+      },
+      "keys": [
+        "session.tabBar.splitCount"
+      ],
+      "reason": "实测 de 里「分屏」这一概念有两种写法：session.tabBar.splitBadge 用 `Teilungen: {count}`，session.agentPanel.splitCount 用 `Bereiche: {count}`，session.tabBar.splitCount（工具提示「分屏数量」）用 `Anzahl der geteilten Bereiche`。统一为 `Teilungen`。⚠️ **api-profile 里的 `Bereiche` 是「作用域 scope」，不是分屏**——那些键（importConflict.summaryScopes、savedCascaded、scopeAllocation.emptyTitle 等）**不在本概念范围内，不动**。 （T6 备注：已应用。`session.agentPanel.splitCount` 的 de 由 `Bereiche: {count}` 改为 `Teilungen: {count}`（与 `session.tabBar.splitBadge` 同值，该 en 值因此成为重复组，见报告）。`session.tabBar.splitCount` 的 en 是 `Number of split panes`（工具提示），canonical 是该概念的**术语**而非整句，故把它原句里的概念词换成该术语：`Anzahl der geteilten Bereiche` → **`Anzahl der Teilungen`**，保留「数量」短语形态。） （T6 合并备注：`session.agentPanel.splitCount` 已并入 `session.tabBar.splitBadge`（同值），本项 keys 因此只剩 `session.tabBar.splitCount`。）"
+    },
+    {
+      "concept": "New session（de/ja）——按 Ruling 7a 统一到多数形态",
+      "canonical": {
+        "ja": "新しい会話",
+        "de": "Neue Unterhaltung"
+      },
+      "keys": [
+        "app.ctxMenu.newSession"
+      ],
+      "reason": "本项原为**记录项**（原 canonical 写「agentPanel/agentDashboard 用 セッション/Sitzung；其余用 会話/Unterhaltung」，并注明「Task 6 不应对它做任何改动」）。**Ruling 7a 推翻了那个记录项**：en 为 `New session` 的键在两条源语言里逐字全等（en 一律 `New session`、zh 一律 `新建会话`），「不同对象故译文应当区分」在 en/zh 上都没有依据，故统一到多数形态。**需要改动的只有 `session.agentPanel.newSession`**（ja `新しいセッション`→`新しい会話`、de `Neue Sitzung`→`Neue Unterhaltung`）；`app.ctxMenu.newSession` 本就是 canonical 形态，不动。⚠️ 本项**只管 en=\"New session\" 这一个值**——agent 面板其余键（`session.agentPanel.title` = `Aktive Sitzungen` / `アクティブなセッション`、`session.agentDashboard.emptyTitle`）仍用 Sitzung / セッション，不在本项范围。实测计数（HEAD，改动前）：de/session.json `Unterhaltung` 42 键 vs `Sitzung` 3 键；ja/session.json `会話` 45 键（46 处）vs `セッション` 3 键。改动后（提交 1 时点）：de 43 / 2，ja `会話` 46 键（47 处）/ `セッション` 2；**合并执行后的 HEAD 复测为 de 42 / 2、ja `会話` 45 键（46 处）/ `セッション` 2**（`session.agentPanel.newSession` 已并入 `app.ctxMenu.newSession`）。（原 canonical 的「那 4 处恰好就是 agentPanel/agentDashboard 的这 4 个键」在 HEAD 已不成立：T5 已把 `session.tabBar.newSession`、`session.agentDashboard.newSession` 并入 `session.agentPanel.newSession`，本项 keys 因此只剩 2 个成员，且实测 `Sitzung` / `セッション` 各是 3 个键，不是 4 个。） （T6 合并备注：`session.agentPanel.newSession` 已并入 `app.ctxMenu.newSession`（同值），本项 keys 只剩后者。）"
+    },
+    {
+      "concept": "Clear（清空搜索框）",
+      "canonical": {
+        "ja": "クリア",
+        "de": "Leeren"
+      },
+      "keys": [
+        "session.projectPanel.clear"
+      ],
+      "reason": "实测调用点：这两个键都挂在 `class=\"search-clear-btn\"` 上（ProjectPanel.vue:443-444、DashboardView.vue:249），动作是**清空搜索框**，de 应为 `Leeren`（`Löschen` 是删除）。两键的 ja 都已是 `クリア`。⚠️ **settings.index.clear 不在本概念内**——它是删除搜索索引（真删除），de `Löschen` / ja `消去` 正确，**不动**（见 drift 段 `Clear` 的 keep 理由）。 （T6 备注：已应用——`session.dashboard.clear` 的 de 由 `Löschen` 改为 `Leeren`；`session.projectPanel.clear` 本就是 `Leeren`；两键的 ja 本就都是 `クリア`。T6 逐条复核过调用点，与上列行号一致。） （T6 合并备注：`session.dashboard.clear` 已并入 `session.projectPanel.clear`（同值），本项 keys 只剩后者；两键的 de 现在同为 `Leeren`。）"
+    }
+  ]
+}

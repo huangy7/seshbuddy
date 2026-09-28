@@ -1,0 +1,159 @@
+{
+  "onboarding": {
+    "languageTitle": "Sprache wählen",
+    "languageHint": "Wähle die Sprache für SeshBuddy. Du kannst sie später in den Einstellungen ändern.",
+    "sourcesTitle": "Sitzungsquellen wählen",
+    "sourcesHint": "Wähle die CLI-Sitzungen aus, die du sehen möchtest. Du kannst dies später ändern.",
+    "hasSessions": "Sitzungen gefunden",
+    "noSessions": "Noch keine Sitzungen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "SeshBuddy starten",
+    "saving": "Wird gespeichert…",
+    "statusErrorTitle": "Einrichtungsstatus konnte nicht geprüft werden",
+    "statusErrorHint": "Versuche es erneut oder fahre mit den Standardeinstellungen fort. Beim nächsten Start wird erneut geprüft.",
+    "retry": "Erneut versuchen",
+    "continueDefault": "Standardeinstellungen verwenden",
+    "saveError": "Deine Auswahl konnte nicht gespeichert werden. Bitte versuche es erneut."
+  },
+  "boot": {
+    "deepIndexing": "Erster tiefer Index wird ausgeführt…",
+    "probingCli": "CLI-Umgebungen werden erkannt…",
+    "syncingConfig": "Projektkonfiguration wird synchronisiert…",
+    "scanning": "Sitzungen und Index werden durchsucht…",
+    "ready": "Arbeitsbereich bereit",
+    "starting": "SeshBuddy wird gestartet…",
+    "splashAria": "SeshBuddy wird gestartet",
+    "brandSubtitle": "AI-Sitzungs-Explorer & Workbench"
+  },
+  "about": {
+    "updateSettings": "Update-Einstellungen",
+    "autoCheck": "Automatisch nach Updates suchen",
+    "autoCheckHint": "Wenn aktiviert, sucht die App im Hintergrund regelmäßig nach neuen Versionen.",
+    "autoCheckEnabled": "Automatische Update-Suche aktiviert.",
+    "autoCheckDisabled": "Automatische Update-Suche deaktiviert.",
+    "changelog": "Changelog",
+    "currentVersion": "Aktuell",
+    "changeCount": "Änderungen: {count}",
+    "showOlder": "Ältere Versionen anzeigen ({count})",
+    "checking": "Suche nach Updates…",
+    "checkingShort": "Suche läuft…",
+    "checkNow": "Nach Updates suchen",
+    "ready": "Bereit, nach Updates zu suchen.",
+    "upToDate": "Sie sind auf der neuesten Version.",
+    "updateAvailable": "Version v{version} ist verfügbar – klicken Sie auf \"Herunterladen und installieren\", um zu aktualisieren.",
+    "downloading": "Installer wird heruntergeladen…",
+    "downloadingWithSize": "Installer wird heruntergeladen… {downloaded} MB",
+    "downloadingWithProgress": "Installer wird heruntergeladen… {percent}% ({downloaded} / {total} MB)",
+    "downloadingShort": "Wird heruntergeladen…",
+    "downloadAndInstall": "Herunterladen und installieren",
+    "installingQuit": "Die App wird beendet und die Installation startet. Bitte warten…",
+    "installingRestart": "Nach der Installation startet die App automatisch neu. Bitte warten…",
+    "installing": "Das Update wird installiert. Bitte warten…",
+    "viewReleaseNotes": "Versionshinweise anzeigen",
+    "hideNotes": "Hinweise ausblenden",
+    "feedback": "Feedback",
+    "feedbackTitle": "Feedback (GitHub Issues)"
+  },
+  "dialog": {
+    "notice": "Hinweis",
+    "error": "Fehler",
+    "forkFailed": "Fork fehlgeschlagen",
+    "forkSession": "Sitzung forken",
+    "launchFailed": "Start fehlgeschlagen",
+    "resumeFailed": "Fortsetzen fehlgeschlagen",
+    "newSessionUnsupported": "{cli} unterstützt das Starten einer neuen Unterhaltung aus SeshBuddy nicht. Erstellen Sie sie stattdessen in {cli}.",
+    "renameSession": "Unterhaltung umbenennen",
+    "renameTab": "Tab umbenennen",
+    "renameSessionDescription": "Legen Sie einen neuen Anzeigenamen für diese Unterhaltung fest (leer lassen, um den Standard wiederherzustellen).",
+    "renameTabDescription": "Legen Sie einen eigenen Anzeigenamen für diesen Tab fest (leer lassen, um den Standard wiederherzustellen).",
+    "renamePlaceholder": "Neuen Namen eingeben; leer lassen, um den Standard wiederherzustellen…",
+    "save": "Speichern",
+    "cancelPermanent": "Dauerhafte Aufbewahrung aufheben?",
+    "retentionImmediate": "Die aktuelle Einstellung löscht normale Archive sofort",
+    "retentionDays": "Aktuelle Aufbewahrungsdauer in Tagen: {days}",
+    "retentionWarning": "Die ursprüngliche Unterhaltungsdatei existiert nicht mehr, und das Aufheben der dauerhaften Aufbewahrung macht dieses Archiv sofort löschbar ({retention}). Wenn Sie fortfahren, wird diese Unterhaltung beim nächsten Aufräumen aus dem Verlauf entfernt und kann nicht mehr angesehen werden."
+  },
+  "ctxMenu": {
+    "select": "Diese Sitzung auswählen",
+    "deselect": "Auswahl aufheben",
+    "star": "Markieren",
+    "unstar": "Markierung entfernen",
+    "rename": "Umbenennen",
+    "copy": "Kopieren",
+    "copySessionId": "Sitzungs-ID",
+    "copySessionPath": "Sitzungspfad",
+    "resume": "Fortsetzen",
+    "blockFolder": "Übergeordneten Ordner blockieren",
+    "deleteSession": "Diese Unterhaltung löschen",
+    "newSession": "Neue Unterhaltung",
+    "selectProject": "Alle Unterhaltungen dieses Projekts auswählen",
+    "deselectProject": "Auswahl der Unterhaltungen dieses Projekts aufheben",
+    "blockProjectFolder": "Diesen Ordner blockieren",
+    "deleteProjectSessions": "Alle Unterhaltungen dieses Projekts löschen"
+  },
+  "session": {
+    "untitled": "Unbenannte Unterhaltung"
+  },
+  "filter": {
+    "ariaLabel": "Filter für Nachrichtentypen",
+    "count": "Nachrichten: {count}",
+    "user": "Benutzer",
+    "assistant": "Assistent",
+    "thinking": "Denkblock"
+  },
+  "batch": {
+    "selected": "{count} ausgewählt",
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Auswahl aufheben",
+    "export": "Exportieren",
+    "exportTooltip": "Stapel-Export",
+    "mergedExport": "Zusammengeführt exportieren",
+    "separateExport": "Getrennt exportieren",
+    "delete": "Löschen",
+    "deleteTooltip": "Stapel-Löschung",
+    "backHome": "Zurück zur Startseite",
+    "exitSelection": "Mehrfachauswahl beenden",
+    "exportOutcome": {
+      "single": "Sitzung exportiert.",
+      "merged": "{count} Sitzung in eine Datei zusammengeführt. | {count} Sitzungen in eine Datei zusammengeführt.",
+      "separate": "{count} Sitzung einzeln exportiert. | {count} Sitzungen einzeln exportiert."
+    }
+  },
+  "systemContextMenu": {
+    "registeredMacos": "Kontextmenü registriert. Klicken Sie im Finder mit der rechten Maustaste auf einen Ordner und suchen Sie Claude Code unter „Schnellaktionen“ oder „Dienste“.",
+    "registeredWindows": "Kontextmenü registriert. Sie können Claude Code jetzt über einen Rechtsklick auf den leeren Bereich eines Ordners oder auf ein Ordnerelement im Datei-Explorer starten; unter Windows wird standardmäßig ein neues cmd-Fenster verwendet, Windows Terminal ist nicht erforderlich.",
+    "unregistered": "Kontextmenü deregistriert."
+  },
+  "sidebar": {
+    "ariaLabel": "Rechte Seitenleiste",
+    "modeAriaLabel": "Seitenleistenmodus",
+    "project": "Projekt",
+    "timeline": "Zeitachse",
+    "collapse": "Seitenleiste einklappen",
+    "timelineEmpty": "Verfügbar, sobald eine Verlaufsunterhaltung geöffnet ist"
+  },
+  "update": {
+    "available": "Version v{version} ist verfügbar. Klicken Sie für Details."
+  },
+  "toast": {
+    "crashRecovery": "Die App wurde unerwartet neu geladen und automatisch wiederhergestellt."
+  },
+  "error": {
+    "renderTitle": "Renderfehler",
+    "renderDetail": "{err}\n\nKomponentenposition: {info}\nKomponentenkette: {chain}\n\nStack:\n{stack}",
+    "renderMessage": "Ein Renderfehler ist aufgetreten: {detail}\n\nStarten Sie die App neu oder kontaktieren Sie den Entwickler.",
+    "unknownComponent": "unbekannt"
+  },
+  "changelog": {
+    "v0_1_0": {
+      "multicli": "Multi-CLI-Sitzungsbrowser: Sitzungen von sechs CLIs in einem Baum.",
+      "fulltextSearch": "Volltextsuche: lokaler Index über Prompts, Antworten, Tool-Aufrufe und Codeblöcke.",
+      "proxy": "API-Reverse-Proxy und Traffic-Inspektor: Anfrage- und Antwortinhalte, Laufzeit und token-Verbrauch lokal einsehen.",
+      "editor": "Monaco-Editor und Git-Diff: Diffs nebeneinander mit Syntaxhervorhebung.",
+      "assistant": "Desktop-Assistent: Fragen zu Verlaufsitzungen stellen, mit belegten Quellen.",
+      "performance": "Leistung bei großen Sitzungen: eine 1-GB-Sitzung öffnet ohne Hänger.",
+      "updater": "In-App-Updates: Bereitstellung über GitHub Releases."
+    }
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "onboarding": {
+    "languageTitle": "Choose your language",
+    "languageHint": "Choose the language SeshBuddy will use. You can change it later in Settings.",
+    "sourcesTitle": "Choose session sources",
+    "sourcesHint": "Select the CLI conversations you want to see. You can change this later in Settings.",
+    "hasSessions": "Sessions found",
+    "noSessions": "No sessions yet",
+    "back": "Back",
+    "next": "Continue",
+    "finish": "Start using SeshBuddy",
+    "saving": "Saving…",
+    "statusErrorTitle": "Could not check setup status",
+    "statusErrorHint": "Retry the check, or continue with the default settings. Setup will be checked again next time.",
+    "retry": "Retry",
+    "continueDefault": "Use defaults",
+    "saveError": "Could not save your choices. Please try again."
+  },
+  "boot": {
+    "deepIndexing": "Running initial deep index…",
+    "probingCli": "Detecting CLI environments…",
+    "syncingConfig": "Syncing project config…",
+    "scanning": "Scanning sessions and index…",
+    "ready": "Workspace ready",
+    "starting": "Starting SeshBuddy…",
+    "splashAria": "SeshBuddy is starting",
+    "brandSubtitle": "AI Session Explorer & Workbench"
+  },
+  "about": {
+    "updateSettings": "Update settings",
+    "autoCheck": "Check for updates automatically",
+    "autoCheckHint": "When enabled, the app checks for new versions in the background.",
+    "autoCheckEnabled": "Automatic update checks enabled.",
+    "autoCheckDisabled": "Automatic update checks disabled.",
+    "changelog": "Changelog",
+    "currentVersion": "Current",
+    "changeCount": "Changes: {count}",
+    "showOlder": "Show older versions ({count})",
+    "checking": "Checking for updates…",
+    "checkingShort": "Checking…",
+    "checkNow": "Check for updates",
+    "ready": "Ready to check for updates.",
+    "upToDate": "You're on the latest version.",
+    "updateAvailable": "Version v{version} is available — click \"Download and install\" to upgrade.",
+    "downloading": "Downloading the installer…",
+    "downloadingWithSize": "Downloading the installer… {downloaded} MB",
+    "downloadingWithProgress": "Downloading the installer… {percent}% ({downloaded} / {total} MB)",
+    "downloadingShort": "Downloading…",
+    "downloadAndInstall": "Download and install",
+    "installingQuit": "The app will quit and start installing. Please wait…",
+    "installingRestart": "The app will restart automatically once the installation finishes. Please wait…",
+    "installing": "Installing the update. Please wait…",
+    "viewReleaseNotes": "View release notes",
+    "hideNotes": "Hide notes",
+    "feedback": "Feedback",
+    "feedbackTitle": "Feedback (GitHub Issues)"
+  },
+  "dialog": {
+    "notice": "Notice",
+    "error": "Error",
+    "forkFailed": "Fork failed",
+    "forkSession": "Fork session",
+    "launchFailed": "Launch failed",
+    "resumeFailed": "Resume failed",
+    "newSessionUnsupported": "{cli} cannot start a new conversation from SeshBuddy. Create it in {cli} instead.",
+    "renameSession": "Rename session",
+    "renameTab": "Rename tab",
+    "renameSessionDescription": "Set a new display name for this session (leave empty to restore the default).",
+    "renameTabDescription": "Set a custom display name for this tab (leave empty to restore the default).",
+    "renamePlaceholder": "Enter a new name; leave empty to restore the default…",
+    "save": "Save",
+    "cancelPermanent": "Cancel permanent retention?",
+    "retentionImmediate": "The current setting purges normal archives immediately",
+    "retentionDays": "Current retention in days: {days}",
+    "retentionWarning": "The original conversation file no longer exists, and unpinning this archive makes it immediately eligible for purging ({retention}). If you continue, the conversation is removed from history at the next cleanup and can no longer be viewed."
+  },
+  "ctxMenu": {
+    "select": "Select this session",
+    "deselect": "Deselect",
+    "star": "Star",
+    "unstar": "Unstar",
+    "rename": "Rename",
+    "copy": "Copy",
+    "copySessionId": "Session ID",
+    "copySessionPath": "Session path",
+    "resume": "Resume",
+    "blockFolder": "Block containing folder",
+    "deleteSession": "Delete this session",
+    "newSession": "New session",
+    "selectProject": "Select all sessions in this project",
+    "deselectProject": "Deselect sessions in this project",
+    "blockProjectFolder": "Block this folder",
+    "deleteProjectSessions": "Delete all sessions in this project"
+  },
+  "session": {
+    "untitled": "Untitled session"
+  },
+  "filter": {
+    "ariaLabel": "Message type filter",
+    "count": "Messages: {count}",
+    "user": "User",
+    "assistant": "Assistant",
+    "thinking": "Thinking"
+  },
+  "batch": {
+    "selected": "{count} selected",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "export": "Export",
+    "exportTooltip": "Batch export",
+    "mergedExport": "Export merged",
+    "separateExport": "Export separately",
+    "delete": "Delete",
+    "deleteTooltip": "Batch delete",
+    "backHome": "Back to home",
+    "exitSelection": "Exit multi-select",
+    "exportOutcome": {
+      "single": "Session exported.",
+      "merged": "Merged {count} session into one file. | Merged {count} sessions into one file.",
+      "separate": "Exported {count} session separately. | Exported {count} sessions separately."
+    }
+  },
+  "systemContextMenu": {
+    "registeredMacos": "Context menu registered. Right-click a folder in Finder and look for Claude Code under Quick Actions or Services.",
+    "registeredWindows": "Context menu registered. You can now launch Claude Code by right-clicking a folder's empty space or a folder item in File Explorer; on Windows a new cmd window is used by default, with no dependency on Windows Terminal.",
+    "unregistered": "Context menu unregistered."
+  },
+  "sidebar": {
+    "ariaLabel": "Right sidebar",
+    "modeAriaLabel": "Sidebar mode",
+    "project": "Project",
+    "timeline": "Timeline",
+    "collapse": "Collapse sidebar",
+    "timelineEmpty": "Available once a history session is open"
+  },
+  "update": {
+    "available": "Version v{version} is available. Click for details."
+  },
+  "toast": {
+    "crashRecovery": "The app reloaded unexpectedly; your workspace was restored."
+  },
+  "error": {
+    "renderTitle": "Render error",
+    "renderDetail": "{err}\n\nComponent: {info}\nComponent chain: {chain}\n\nStack:\n{stack}",
+    "renderMessage": "A render error occurred: {detail}\n\nRestart the app or contact the developer.",
+    "unknownComponent": "unknown"
+  },
+  "changelog": {
+    "v0_1_0": {
+      "multicli": "Multi-CLI session browser: sessions from six CLIs in one tree.",
+      "fulltextSearch": "Full-text search: a local index over prompts, replies, tool calls and code blocks.",
+      "proxy": "API reverse proxy and traffic inspector: inspect request and response bodies, latency and token usage locally.",
+      "editor": "Monaco editor and Git diff: side-by-side diffs with syntax highlighting.",
+      "assistant": "Desktop assistant: ask questions over past sessions, with cited sources.",
+      "performance": "Large-session performance: a 1 GB session opens without freezing the UI.",
+      "updater": "In-app updates: delivered through GitHub Releases."
+    }
+  }
+}

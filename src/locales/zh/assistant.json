@@ -1,0 +1,111 @@
+{
+  "messageList": {
+    "summarySteps": "已完成 {count} 步操作",
+    "summaryNotes": "{count} 条解说",
+    "summaryNotesOnly": "{count} 条过程解说",
+    "summaryDuration": "用时 {duration}",
+    "emptyTitle": "有什么可以帮你？",
+    "emptyPinHint": "将以 {profile} 开始对话 · 发送后固定",
+    "suggestionProfile": "根据我的对话，帮我生成用户画像",
+    "suggestionSearch": "搜索提到「重构」的会话",
+    "suggestionWeekly": "帮我总结一下本周的工作进展",
+    "profilePrompt": "请根据我的所有对话历史，为我生成一份结构化的用户画像分析报告。请包含以下维度：\n\n1. **核心性格特质**：从我的提问方式、关注点和表达习惯中，提炼 3-5 个核心性格标签（如：结果导向、细节控、好奇心强等），并引用对话中的实际表述作为佐证。\n\n2. **沟通风格与偏好**：分析我偏好的沟通方式——是逻辑导向还是发散式的？喜欢简洁回答还是深度解释？对回复格式有什么隐含偏好？\n\n3. **专业领域与技术栈**：从对话中提炼我最常涉及的技术领域、工具链和专业知识范围，评估每个领域的熟练程度。\n\n4. **工作习惯与思维模式**：我如何分解问题？倾向于自顶向下还是自底向上？是否有明显的决策风格或思维盲点？\n\n5. **MBTI 倾向预估**：基于以上分析，推测我最可能的 MBTI 类型，给出每个维度的倾向判断和置信度。\n\n6. **AI 协作最佳实践**：基于以上画像，给出 3-5 条具体建议，告诉我应该如何更好地与 AI 协作以发挥最大效率。\n\n请基于实际对话内容分析，避免泛泛而谈的「星座式」描述。如果某个维度数据不足，请标注\"低置信度\"。",
+    "thinking": "Thinking…",
+    "thoughtFor": "Thought for {duration}",
+    "stopped": "已停止",
+    "copyMarkdownTitle": "复制 Markdown 全文",
+    "usageTooltip": "上下文总量 {total}（新输入 {input} · 缓存读取 {cacheRead} · 缓存写入 {cacheWrite}）· 输出 {output}"
+  },
+  "input": {
+    "quickPhrases": "快捷用语",
+    "slashTip": "↑↓ 选择 · Enter 填入",
+    "noPhraseMatch": "未匹配到快捷用语",
+    "placeholder": "问点什么… (输入 / 快捷用语)",
+    "usageTooltip": "本对话所有轮次的输出 token 累计",
+    "cumulative": "累计",
+    "stopTitle": "停止生成"
+  },
+  "quickPhrases": {
+    "empty": "还没有快捷用语，点下面新建一条",
+    "edit": "编辑",
+    "create": "＋ 新建快捷用语",
+    "editTitle": "编辑快捷用语",
+    "createTitle": "新建快捷用语",
+    "namePlaceholder": "名称（如：复盘昨天的工作）",
+    "contentPlaceholder": "prompt 内容，支持变量：{variables}",
+    "deleteConfirm": "删除快捷用语「{name}」？"
+  },
+  "history": {
+    "title": "历史对话",
+    "empty": "暂无历史对话",
+    "untitled": "（无标题）",
+    "today": "今天",
+    "yesterday": "昨天",
+    "last7Days": "过去 7 天",
+    "earlier": "更早",
+    "deleteConversation": "删除对话",
+    "deleteTitle": "删除确认",
+    "deleteConfirm": "删除对话「{title}」？"
+  },
+  "phraseVariables": {
+    "today": "今天",
+    "yesterday": "昨天",
+    "thisMonday": "本周一",
+    "thisFriday": "本周五",
+    "lastMonday": "上周一",
+    "lastFriday": "上周五"
+  },
+  "cacheBackfill": {
+    "indexBuilding": "正在建立全文索引…",
+    "backfilling": "补齐缓存中…",
+    "failed": "缓存补齐失败：{error}",
+    "dismiss": "知道了",
+    "enableIndexHint": "启用全文索引后，助手可搜索全部会话正文",
+    "enableIndex": "启用全文索引",
+    "ignore": "忽略",
+    "pendingHint": "还有 {pending} 个会话未提取正文缓存（已缓存 {cached} 个）",
+    "startBackfill": "后台补齐"
+  },
+  "modelPicker": {
+    "defaultModel": "默认模型",
+    "followConfig": "跟随配置",
+    "chipTitleSelected": "当前模型: {label} ({id})",
+    "chipTitleFollow": "当前模型: 跟随配置 ({hint})",
+    "mainModel": "主模型 ({model})",
+    "noOverride": "当前配置未设置额外模型覆盖"
+  },
+  "profilePicker": {
+    "lockedTitle": "当前对话已绑定此配置，新对话可切换",
+    "switchTitle": "切换模型配置",
+    "select": "选择配置",
+    "empty": "无可用配置"
+  },
+  "app": {
+    "newConversation": "新对话",
+    "newConversationGlyph": "＋",
+    "pinWindow": "窗口置顶",
+    "unpinWindow": "取消置顶",
+    "engineMissing": "未检测到 claude CLI，请先安装后再使用助手。"
+  },
+  "activity": {
+    "list": "查询会话列表",
+    "search": "搜索会话内容",
+    "read": "读取会话正文",
+    "run": "执行命令",
+    "targetQuoted": "「{target}」",
+    "listing": "正在查询会话列表…",
+    "searching": "正在搜索会话内容…",
+    "reading": "正在读取会话正文…",
+    "running": "正在执行命令…",
+    "thinking": "正在思考…"
+  },
+  "error": {
+    "unknown": "未知错误",
+    "engineFailed": "助手引擎运行失败",
+    "listenerTimeout": "事件监听注册超时（3s）",
+    "listenerFailed": "事件监听注册失败: {error}",
+    "historyLoadFailed": "加载历史失败: {error}",
+    "cliMissing": "未检测到 Claude CLI，请先安装并完成配置",
+    "turnInProgress": "上一轮回复还在进行中，请稍候"
+  }
+}

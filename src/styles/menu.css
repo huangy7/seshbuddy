@@ -1,0 +1,77 @@
+/* 菜单浮层契约：所有下拉 / 右键菜单与子面板的单一样式来源。
+   新增菜单一律复用这里的 .menu-surface / .menu-item 等基类，
+   组件只保留定位与变体覆盖，避免各处各写一套阴影与圆角。 */
+
+.menu-surface {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2);
+  z-index: calc(var(--z-dropdown) + 1);
+}
+
+.menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 30px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.menu-item span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menu-item:hover:not(:disabled),
+.menu-item.active {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+.menu-item:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.menu-divider {
+  height: 1px;
+  margin: var(--space-1) 0;
+  background: var(--color-border-light);
+}
+
+.menu-anchor {
+  position: relative;
+}
+
+.menu-chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+/* 子面板:与父菜单共享 1px 边缘(连接式),首行与高亮项对位 */
+.menu-submenu {
+  position: absolute;
+  top: calc(-1 * var(--space-2));
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2);
+  z-index: calc(var(--z-dropdown) + 1);
+}
+.menu-submenu--right {
+  left: calc(100% - 1px);
+  transform-origin: top left;
+}

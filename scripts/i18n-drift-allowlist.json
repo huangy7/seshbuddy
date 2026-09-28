@@ -1,0 +1,19 @@
+{
+  "Bookmarks": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"书签\" vs \"书签列表\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Clear": "同一 en「Clear」在三个上下文里**语义不同**（实测调用点）：session.projectPanel.clear 与 session.dashboard.clear 都挂在 `class=\"search-clear-btn\"` 上（清空搜索框，de 应为 Leeren），settings.index.clear 是删除搜索索引（de Löschen 正确）。不是「同一句源文案的译文没对齐」，而是同一英文词的两处不同含义；统一任一侧都会改错。组内**真正的不一致**只有 projectPanel/dashboard 这一对，已单列为 terminology 条目。 （T6 备注：那一对已按 terminology 条目统一为 de `Leeren` / ja `クリア`。T6 复核了调用点：ProjectPanel.vue:443-444 的 `class=\"search-clear-btn\"` 按钮 `:title=\"t('session.projectPanel.clear')\"`、`@click=\"filterText = ''\"`；DashboardView.vue:249 的 `class=\"search-clear-btn\"` 按钮 `{{ t(\"session.dashboard.clear\") }}`、`@click=\"emit('clearSearch')\"`——两者都只清空搜索框、不删数据。**统一后本组残余的 ja/de 分歧只来自 `settings.index.clear`**（ja `消去` / de `Löschen`；IndexSettings.vue:432 的 `btn-danger-outline` + trash-2 图标按钮 `@click=\"clearIndex\"`，真删除索引），不再是「整族」的分歧。本组留 `keep` 的依据因此可复核为：同一 en 词下的**两个不同产品动作**，两个 search-clear-btn 键与 settings.index.clear 不是同一句源文案。规则 9 会因 `settings.index.clear` 与另外两键的 ja/de 不同而命中该 en 值，故本条必须留在允许清单里。） （T6 合并备注：`session.dashboard.clear` 已并入 `session.projectPanel.clear`（target 来源侧），调用点 `DashboardView.vue` 已改指；本组因此只剩两键——`session.projectPanel.clear`（清空搜索框）与 `settings.index.clear`（真删除索引），残余的 ja/de 分歧仍只来自后者，`keep` 与允许清单归属不变。）",
+  "Clear search": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"清除搜索\" vs \"清空搜索\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Current": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"当前\" vs \"当前版本\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Deselect all": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"取消全选\" vs \"全不选\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Got it": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"知道了\" vs \"好的\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Keep forever": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"永久保留\" vs \"设为永久保留\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Messages: {count}": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"当前显示 {count} 条消息\" vs \"{count} 条消息\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Model": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"模型\" vs \"模型名称\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Models: {count}": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"共 {count} 个模型\" vs \"{count} 个\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "New profile": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"新配置\" vs \"新建配置\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Refreshing...": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"刷新中...\" vs \"正在刷新...\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Remove bookmark": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"取消书签\" vs \"移除书签\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Requests: {count}": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"{count} 条\" vs \"{count} 条请求\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Select messages": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"选择部分消息\" vs \"进入选择\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Total tokens": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"总 tokens\" vs \"总 Tokens\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。",
+  "Untitled session": "两条不同的源文案：组内各键的原文都是中文，而 zh 逐字不同（\"未命名对话\" vs \"未命名会话\"）。zh 是原文逐字，zh 不同即证明它们不是同一句源文案；合并会改中文界面。ja/de 的差异是源文案差异的结果，不是译文没对齐。"
+}

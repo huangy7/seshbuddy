@@ -1,0 +1,1190 @@
+{
+  "src/App.vue": {
+    "MAC": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Enter": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Delete": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Backspace": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Sesh": {
+      "verdict": "keep",
+      "reason": "品牌名"
+    },
+    "Buddy": {
+      "verdict": "keep",
+      "reason": "品牌名"
+    },
+    "Text": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "Markdown": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "JSON": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "JSONL": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "Git": {
+      "verdict": "keep",
+      "reason": "git 术语（右侧栏 Git 按钮的 title）"
+    },
+    "Git#2": {
+      "verdict": "keep",
+      "reason": "git 术语（同上，aria-label）"
+    },
+    "history tab is missing a CLI identity": {
+      "verdict": "keep",
+      "reason": "抛出的内部诊断信息（不变量断言）"
+    }
+  },
+  "src/components/AboutView.vue": {
+    "Windows": {
+      "verdict": "keep",
+      "reason": "平台名"
+    },
+    "Macintosh": {
+      "verdict": "keep",
+      "reason": "平台名"
+    },
+    "SeshBuddy": {
+      "verdict": "keep",
+      "reason": "品牌名"
+    },
+    "SeshBuddy ": {
+      "verdict": "keep",
+      "reason": "版本号前缀（符号）"
+    },
+    "v": {
+      "verdict": "keep",
+      "reason": "版本号前缀（符号）"
+    }
+  },
+  "src/components/AgentPanel.vue": {
+    "⌘D": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "⌘⇧D": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "⌘W": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/AgentTerminal.vue": {
+    "SeshBuddy: … …": {
+      "verdict": "keep",
+      "reason": "品牌名 + 已本地化的 action + 路径，无硬编码英文界面词"
+    },
+    "Shift": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/api-log/ApiLogMessagesView.vue": {
+    "temp: ": {
+      "verdict": "keep",
+      "reason": "协议字段名（请求参数标识符，计划 3 裁定、控制器 Ruling 维持）"
+    },
+    "max_tokens: ": {
+      "verdict": "keep",
+      "reason": "协议字段名（请求参数标识符，计划 3 裁定、控制器 Ruling 维持）"
+    },
+    " SYSTEM PROMPT ": {
+      "verdict": "keep",
+      "reason": "协议字段的格式名（Messages 协议 system 字段的标识，非普通名词标签；计划 3 裁定保留，计划 6 的改判已由评审推翻）"
+    }
+  },
+  "src/components/api-log/ApiLogRequestDetail.vue": {
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/api-log/ApiLogSseView.vue": {
+    "stop: ": {
+      "verdict": "keep",
+      "reason": "协议字段名（SSE stop 字段）"
+    }
+  },
+  "src/components/api-log/ApiLogToolbar.vue": {
+    "… KB": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    },
+    "… MB": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    }
+  },
+  "src/components/api-log/ApiLogToolInspector.vue": {
+    "schema": {
+      "verdict": "keep",
+      "reason": "协议字段名（与 Input Schema 同类）"
+    }
+  },
+  "src/components/api-profile/ApiProfileAttributionSection.vue": {
+    "Generated with Claude Code": {
+      "verdict": "keep",
+      "reason": "示例值：它会被写进提交信息，不是界面标签"
+    }
+  },
+  "src/components/api-profile/ApiProfileList.vue": {
+    "CF": {
+      "verdict": "keep",
+      "reason": "占位缩写（无名称时的头像首字母）"
+    },
+    "Sonnet": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "• Sonnet: ……": {
+      "verdict": "keep",
+      "reason": "身份值（模型名）+ 标点（项目符号与冒号）"
+    },
+    "• Opus: ……": {
+      "verdict": "keep",
+      "reason": "身份值（模型名）+ 标点（项目符号与冒号）"
+    },
+    "• Haiku: ……": {
+      "verdict": "keep",
+      "reason": "身份值（模型名）+ 标点（项目符号与冒号）"
+    }
+  },
+  "src/components/api-profile/ApiProfileModelOverridesSection.vue": {
+    "1M": {
+      "verdict": "keep",
+      "reason": "单位符号（1M tokens）"
+    },
+    "Sonnet": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Opus": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Haiku": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    }
+  },
+  "src/components/api-profile/ProfileImportConflictDialog.vue": {
+    "CLI": {
+      "verdict": "keep",
+      "reason": "缩写（表头；同排其余表头已 t()，但缩写不因兄弟被翻而变成要翻）"
+    }
+  },
+  "src/components/ApiLogView.vue": {
+    "CLI": {
+      "verdict": "keep",
+      "reason": "缩写（与 spec 既有裁决 SVG/CLI/HEAD 同类）"
+    }
+  },
+  "src/components/ApiProfileManager.vue": {
+    "OpenAI using Chat Completions": {
+      "verdict": "keep",
+      "reason": "写进配置的值（codex.provider_name）"
+    },
+    "… copy": {
+      "verdict": "keep",
+      "reason": "持久化的配置名，同时用作重名判定的键——翻译会随语言改数据"
+    },
+    "… copy …": {
+      "verdict": "keep",
+      "reason": "持久化的配置名（同上）"
+    },
+    "default …": {
+      "verdict": "keep",
+      "reason": "持久化的配置名（同上）"
+    },
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "URL": {
+      "verdict": "keep",
+      "reason": "缩写专名（URL 在 ja/de 界面里就是 URL）"
+    },
+    "Haiku": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Sonnet": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Opus": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "seshbuddy-model-list-cache:": {
+      "verdict": "keep",
+      "reason": "存储键（localStorage）"
+    },
+    "Anthropic": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "DeepSeek": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Gemini": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Kimi": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "GLM": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "OpenAI": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "model = …": {
+      "verdict": "keep",
+      "reason": "生成的 TOML 配置字段名"
+    },
+    "model_reasoning_effort = …": {
+      "verdict": "keep",
+      "reason": "生成的 TOML 配置字段名"
+    },
+    "model_provider = …": {
+      "verdict": "keep",
+      "reason": "生成的 TOML 配置字段名"
+    },
+    "name = …": {
+      "verdict": "keep",
+      "reason": "生成的 TOML 配置字段名"
+    },
+    "base_url = …": {
+      "verdict": "keep",
+      "reason": "生成的 TOML 配置字段名"
+    },
+    "wire_api = …": {
+      "verdict": "keep",
+      "reason": "生成的 TOML 配置字段名"
+    },
+    "experimental_bearer_token = …": {
+      "verdict": "keep",
+      "reason": "生成的 TOML 配置字段名"
+    },
+    "requires_openai_auth = true": {
+      "verdict": "keep",
+      "reason": "生成的 TOML 配置字段名"
+    },
+    "JSON": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    }
+  },
+  "src/components/assistant/ChatInput.vue": {
+    "Enter": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "ArrowDown": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "ArrowUp": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Tab": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/assistant/ModelPicker.vue": {
+    "Sonnet": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Opus": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Haiku": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Sonnet …": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    },
+    "Opus …": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    },
+    "Haiku …": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    }
+  },
+  "src/components/chat/ChatApiDetailPanel.vue": {
+    "ms": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    }
+  },
+  "src/components/chat/ChatImageFullscreenModal.vue": {
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "center center": {
+      "verdict": "keep",
+      "reason": "CSS 值（background-position）"
+    }
+  },
+  "src/components/chat/ChatSelectionPill.vue": {
+    "Markdown (.md)": {
+      "verdict": "keep",
+      "reason": "格式名 + 扩展名（计划 4 两处明写，经评审确认）"
+    }
+  },
+  "src/components/chat/ChatSvgWidgetCard.vue": {
+    "SVG": {
+      "verdict": "keep",
+      "reason": "格式名"
+    }
+  },
+  "src/components/chat/ChatToolUsePart.vue": {
+    "Agent": {
+      "verdict": "keep",
+      "reason": "toolName === 'Agent' 的比较值，是标识符不是标签"
+    }
+  },
+  "src/components/ChatSearchBar.vue": {
+    " Aa ": {
+      "verdict": "keep",
+      "reason": "字形/符号（:title 已 t()；纯 ASCII，不受闸门 CJK 区间约束）"
+    },
+    " W ": {
+      "verdict": "keep",
+      "reason": "字形/符号（:title 已 t()；纯 ASCII，不受闸门 CJK 区间约束）"
+    },
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Enter": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/ChatView.vue": {
+    "… KB": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    },
+    "… MB": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    }
+  },
+  "src/components/common/ElegantSelect.vue": {
+    "Tab": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Enter": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "ArrowDown": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "ArrowUp": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Home": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "End": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/DashboardView.vue": {
+    "MAC": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Ctrl + Shift + F": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/ExportSessionDialog.vue": {
+    "Text": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "Markdown": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "JSON": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "JSONL": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    }
+  },
+  "src/components/FeedbackDialog.vue": {
+    "SeshBuddy v…": {
+      "verdict": "keep",
+      "reason": "品牌名 + 版本号"
+    },
+    "[Bug]: ": {
+      "verdict": "keep",
+      "reason": "GitHub issue 标题模板（提交到外部系统）"
+    },
+    "[Feature]: ": {
+      "verdict": "keep",
+      "reason": "GitHub issue 标题模板（同上）"
+    },
+    "*SeshBuddy v…*": {
+      "verdict": "keep",
+      "reason": "品牌名 + 版本号"
+    },
+    "Desktop": {
+      "verdict": "keep",
+      "reason": "诊断块的平台标识"
+    },
+    "macOS …": {
+      "verdict": "keep",
+      "reason": "诊断块的平台标识（macOS / Apple Silicon / Intel 三条）"
+    },
+    "(Apple Silicon / ARM64)": {
+      "verdict": "keep",
+      "reason": "诊断块的平台标识（macOS / Apple Silicon / Intel 三条）"
+    },
+    "(Intel / x64)": {
+      "verdict": "keep",
+      "reason": "诊断块的平台标识（macOS / Apple Silicon / Intel 三条）"
+    },
+    "Windows (x64)": {
+      "verdict": "keep",
+      "reason": "诊断块的平台标识"
+    },
+    "Linux (x64)": {
+      "verdict": "keep",
+      "reason": "诊断块的平台标识"
+    },
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/GitPanel.vue": {
+    "HEAD": {
+      "verdict": "keep",
+      "reason": "git 术语"
+    }
+  },
+  "src/components/FirstRunOnboarding.vue": {
+    "SeshBuddy": {
+      "verdict": "keep",
+      "reason": "产品品牌名"
+    },
+    "Tab": {
+      "verdict": "keep",
+      "reason": "键盘键名，用于焦点约束判定"
+    },
+    "button:not([disabled]), input:not([disabled])": {
+      "verdict": "keep",
+      "reason": "DOM 选择器，用于查找可聚焦控件"
+    }
+  },
+  "src/components/GlobalSearch.vue": {
+    "… KB": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    },
+    "… MB": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    },
+    "… GB": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    },
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/HistoryPanel.vue": {
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "ArrowDown": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "ArrowUp": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/ImagePreview.vue": {
+    " px ": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    },
+    "center center": {
+      "verdict": "keep",
+      "reason": "CSS 值（background-position）"
+    }
+  },
+  "src/components/MonacoEditor.vue": {
+    "UTF-8": {
+      "verdict": "keep",
+      "reason": "格式名/字符编码"
+    }
+  },
+  "src/components/SearchBar.vue": {
+    "MAC": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "Ctrl+Shift+F": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/SessionHeader.vue": {
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "ArrowDown": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "ArrowUp": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/SessionTree.vue": {
+    " KB": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    },
+    " MB": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    },
+    "ArrowUp": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "ArrowDown": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "MAC": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "CLI": {
+      "verdict": "keep",
+      "reason": "缩写（currentCliLabel 的回退值）"
+    }
+  },
+  "src/components/TabBar.vue": {
+    "⌘D": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "⌘⇧D": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "⌘W": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "⌘T": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/components/TerminalSettings.vue": {
+    "Canvas 2D": {
+      "verdict": "keep",
+      "reason": "渲染器技术名"
+    },
+    "WebGL": {
+      "verdict": "keep",
+      "reason": "渲染器技术名"
+    },
+    "DOM": {
+      "verdict": "keep",
+      "reason": "渲染器技术名"
+    }
+  },
+  "src/components/TimelineView.vue": {
+    "Agent": {
+      "verdict": "keep",
+      "reason": "tool_name === \"Agent\" 的比较值，是标识符不是标签"
+    }
+  },
+  "src/components/UsageDashboard.vue": {
+    "Opus 4.6": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    },
+    "Sonnet 4.6/4.5": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    },
+    "Haiku 4.5": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    },
+    "Gemini 2.5 Pro": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    },
+    "Gemini 2.5 Flash": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    },
+    "Sonnet 4/3.5": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    },
+    "Haiku 3.5": {
+      "verdict": "keep",
+      "reason": "模型名（身份值）"
+    }
+  },
+  "src/components/WhatsNewDialog.vue": {
+    "SeshBuddy v": {
+      "verdict": "keep",
+      "reason": "品牌名"
+    }
+  },
+  "src/composables/useChatScroll.ts": {
+    "250px 0px": {
+      "verdict": "keep",
+      "reason": "CSS 值"
+    }
+  },
+  "src/composables/useChatSearch.ts": {
+    "Write": {
+      "verdict": "keep",
+      "reason": "part.tool_name !== \"Write\" 的比较值，是标识符不是标签"
+    },
+    " search-highlight-active": {
+      "verdict": "keep",
+      "reason": "CSS 类名"
+    }
+  },
+  "src/composables/useMessageTurns.ts": {
+    "Result": {
+      "verdict": "keep",
+      "reason": "工具名回退值：与 CLI 上报的 tool_name 并排显示，翻它会让同一工具出现两种名字"
+    },
+    "Result#2": {
+      "verdict": "keep",
+      "reason": "工具名回退值（同上）"
+    },
+    "Base directory for this skill:": {
+      "verdict": "keep",
+      "reason": "与 CLI 输出正文匹配的标记（content.includes(…)），翻译会让识别失效"
+    },
+    "Skill: …": {
+      "verdict": "keep",
+      "reason": "工具名回退值（同上，Skill: … / Skill）"
+    },
+    "Skill": {
+      "verdict": "keep",
+      "reason": "工具名回退值（同上，Skill: … / Skill）"
+    }
+  },
+  "src/composables/useProxy.ts": {
+    "POST": {
+      "verdict": "keep",
+      "reason": "HTTP 方法名"
+    }
+  },
+  "src/composables/useSessions.ts": {
+    "Text": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "Markdown": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "JSON": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    },
+    "JSON Lines": {
+      "verdict": "keep",
+      "reason": "格式名/技术名"
+    }
+  },
+  "src/composables/useTerminalApp.ts": {
+    "PowerShell": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "CMD": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "Terminal.app": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "Windows Terminal": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    }
+  },
+  "src/composables/useTheme.ts": {
+    "(prefers-color-scheme: dark)": {
+      "verdict": "keep",
+      "reason": "CSS 媒体特性"
+    }
+  },
+  "src/main.ts": {
+    "Anonymous": {
+      "verdict": "keep",
+      "reason": "日志诊断值"
+    }
+  },
+  "src/types/cli.ts": {
+    "Codex": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Gemini": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "WorkBuddy": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "DSH": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Antigravity": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "Claude Code": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    }
+  },
+  "src/utils/format.ts": {
+    "KB": {
+      "verdict": "keep",
+      "reason": "单位符号"
+    },
+    "MB": {
+      "verdict": "keep",
+      "reason": "单位符号"
+    },
+    "GB": {
+      "verdict": "keep",
+      "reason": "单位符号"
+    }
+  },
+  "src/utils/json.ts": {
+    "data:": {
+      "verdict": "keep",
+      "reason": "协议记号（SSE data 字段）"
+    }
+  },
+  "src/utils/markdown.ts": {
+    "noopener noreferrer": {
+      "verdict": "keep",
+      "reason": "rel 属性值"
+    },
+    "Unable to load markdown-it KaTeX plugin": {
+      "verdict": "keep",
+      "reason": "抛出的内部诊断信息；错误处理不在本计划范围"
+    }
+  },
+  "src/utils/markdownLinks.ts": {
+    "http:": {
+      "verdict": "keep",
+      "reason": "协议名（http/https/mailto/tel）"
+    },
+    "https:": {
+      "verdict": "keep",
+      "reason": "协议名（http/https/mailto/tel）"
+    },
+    "mailto:": {
+      "verdict": "keep",
+      "reason": "协议名（http/https/mailto/tel）"
+    },
+    "tel:": {
+      "verdict": "keep",
+      "reason": "协议名（http/https/mailto/tel）"
+    }
+  },
+  "src/utils/mermaid.ts": {
+    "Mermaid did not return an SVG document": {
+      "verdict": "keep",
+      "reason": "抛出的内部诊断信息（同上）"
+    },
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    },
+    "code.language-mermaid, .markdown-mermaid-block[data-mermaid-source]": {
+      "verdict": "keep",
+      "reason": "CSS 选择器"
+    }
+  },
+  "src/utils/officialProfile.ts": {
+    "Codex Official": {
+      "verdict": "keep",
+      "reason": "身份值（OFFICIAL_PROFILE_NAME）"
+    }
+  },
+  "src/utils/reqSkills.ts": {
+    "skills are available for use with the Skill tool": {
+      "verdict": "keep",
+      "reason": "系统提示词的匹配锚点；spec 明写助手系统提示词保持英文"
+    },
+    "Skill": {
+      "verdict": "keep",
+      "reason": "name !== \"Skill\" 的比较值，是标识符不是标签"
+    }
+  },
+  "src/utils/sessionAnalytics.ts": {
+    "Tool": {
+      "verdict": "keep",
+      "reason": "工具名回退值（图表图例里与 tool_name 混排）"
+    },
+    "… min": {
+      "verdict": "keep",
+      "reason": "单位符号（整族一起改属「动态格式化」域）"
+    }
+  },
+  "src/utils/sse.ts": {
+    "event:": {
+      "verdict": "keep",
+      "reason": "协议记号（SSE event / data 字段）"
+    },
+    "data:": {
+      "verdict": "keep",
+      "reason": "协议记号（SSE event / data 字段）"
+    },
+    "data:#2": {
+      "verdict": "keep",
+      "reason": "协议记号（SSE data 字段）"
+    }
+  },
+  "src/utils/svg.ts": {
+    "<svg …>": {
+      "verdict": "keep",
+      "reason": "生成的 SVG 源码片段"
+    },
+    ".c-blue rect": {
+      "verdict": "keep",
+      "reason": "生成的 SVG 选择器与注释"
+    },
+    "/* WorkBuddy Visualizer": {
+      "verdict": "keep",
+      "reason": "生成的 SVG 选择器与注释"
+    }
+  },
+  "src/utils/toolPartScan.ts": {
+    "[Tool Error]": {
+      "verdict": "keep",
+      "reason": "与 CLI 输出正文匹配的标记（content.includes(…)），翻译会让识别失效"
+    }
+  },
+  "src/components/PricingCatalogDialog.vue": {
+    "Other": {
+      "verdict": "keep",
+      "reason": "厂商哨兵值（分组判定键 `!== \"Other\"`），不是界面文案"
+    },
+    "Other#2": {
+      "verdict": "keep",
+      "reason": "厂商哨兵值（同上）"
+    },
+    "Escape": {
+      "verdict": "keep",
+      "reason": "键盘键名/键盘符号"
+    }
+  },
+  "src/composables/usePricingCatalog.ts": {
+    "HTTP …: …": {
+      "verdict": "keep",
+      "reason": "HTTP 状态码与服务端 statusText 的运行时拼装（协议名 + 上游原文），不是界面文案"
+    },
+    "Other": {
+      "verdict": "keep",
+      "reason": "厂商哨兵值（Pass 2 认不出厂商时的落点，随即按 DEFAULT_CATALOG 丢弃），不是界面文案"
+    },
+    "Other#2": {
+      "verdict": "keep",
+      "reason": "厂商哨兵值（同上）"
+    }
+  },
+  "src/utils/enumParity.ts": {
+    "export type … =": {
+      "verdict": "keep",
+      "reason": "正则片段：构造 `export type <名> =` 的匹配式（插值归一化后形似英文），不是界面文案"
+    }
+  },
+  "_orphans": {
+    "src/App.vue:1821": {
+      "text": "AI Session Explorer & Workbench",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/api-log/ApiLogTrafficPanel.vue:420": {
+      "text": " ERR",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/api-profile/ApiProfileAttributionSection.vue:59": {
+      "text": "Co-Authored-By: Claude <noreply@anthropic.com>",
+      "verdict": "keep",
+      "reason": "示例值：commit 归属尾注的示例（它会被原样写进提交信息，不是界面标签）"
+    },
+    "src/components/ApiProfileManager.vue:165": {
+      "text": "Token",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/ApiProfileManager.vue:168": {
+      "text": "Effort",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/ApiProfileManager.vue:174": {
+      "text": "Beta",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/ApiProfileManager.vue:180": {
+      "text": "Key",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/chat/ChatAvatar.vue:65": {
+      "text": "User",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/chat/ChatAvatar.vue:66": {
+      "text": "Model: …",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/chat/ChatAvatar.vue:66#2": {
+      "text": "Provider: …",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/chat/ChatAvatar.vue:66#3": {
+      "text": "AI Assistant",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/GitPanel.vue:138": {
+      "text": "… (diff)",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/GitPanel.vue:302": {
+      "text": " files",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/GitPanel.vue:321": {
+      "text": "staged",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/GitPanel.vue:356": {
+      "text": "staged",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/NewSessionDialog.vue:206": {
+      "text": " Agent ",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/PricingCatalogDialog.vue:234": {
+      "text": "models.dev",
+      "verdict": "keep",
+      "reason": "域名（外链 https://models.dev 的可见文本，专有名词不翻）"
+    },
+    "src/components/PricingCatalogDialog.vue:35": {
+      "text": "Anthropic",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:73": {
+      "text": "Anthropic",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:36": {
+      "text": "OpenAI",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:74": {
+      "text": "OpenAI",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:37": {
+      "text": "Google",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:75": {
+      "text": "Google",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:38": {
+      "text": "DeepSeek",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:76": {
+      "text": "DeepSeek",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:39": {
+      "text": "Moonshot / Kimi",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:77": {
+      "text": "Moonshot / Kimi",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:42": {
+      "text": "MiniMax",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:80": {
+      "text": "MiniMax",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:48": {
+      "text": "Meta",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/PricingCatalogDialog.vue:49": {
+      "text": "Mistral",
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
+    "src/components/ResumeSessionDialog.vue:105": {
+      "text": " Agent ",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/components/TimelineView.vue:66": {
+      "text": "[Agent Call]",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/composables/useTabs.ts:240": {
+      "text": "Agent",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/utils/reqMessages.ts:123": {
+      "text": "[Image Content]",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/utils/reqMessages.ts:249": {
+      "text": "[Image Content]",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/utils/reqMessages.ts:216": {
+      "text": "=== SYSTEM PROMPT ===",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/utils/reqMessages.ts:235": {
+      "text": "> [Tool Use] …:",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/utils/reqMessages.ts:245": {
+      "text": " [Error]",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    },
+    "src/utils/reqMessages.ts:246": {
+      "text": "> [Tool Result…]:",
+      "verdict": "migrate",
+      "reason": "普通名词的 UI 标签（判据：专有名词/品牌名/格式名/标识符不动，普通名词要翻）"
+    }
+  }
+}

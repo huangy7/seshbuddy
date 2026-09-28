@@ -1,0 +1,160 @@
+:root {
+  /* Primary (Apple SF Azure Blue) */
+  --color-primary: #007aff;
+  --color-primary-hover: #0062cc;
+  --color-primary-light: #eff6ff;
+  --color-primary-ring: rgba(0, 122, 255, 0.25);
+
+  /* Neutrals (Unified Crisp Pure White + Ice Light Gray) */
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-tertiary: #f1f4f9;
+  --color-bg-sidebar: #f8fafc;
+  --color-bg-elevated: #ffffff;
+  --color-bg-hover: #f0f3f8;
+  --color-bg-active: #e4e9f2;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f0f3f8;
+  --color-surface-selected: #e8f0fe;
+  --color-border: #e2e7ef;
+  --color-border-light: #edf1f7;
+  --color-text: #1d1d1f;
+  --color-text-secondary: #48484a;
+  --color-text-muted: #6e6e73;
+  --color-text-inverse: #ffffff;
+
+  --color-activity-bar-bg: #f0f3f8;
+  --color-activity-bar-active: #007aff;
+
+  /* Role colors */
+  --color-role-user: #007aff;
+  --color-role-user-bg: #eaf2ff;
+  --color-role-assistant: #34c759;
+  --color-role-assistant-bg: #f8fafc;
+  --color-role-tool: #48484a;
+  --color-role-tool-bg: #f1f4f9;
+
+  /* Semantic */
+  --color-success: #34c759;
+  --color-warning: #ff9500;
+  --color-danger: #ff3b30;
+  --color-danger-hover: #d70015;
+  --color-info: #007aff;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+
+  --leading-tight: 1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  /* Spacing (4px base) */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows (Soft crisp shadows) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --shadow-context: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+  --transition-slow: 260ms ease;
+
+  /* Modal overlay (theme-independent) */
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+  --overlay-blur: 4px;
+
+  /* Z-index layers */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 500;
+  --z-modal: 1000;
+  --z-tooltip: 1100;
+
+  /* Layout constants */
+  --sidebar-min-width: 180px;
+  --sidebar-max-width: 600px;
+  --sidebar-default-width: 280px;
+  --statusbar-height: 28px;
+  --toolbar-height: 40px;
+  --activity-bar-width: 44px;
+}
+
+/* Dark mode (Apple macOS Dark: Deep Slate + Dark Indigo/Blue Accents) */
+[data-theme="dark"] {
+  /* Primary */
+  --color-primary: #0a84ff;
+  --color-primary-hover: #409cff;
+  --color-primary-light: rgba(10, 132, 255, 0.15);
+  --color-primary-ring: rgba(10, 132, 255, 0.3);
+
+  /* Neutrals */
+  --color-bg: #16181d;
+  --color-bg-secondary: #232730;
+  --color-bg-tertiary: #2a2e39;
+  --color-bg-sidebar: #1e2128;
+  --color-bg-elevated: #232730;
+  --color-bg-hover: #262a34;
+  --color-bg-active: #313744;
+  --color-surface: #16181d;
+  --color-surface-hover: #262a34;
+  --color-surface-selected: #1e3a5f;
+  --color-border: #2d323f;
+  --color-border-light: #242833;
+  --color-text: #f5f5f7;
+  --color-text-secondary: #c7c7cc;
+  --color-text-muted: #98989d;
+  --color-text-inverse: #16181d;
+
+  /* Role colors */
+  --color-role-user: #0a84ff;
+  --color-role-user-bg: #163660;
+  --color-role-assistant: #30d158;
+  --color-role-assistant-bg: #232730;
+  --color-role-tool: #98989d;
+  --color-role-tool-bg: #1c1e24;
+
+  /* Semantic */
+  --color-success: #30d158;
+  --color-warning: #ffd60a;
+  --color-danger: #ff453a;
+  --color-danger-hover: #ff6961;
+  --color-info: #0a84ff;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-context: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  --color-activity-bar-bg: #16181d;
+  --color-activity-bar-active: #0a84ff;
+}

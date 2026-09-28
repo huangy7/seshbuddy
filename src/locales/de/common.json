@@ -1,0 +1,165 @@
+{
+  "language": {
+    "title": "Sprache",
+    "hint": "Sprache der Benutzeroberfläche. Änderungen wirken sofort, ein Neustart ist nicht nötig.",
+    "en": "English",
+    "zh": "简体中文",
+    "ja": "日本語",
+    "de": "Deutsch"
+  },
+  "select": {
+    "placeholder": "Auswählen…",
+    "empty": "Keine Optionen"
+  },
+  "terminal": {
+    "systemTerminal": "Systemterminal",
+    "restoreSplit": "Split wiederherstellen (Titelleiste doppelklicken / Esc)",
+    "tempFullscreen": "Temporärer Vollbildmodus (Titelleiste doppelklicken / ⌘⇧Enter)",
+    "splitRight": "Nach rechts teilen (⌘D)",
+    "splitDown": "Nach unten teilen (⌘⇧D)",
+    "closeSplit": "Split schließen (⌘W)",
+    "resizeHint": "Zum Anpassen der Split-Größe ziehen; Doppelklick für gleiche Aufteilung"
+  },
+  "copyButton": {
+    "copied": "In die Zwischenablage kopiert",
+    "copy": "Inhalt kopieren"
+  },
+  "searchBar": {
+    "shortcutMac": "Globale Suche (⌘ ⇧ F)",
+    "shortcutOther": "Globale Suche (Ctrl + Shift + F)",
+    "placeholder": "Unterhaltungen durchsuchen…",
+    "clear": "Suche löschen"
+  },
+  "chatSearchBar": {
+    "placeholder": "In der Unterhaltung suchen…",
+    "noMatches": "Keine Treffer",
+    "caseSensitive": "Groß-/Kleinschreibung beachten (Alt+C)",
+    "wholeWord": "Ganzes Wort (Alt+W)",
+    "previous": "Zurück (Shift+Enter)",
+    "next": "Weiter (Enter)",
+    "close": "Schließen (Esc)"
+  },
+  "chatView": {
+    "widgetExportLabel": "[Diagramm: {title}]",
+    "capturingImage": "Hochauflösendes Bild wird erzeugt, bitte warten…",
+    "exportImageFailed": "Bild konnte nicht exportiert werden",
+    "allTypesHidden": "Alle Nachrichtentypen sind ausgeblendet",
+    "streamingProgress": "Streaming… empfangene Nachrichten: {count}",
+    "loadMore": "Mehr laden… (oder zum manuellen Laden klicken)",
+    "pngImage": "PNG-Bild",
+    "svgImage": "SVG-Bild"
+  },
+  "scrollToBottom": {
+    "newMessages": "Neue Nachrichten: {count}",
+    "newMessagesCapped": "Neue Nachrichten: 99+",
+    "titleUnread": "Neue Nachrichten – zum Ende scrollen",
+    "titleScrollToEnd": "Zum Ende scrollen",
+    "titleScrollToTop": "Zum Anfang scrollen"
+  },
+  "timelineView": {
+    "loading": "Wird geladen…",
+    "empty": "Keine Benutzernachrichten",
+    "imagePreview": "📷 Bild",
+    "imageCount": "📷 {count} Bilder",
+    "agentCall": "[Agent-Aufruf]"
+  },
+  "monacoEditor": {
+    "conflictTitle": "Dateikonflikt",
+    "conflictMessage": "Die Datei wurde von einem anderen Programm geändert.\n\nMit „Externe Version laden“ gehen Ihre ungespeicherten Änderungen verloren.",
+    "loadExternal": "Externe Version laden",
+    "keepLocal": "Lokale Änderungen behalten",
+    "binaryPreviewUnsupported": "Binärdateien können im Code-Editor nicht angezeigt werden",
+    "readFileFailed": "Dateiinhalt kann nicht gelesen werden"
+  },
+  "mdPreview": {
+    "reload": "Neu laden",
+    "source": "Quelltext",
+    "split": "Geteilte Ansicht",
+    "preview": "Vorschau"
+  },
+  "imagePreview": {
+    "zoomOut": "Verkleinern",
+    "originalSize": "Originalgröße (100%)",
+    "fit": "Einpassen",
+    "zoomIn": "Vergrößern",
+    "fitToWindow": "An Fenster anpassen",
+    "loadFailed": "Bild kann nicht geladen werden",
+    "tooLargeTitle": "Bild zu groß – Vorschau übersprungen",
+    "tooLargeDesc": "Bilder über 100 MB werden nicht dekodiert, um Verzögerungen zu vermeiden. Bitte mit der Bildanzeige des Systems öffnen."
+  },
+  "sessionAnalytics": {
+    "title": "Sitzungsanalyse",
+    "subtitle": "Vollständiger Nachrichtenverlauf für „{name}“",
+    "totalTokens": "Tokens gesamt",
+    "analyzedMessages": "Analysierte Nachrichten: {count}",
+    "toolCalls": "Tool-Aufrufe",
+    "toolTypeCount": "Tool-Typen: {count}",
+    "timeSpan": "Zeitspanne",
+    "firstToLast": "Erste bis letzte Nachricht",
+    "averageTokens": "Durchschnittliche Tokens",
+    "perAssistantTurn": "Pro Assistenten-Runde",
+    "toolDistribution": "Verteilung der Tool-Aufrufe",
+    "toolDistributionHint": "Aufrufe nach Tool-Typ aggregiert",
+    "otherTools": "Andere Tools",
+    "noToolCalls": "In dieser Sitzung wurden keine Tool-Aufrufe aufgezeichnet",
+    "tokenTimeline": "Token-Verlauf",
+    "tokenTimelineHint": "Eingabe, Ausgabe und Cache pro Modellaufruf",
+    "selectedRange": "Ausgewählter Bereich",
+    "rangeTotal": "Summe im Bereich",
+    "inputTokens": "Eingabe-Tokens",
+    "outputTokens": "Ausgabe-Tokens",
+    "cacheTokens": "Cache-Tokens",
+    "cumulativeToHere": "Kumuliert bis hier",
+    "cumulativeLegend": "Kumuliert",
+    "peakTurn": "Größte Runde",
+    "peakTurnValue": "Nachricht #{index} · {tokens}",
+    "topTool": "Häufigstes Tool",
+    "none": "Keine",
+    "cacheHitRate": "Cache-Trefferquote"
+  },
+  "breadcrumb": {
+    "loading": "Wird geladen…",
+    "empty": "Leer"
+  },
+  "relativeTime": {
+    "justNow": "Gerade eben",
+    "minutesAgo": "vor {count} Min.",
+    "hoursAgo": "vor {count} Std.",
+    "daysAgo": "vor {count} Tag | vor {count} Tagen"
+  },
+  "markdownLink": {
+    "outsideProject": "Blockiert: Der Link zeigt außerhalb des Projektverzeichnisses",
+    "missingProjectPath": "Relativer Link kann nicht geöffnet werden: Projektpfad fehlt",
+    "unsupportedView": "Lokale relative Links lassen sich in dieser Ansicht nicht öffnen"
+  },
+  "mermaid": {
+    "fullscreen": "Vollbild anzeigen",
+    "exitFullscreen": "Vollbild verlassen (Esc)",
+    "copySource": "Mermaid-Quelltext kopieren",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "resetZoom": "Zoom zurücksetzen"
+  },
+  "svg": {
+    "defaultTitle": "SVG-Diagramm"
+  },
+  "reqMessages": {
+    "thinkingLabel": "> [Thinking]:",
+    "truncatedSuffix": "\n\n... [Überlauf automatisch eingeklappt, insgesamt {count} Zeichen]",
+    "imageContentLabel": "[Bildinhalt]",
+    "systemPromptHeading": "=== SYSTEM-PROMPT ===",
+    "toolUseLabel": "> [Tool-Aufruf] {name}:",
+    "unknownToolName": "unbekannt",
+    "errorTag": " [Fehler]",
+    "toolResultLabel": "> [Tool-Ergebnis{tag}]:"
+  },
+  "toolResult": {
+    "truncatedSuffix": "[Inhalt zu lang, vom System gekürzt, um ein Einfrieren der Oberfläche zu vermeiden]"
+  },
+  "modelPricing": {
+    "tooltip": "{id} · {price} pro 1 Mio. Tokens"
+  },
+  "jsonViewer": {
+    "empty": "(leer)"
+  }
+}

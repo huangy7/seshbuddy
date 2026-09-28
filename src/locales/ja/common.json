@@ -1,0 +1,165 @@
+{
+  "language": {
+    "title": "表示言語",
+    "hint": "画面の表示言語です。切り替えるとすぐに反映され、再起動は不要です。",
+    "en": "English",
+    "zh": "简体中文",
+    "ja": "日本語",
+    "de": "Deutsch"
+  },
+  "select": {
+    "placeholder": "選択してください…",
+    "empty": "選択肢がありません"
+  },
+  "terminal": {
+    "systemTerminal": "システムターミナル",
+    "restoreSplit": "分割を元に戻す (タイトルバーをダブルクリック / Esc)",
+    "tempFullscreen": "一時的な全画面表示 (タイトルバーをダブルクリック / ⌘⇧Enter)",
+    "splitRight": "右に分割 (⌘D)",
+    "splitDown": "下に分割 (⌘⇧D)",
+    "closeSplit": "分割を閉じる (⌘W)",
+    "resizeHint": "ドラッグで分割サイズを調整、ダブルクリックで均等に分割"
+  },
+  "copyButton": {
+    "copied": "クリップボードにコピーしました",
+    "copy": "内容をコピー"
+  },
+  "searchBar": {
+    "shortcutMac": "全体検索 (⌘ ⇧ F)",
+    "shortcutOther": "全体検索 (Ctrl + Shift + F)",
+    "placeholder": "会話を検索…",
+    "clear": "検索をクリア"
+  },
+  "chatSearchBar": {
+    "placeholder": "会話内を検索…",
+    "noMatches": "一致なし",
+    "caseSensitive": "大文字小文字を区別 (Alt+C)",
+    "wholeWord": "単語単位で一致 (Alt+W)",
+    "previous": "前へ (Shift+Enter)",
+    "next": "次へ (Enter)",
+    "close": "閉じる (Esc)"
+  },
+  "chatView": {
+    "widgetExportLabel": "[グラフ: {title}]",
+    "capturingImage": "高解像度の長い画像を生成しています。しばらくお待ちください…",
+    "exportImageFailed": "画像のエクスポートに失敗しました",
+    "allTypesHidden": "すべてのメッセージ種別が非表示です",
+    "streamingProgress": "ストリーミング中…受信メッセージ: {count}",
+    "loadMore": "さらに読み込む… (クリックで手動読み込み)",
+    "pngImage": "PNG 画像",
+    "svgImage": "SVG 画像"
+  },
+  "scrollToBottom": {
+    "newMessages": "新着メッセージ: {count}",
+    "newMessagesCapped": "新着メッセージ: 99+",
+    "titleUnread": "新着メッセージがあります。クリックで最下部へ",
+    "titleScrollToEnd": "最下部へスクロール",
+    "titleScrollToTop": "最上部へスクロール"
+  },
+  "timelineView": {
+    "loading": "読み込み中…",
+    "empty": "ユーザーメッセージはありません",
+    "imagePreview": "📷 画像",
+    "imageCount": "📷 {count} 枚の画像",
+    "agentCall": "[Agent 呼び出し]"
+  },
+  "monacoEditor": {
+    "conflictTitle": "ファイルの競合",
+    "conflictMessage": "ファイルが外部プログラムによって変更されました。\n\n「外部バージョンを読み込む」を選ぶと、未保存の変更は失われます。",
+    "loadExternal": "外部バージョンを読み込む",
+    "keepLocal": "ローカルの変更を保持",
+    "binaryPreviewUnsupported": "バイナリファイルはコードエディターでプレビューできません",
+    "readFileFailed": "ファイルの内容を読み取れません"
+  },
+  "mdPreview": {
+    "reload": "再読み込み",
+    "source": "ソース",
+    "split": "分割表示",
+    "preview": "プレビュー"
+  },
+  "imagePreview": {
+    "zoomOut": "縮小",
+    "originalSize": "原寸 (100%)",
+    "fit": "フィット",
+    "zoomIn": "拡大",
+    "fitToWindow": "ウィンドウに合わせる",
+    "loadFailed": "画像を読み込めません",
+    "tooLargeTitle": "画像が大きすぎるためプレビューを省略しました",
+    "tooLargeDesc": "100MB を超える画像は動作を重くしないためデコードしません。システムの画像ビューアーで開いてください。"
+  },
+  "sessionAnalytics": {
+    "title": "セッション分析",
+    "subtitle": "「{name}」のメッセージ全体の流れ",
+    "totalTokens": "合計 tokens",
+    "analyzedMessages": "分析済みメッセージ: {count}",
+    "toolCalls": "ツール呼び出し",
+    "toolTypeCount": "ツール種別: {count}",
+    "timeSpan": "期間",
+    "firstToLast": "最初から最後のメッセージまで",
+    "averageTokens": "平均 tokens",
+    "perAssistantTurn": "アシスタントのターンごと",
+    "toolDistribution": "ツール呼び出しの分布",
+    "toolDistributionHint": "ツール種別ごとの呼び出し回数の集計",
+    "otherTools": "その他のツール",
+    "noToolCalls": "このセッションにはツール呼び出しの記録がありません",
+    "tokenTimeline": "Token の推移",
+    "tokenTimelineHint": "モデル呼び出しごとの入力・出力・キャッシュ",
+    "selectedRange": "選択区間",
+    "rangeTotal": "区間の合計",
+    "inputTokens": "入力 tokens",
+    "outputTokens": "出力 tokens",
+    "cacheTokens": "キャッシュ tokens",
+    "cumulativeToHere": "ここまでの累計",
+    "cumulativeLegend": "累計",
+    "peakTurn": "最大のターン",
+    "peakTurnValue": "メッセージ #{index} · {tokens}",
+    "topTool": "最多ツール",
+    "none": "なし",
+    "cacheHitRate": "キャッシュヒット率"
+  },
+  "breadcrumb": {
+    "loading": "読み込み中…",
+    "empty": "項目がありません"
+  },
+  "relativeTime": {
+    "justNow": "たった今",
+    "minutesAgo": "{count}分前",
+    "hoursAgo": "{count}時間前",
+    "daysAgo": "{count}日前"
+  },
+  "markdownLink": {
+    "outsideProject": "プロジェクトディレクトリ外を指すため、リンクを開くのをブロックしました",
+    "missingProjectPath": "プロジェクトパスがないため、相対リンクを開けません",
+    "unsupportedView": "このビューではローカルの相対リンクを開けません"
+  },
+  "mermaid": {
+    "fullscreen": "全画面表示",
+    "exitFullscreen": "全画面表示を終了 (Esc)",
+    "copySource": "Mermaid ソースをコピー",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "resetZoom": "ズームをリセット"
+  },
+  "svg": {
+    "defaultTitle": "SVG グラフ"
+  },
+  "reqMessages": {
+    "thinkingLabel": "> [Thinking 思考]:",
+    "truncatedSuffix": "\n\n... [超過分を自動折りたたみ、合計 {count} 文字]",
+    "imageContentLabel": "[画像コンテンツ]",
+    "systemPromptHeading": "=== SYSTEM PROMPT ===",
+    "toolUseLabel": "> [ツール呼び出し] {name}:",
+    "unknownToolName": "不明",
+    "errorTag": " [エラー]",
+    "toolResultLabel": "> [ツール実行結果{tag}]:"
+  },
+  "toolResult": {
+    "truncatedSuffix": "[内容が長すぎるため、UI のフリーズを避けるためシステムにより切り詰められました]"
+  },
+  "modelPricing": {
+    "tooltip": "{id} · {price} / 1M トークン"
+  },
+  "jsonViewer": {
+    "empty": "(空)"
+  }
+}

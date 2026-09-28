@@ -1,0 +1,67 @@
+{
+  "selectionPill": {
+    "selected": "選択中",
+    "clearSelection": "選択をクリア",
+    "selectAllMessages": "すべてのメッセージを選択",
+    "deselectAll": "すべて選択解除",
+    "plainText": "プレーンテキスト (.txt)",
+    "jsonData": "JSON データ",
+    "rawJsonlStream": "JSONL 生ストリーム",
+    "pngLongImage": "PNG 高画質縦長画像"
+  },
+  "imageFullscreen": {
+    "zoomOut": "縮小 (-)",
+    "resetZoom": "クリックでズームをリセット (0)",
+    "fit": "フィット",
+    "zoomIn": "拡大 (+)",
+    "fitToWindow": "ウィンドウに合わせる",
+    "copiedSvg": "SVG ソースをコピーしました",
+    "copySvg": "SVG ソースをコピー",
+    "downloadSvg": "SVG ファイルをダウンロード"
+  },
+  "imagePart": {
+    "downloadImage": "画像をダウンロード"
+  },
+  "messageHeader": {
+    "tokenInput": "入力 (上り): {count}",
+    "tokenOutput": "出力 (下り): {count}",
+    "tokenCacheRead": "キャッシュ読込: {count} ({rate}% ヒット)",
+    "tokenCacheWrite": "キャッシュ書込: {count}",
+    "modelTooltip": "モデル: {model}",
+    "forkFromHere": "ここから続ける (Fork)",
+    "identityResolving": "セッション識別子を解析しています",
+    "addBookmark": "ブックマークを追加",
+    "removeBookmark": "ブックマークを解除",
+    "viewApiRequest": "API リクエストを表示"
+  },
+  "toolGroup": {
+    "fullContentFailed": "全文の読み込みに失敗しました。プレビューを表示しています",
+    "loadingFullContent": "全文を読み込んでいます…",
+    "openSubagentInNewTab": "サブエージェントを新しいタブで開く"
+  },
+  "thinkingPart": {
+    "collapse": "折りたたむ",
+    "expand": "展開",
+    "thinkingProcess": "思考プロセス",
+    "wordCount": "{count} 語"
+  },
+  "apiDetail": {
+    "notFound": "対応する API リクエストが見つかりません",
+    "request": "リクエスト",
+    "response": "レスポンス",
+    "body": "Body",
+    "headers": "Headers"
+  },
+  "svgCard": {
+    "defaultTitle": "グラフ",
+    "switchToChart": "グラフ表示に切り替え",
+    "viewSource": "SVG ソースを表示",
+    "preview": "拡大表示",
+    "downloadSvg": "SVG をダウンロード"
+  },
+  "avatar": {
+    "roleUser": "ユーザー",
+    "roleAssistant": "AI アシスタント",
+    "providerTooltip": "提供元: {provider}"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "updateNotificationTitle": "SeshBuddy 有新版本",
+  "updateNotificationBody": "v{version} 已发布，点击打开 SeshBuddy 查看详情。",
+  "assistantWindowTitle": "SeshBuddy 助手",
+  "contextMenuOpenWith": "用 Claude Code 打开"
+}

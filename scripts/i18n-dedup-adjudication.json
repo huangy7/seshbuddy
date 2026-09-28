@@ -1,0 +1,58 @@
+{
+  "app.onboarding.retry": {
+    "action": "keep",
+    "reason": "首次启动状态读取失败时的重试按钮，与会话树加载失败时的重试属于不同流程，保留各自的文案键。"
+  },
+  "api-profile.editorHeader.untitled": {
+    "action": "keep",
+    "reason": "键名与值语义不符：本键是**无名配置的标题兜底**（键名 untitled），值却是 Edit profile（疑似误抄，见 api-profile.list.editProfile）。合并会让标题显示成「编辑配置」。两条不同的源文案。"
+  },
+  "api-profile.list.editProfile": {
+    "action": "keep",
+    "reason": "键名与值语义不符：本键是「编辑配置」按钮（en=Edit profile），而 api-profile.editorHeader.untitled 是**无名配置的标题兜底**（该处的值疑似误抄）。合并会让「未命名配置」的标题显示成 Edit profile。两条不同的源文案。"
+  },
+  "api-profile.nameRequired": {
+    "action": "keep",
+    "reason": "跨命名空间的结构性重复，不是可合并的冗余：后端错误码只能落在 errors.*——renderAppError 按 `errors.${err.code}` 取文案，后端引用不了 api-profile.*；而本键是配置表单自己的前端校验文案，调用点在 .vue 里。删任何一条都要改调用点，且换不来任何收益，两条各自被自己的契约要求存在。同一句「配置名称不能为空」在前后端各写一遍是这套契约的固有代价。"
+  },
+  "assistant.input.cumulative": {
+    "action": "keep",
+    "reason": "取值相同是巧合：本键是输入框旁的「累计」用量标记，common.sessionAnalytics.cumulativeLegend 是会话分析弹窗里图例的「累计」。两条不同的源文案（用途、位置、语义都不同）。"
+  },
+  "cli.permissionLabel.dsh": {
+    "action": "keep",
+    "reason": "四语全为空串：本键是 DSH 的权限标签占位（空串表示不显示标签），与 cli.permissionLabel.workbuddy 的「空」是两处独立的占位。空值组不是合并目标——合并两个空串不减少任何文案，却把两个 CLI 的配置耦合成一个键。"
+  },
+  "cli.permissionLabel.workbuddy": {
+    "action": "keep",
+    "reason": "四语全为空串：同上，本键是 WorkBuddy 的权限标签占位，与 cli.permissionLabel.dsh 的「空」各自独立。空值组不是合并目标。"
+  },
+  "common.sessionAnalytics.cumulativeLegend": {
+    "action": "keep",
+    "reason": "取值相同是巧合：本键是会话分析弹窗的图例「累计」，assistant.input.cumulative 是输入框旁的用量标记。两条不同的源文案。"
+  },
+  "dialogs.common.terminal": {
+    "action": "keep",
+    "reason": "本组 all-keep：本键是「终端」这一标签页/面板的默认名，session.agentPanel.terminal 与 session.tabBar.defaultTerminalLabel 的调用点已在本批改指本键（两键已删）；session.activityBar.tabAgent 取值虽相同，但**键名说 Agent**，合并会把该处的键名语义彻底抹掉，故那一键 keep。两条不同的源文案。"
+  },
+  "errors.profile.name_required": {
+    "action": "keep",
+    "reason": "跨命名空间的结构性重复，不是可合并的冗余：见 api-profile.nameRequired。本键是后端 `AppError::coded(\"profile.name_required\")` 的文案来源，而 renderAppError 的 key 前缀写死为 errors.，后端无法复用前端表单那条 api-profile.nameRequired。合并两条路都走不通。"
+  },
+  "session.activityBar.tabAgent": {
+    "action": "keep",
+    "reason": "键名与值语义不符：键名说 Agent（ActivityBar 的 agent 标签），值却是 Terminal（en=Terminal）。合并会把这个矛盾固化成「agent 标签就是终端」；真实缺陷是键名或取值有一处写错，应由后续任务订正，不在本批合并。两条不同的源文案。"
+  },
+  "session.historyPanel.retry": {
+    "action": "keep",
+    "reason": "会话树加载失败时的重试按钮，与首次启动状态读取失败时的重试属于不同流程，保留各自的文案键。"
+  },
+  "session.projectPanel.blockFolder": {
+    "action": "keep",
+    "reason": "hide vs block 不同源：本键是项目面板的「屏蔽文件夹」（屏蔽进索引），session.sessionTree.hideFolder 是会话树的「隐藏文件夹」（视图过滤）。两条不同的源文案。"
+  },
+  "session.sessionTree.hideFolder": {
+    "action": "keep",
+    "reason": "hide vs block 不同源：本键是会话树里「隐藏这个文件夹」（本地视图过滤），session.projectPanel.blockFolder 是项目面板里「屏蔽这个文件夹」（屏蔽进索引）。两者取值当前相同纯属巧合，合并会把两种不同的用户意图耦合成一个键。"
+  }
+}

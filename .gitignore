@@ -1,0 +1,61 @@
+# ==============================================================================
+# 运行期数据（app.db、traffic.db、logs、search_index、archives）全部落在系统的
+# 应用数据目录 com.seshbuddy.app/ 下，不会写进仓库。因此这里只需覆盖构建产物、
+# 本机环境覆盖文件与各类工具缓存。
+# ==============================================================================
+
+# 依赖
+node_modules
+
+# 前端构建产物（vite 的 outDir）
+dist
+
+# Rust 构建产物
+# workspace 各成员 crate 共用仓库根部这一个 target/ 目录
+target
+
+# Tauri sidecar 二进制
+# scripts/stage-sidecar.mjs 按 <名字>-<target-triple> 约定写入，
+# 是每次构建现场合成的产物，不入库
+src-tauri/binaries
+
+# 签名密钥
+# 私钥一旦入库，任何人都能签出被全体客户端接受的更新包，因此本仓库只从
+# CI secret 与本机环境变量读取私钥
+updater-signing.key
+updater-signing.key.pub
+
+# 本机环境覆盖，各人不同
+.env.local
+.env.*.local
+
+# 日志
+*.log
+npm-debug.log*
+
+# 编辑器目录与文件
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea
+*.sw?
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 各 agent 工具的工作目录
+.superpowers/
+.agents/
+.agent/
+.claude/
+
+# 静态分析工具的输出目录
+# vite dev 的 watcher 同样忽略它 —— 不忽略会在分析期间跑爆文件句柄与内存
+graphify-out/
+
+# TypeScript 增量编译缓存
+*.tsbuildinfo
+
+# 以本仓库为工作目录运行 WorkBuddy 时生成的数据目录
+.workbuddy/

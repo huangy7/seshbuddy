@@ -1,0 +1,344 @@
+{
+  "page": {
+    "title": "API 配置",
+    "cliAriaLabel": "API 配置 CLI",
+    "import": "导入备份",
+    "importTitle": "导入 API 配置备份",
+    "importFromFile": "从文件导入…",
+    "importFromClipboard": "从剪贴板导入",
+    "export": "导出备份",
+    "exportTitle": "导出 API 配置备份",
+    "exportToFile": "导出到文件…",
+    "copyToClipboard": "复制到剪贴板"
+  },
+  "proxyBanner": "API 代理已启用，Base URL 已临时指向 127.0.0.1:{port}，关闭代理后会自动还原。",
+  "nameRequired": "配置名称不能为空",
+  "nameConflict": "已存在同名配置，请使用其他名称",
+  "newProfileName": "新配置",
+  "scope": {
+    "global": "全局"
+  },
+  "field": {
+    "mainModel": "主模型",
+    "timeout": "超时",
+    "traffic": "流量",
+    "reasoning": "推理",
+    "token": "Token",
+    "effort": "Effort",
+    "beta": "Beta",
+    "key": "Key"
+  },
+  "cardHint": {
+    "claude": "配置保存后会自动级联同步至已绑定的作用域，hooks 等其他 settings.json 字段会保留原样",
+    "codex": "配置保存后会自动同步至 Codex 配置文件，其他 config.toml / auth.json 内容会保留原样"
+  },
+  "connectionHint": {
+    "claude": "兼容 Claude API 的服务端点地址，不要以斜杠结尾",
+    "codex": "当前 Provider 的 base_url 地址，不要以斜杠结尾"
+  },
+  "apiKeyPlaceholder": {
+    "claude": "sk-ant-... 或 JWT token",
+    "codex": "sk-... 或 JWT token"
+  },
+  "modelGroup": {
+    "others": "其他"
+  },
+  "fetchModels": {
+    "missingKey": "请先填写 API Key",
+    "success": "获取到 {count} 个模型（耗时 {latency}ms）",
+    "failed": "拉取模型列表失败"
+  },
+  "codexToml": {
+    "officialComment": "# Codex Official (官方 ChatGPT 认证模式)\n# 认证凭据托管于 auth.json\n# config.toml 保持官方默认设置\n"
+  },
+  "codexProvider": {
+    "title": "Codex 服务商",
+    "hint": "当前会把模型写入 `model`，并把 Base URL 写到 `model_providers.{provider}.base_url`。"
+  },
+  "dialog": {
+    "importFailed": "导入失败",
+    "common": {
+      "nameLabel": "作用域名称",
+      "nameRequired": "作用域名称不能为空",
+      "nameReserved": "名称不能为 'global'",
+      "nameDuplicate": "已存在同名的作用域",
+      "projectDirsLabel": "绑定项目目录",
+      "browse": "浏览...",
+      "emptyProjects": "暂无扫描项目目录，请点击“浏览...”手动添加目录。",
+      "chooseDirTitle": "选择项目目录",
+      "missingDirTitle": "本地目录已不存在或已被移除",
+      "staleBadge": "已失效",
+      "pathMissing": "{path}（本地目录不存在）",
+      "pathCopied": "已复制路径",
+      "copyFullPath": "复制完整路径",
+      "dirMissingTitle": "目录不存在（点击复制路径）",
+      "openInFileManagerTitle": "在 Finder / 文件管理器中打开",
+      "closeNotice": "关闭提示",
+      "openFailed": "打开失败：{error}",
+      "openFailedMissing": "打开失败：本地目录已不存在或已被移除（已自动复制路径）",
+      "fileManagerUnavailable": "无法打开文件管理器"
+    },
+    "scopeCreate": {
+      "title": "新建项目作用域",
+      "nameTip": "勾选下方目录可自动填充",
+      "namePlaceholder": "例如: Work, ProjectA (勾选目录自动填充)",
+      "nameEmptyHint": "请填写作用域名称（或勾选项目目录自动填充）",
+      "creating": "正在创建...",
+      "creatingButton": "创建中...",
+      "createFailed": "创建失败",
+      "detectTitle": "检测到项目已有配置",
+      "detecting": "检测中…",
+      "officialDefault": "（官方默认）",
+      "matchedProfileTitle": "与配置库中「{name}」相同",
+      "noMatch": "无匹配",
+      "inconsistentWarning": "各目录配置不一致，应用后将统一覆盖所有目录",
+      "bindToProfile": "绑定到已有配置「{name}」",
+      "importAsNew": "导入为新配置并绑定",
+      "ignoreForNow": "忽略，稍后再配"
+    },
+    "scopeEdit": {
+      "title": "管理项目作用域",
+      "namePlaceholder": "例如: Work, ProjectA",
+      "nameEmptyHint": "请填写作用域名称",
+      "saving": "正在保存...",
+      "updateFailed": "更新失败"
+    },
+    "scopeDelete": {
+      "title": "删除作用域",
+      "message": "确定要删除作用域「{name}」吗？删除后将清除该作用域的配置绑定，但不会删除全局配置库中的配置，也不会物理删除磁盘上的项目文件。",
+      "cleanDisk": "同时清理项目目录中由 SeshBuddy 写入的 API 配置"
+    },
+    "importConflict": {
+      "title": "导入 API 配置核对",
+      "summary": "共找到 {total} 个配置{conflicts}{scopes}。",
+      "summaryConflicts": "，其中 {count} 个与本地重名",
+      "summaryScopes": "，含 {count} 个作用域",
+      "batchLabel": "冲突项一键设置：",
+      "batchOverwrite": "全部覆盖",
+      "batchRename": "全部重命名",
+      "batchSkip": "全部跳过",
+      "scopeSectionTitle": "作用域恢复",
+      "boundTo": "→ 绑定「{name}」",
+      "colScope": "作用域",
+      "colStatus": "状态",
+      "colAction": "处理动作",
+      "renamePlaceholder": "新名称",
+      "confirm": "确认导入",
+      "action": {
+        "overwrite": "覆盖",
+        "skip": "跳过",
+        "add": "新增",
+        "addCopy": "新增副本"
+      },
+      "status": {
+        "existing": "已存在",
+        "nameConflict": "重名冲突",
+        "newScope": "新作用域",
+        "newProfile": "新配置"
+      }
+    }
+  },
+  "exportClipboard": {
+    "message": "备份内容将包含所有 CLI 的完整 API 配置及明文 Key/Token，剪贴板内容可被其他应用读取，请谨慎操作并及时清理。",
+    "ok": "继续复制"
+  },
+  "exportFile": {
+    "message": "备份文件将包含所有 CLI 的完整 API 配置及明文 Key/Token，请妥善保管所导出的 JSON 文件。",
+    "title": "导出备份警告",
+    "ok": "继续导出"
+  },
+  "importClipboard": {
+    "readFailed": "无法读取剪贴板内容：{error}",
+    "empty": "剪贴板为空，请先复制配置备份 JSON",
+    "emptyTitle": "无法导入",
+    "invalid": "剪贴板内容不是有效的配置备份：{error}"
+  },
+  "importFile": {
+    "invalidFormat": "备份文件格式无效",
+    "empty": "备份文件中未包含任何 API 配置！",
+    "emptyTitle": "文件为空"
+  },
+  "toast": {
+    "backupCopied": "配置备份已复制到剪贴板",
+    "clipboardWriteFailed": "写入剪贴板失败",
+    "exported": "导出配置备份成功",
+    "imported": "导入恢复配置成功",
+    "profileDeleted": "配置「{name}」已删除",
+    "profileRenamed": "配置已重命名为「{name}」",
+    "savedAndBound": "已保存配置并绑定至作用域",
+    "savedCascaded": "已保存配置，并已自动级联更新 {count} 个作用域",
+    "saved": "已保存配置",
+    "savedAndApplied": "已保存并应用配置「{name}」",
+    "globalSwitched": "全局生效配置已切换为「{name}」",
+    "scopeApplied": "作用域「{scope}」已应用配置「{name}」",
+    "scopeInherited": "作用域「{scope}」已恢复继承全局配置",
+    "scopeCreated": "作用域「{name}」创建成功{action}",
+    "scopeUpdated": "作用域「{name}」已更新",
+    "scopeDeleted": "作用域「{name}」已删除"
+  },
+  "scopeCreate": {
+    "boundSuffix": "，已绑定配置「{name}」",
+    "importedSuffix": "，已导入项目已有配置为「{name}」并绑定"
+  },
+  "error": {
+    "profileExists": "配置 '{name}' 已存在",
+    "scopeCreateFailed": "创建作用域失败",
+    "scopeUpdateFailed": "修改作用域失败",
+    "scopeDeleteFailed": "删除作用域失败"
+  },
+  "list": {
+    "sectionTitle": "全局配置库",
+    "autoWriteHint": "激活后自动写入",
+    "settingsChipTitle": "点击查看与编辑原生配置文件",
+    "popoverTitle": "原生配置文件 (Native Settings)",
+    "editTomlInApp": "在应用内编辑 TOML",
+    "editJsonInApp": "在应用内编辑 JSON",
+    "editTomlInAppDesc": "直接修改 Codex 原生配置文件",
+    "editJsonInAppDesc": "直接修改 Claude 原生配置文件",
+    "openInExplorer": "在资源管理器中打开",
+    "openInFinder": "在 Finder 中打开",
+    "openInFileManager": "在文件管理器中打开",
+    "openInFileManagerDesc": "定位到系统文件目录",
+    "copyPathDesc": "复制绝对路径到剪贴板",
+    "createProfile": "新建配置",
+    "emptyTitle": "配置库暂无可用配置",
+    "emptyDesc": "点击右上角「新建配置」或顶部「导入备份」添加 API 配置文件。",
+    "officialBadge": "官方",
+    "globalActive": "全局生效",
+    "globalActiveTitle": "当前作为全局生效配置",
+    "cardTitleActive": "当前全局生效配置（点右侧 ✏️ 编辑）",
+    "cardTitleSetGlobal": "点击将「{name}」设为全局生效配置",
+    "scopeChipTitle": "正在用于「{name}」项目作用域，点击跳转",
+    "editProfile": "编辑配置",
+    "duplicateProfile": "复制配置",
+    "deleteProfile": "删除配置",
+    "defaultModel": "默认 ({model})",
+    "modelMapping": "模型映射:\n{lines}",
+    "customModelMapping": "自定义模型映射",
+    "tooltipEndpoint": "端点: {value}",
+    "tooltipMainModel": "主模型: {value}",
+    "officialDefault": "官方默认",
+    "systemDefault": "系统默认",
+    "pathCopiedToast": "已复制配置文件完整路径到剪贴板",
+    "openFailedNotCreated": "打开失败：配置文件或目录尚未创建（已自动复制路径）"
+  },
+  "editorHeader": {
+    "back": "返回配置库",
+    "untitled": "编辑配置",
+    "form": "表单",
+    "tomlPreview": "TOML 预览",
+    "jsonPreview": "JSON 预览"
+  },
+  "deleteConfirm": {
+    "title": "确认删除",
+    "message": "确定要删除配置「{name}」吗？此操作无法撤销。"
+  },
+  "connection": {
+    "name": "配置名称",
+    "namePlaceholder": "例如: deepseek, kimi, work-claude",
+    "nameHint": "为配置指定一个好记的名称，用于在列表和作用域中选择",
+    "title": "连接",
+    "apiKey": "API 密钥",
+    "hide": "隐藏",
+    "show": "显示",
+    "baseUrl": "请求地址 (Base URL)",
+    "effortLevel": "Effort Level (思考强度)",
+    "effortPlaceholder": "留空使用默认 (如 medium)",
+    "commonOptions": "常用选项",
+    "currentCustom": "当前自定义",
+    "timeout": "API 超时 (ms)",
+    "current": "当前",
+    "reasoningEffort": "推理强度",
+    "reasoningHint": "仅对新启动或恢复的 Codex 生效",
+    "useCodexDefault": "使用 Codex 默认",
+    "defaultOption": "默认",
+    "newProfileInitial": "新",
+    "timeoutFormat": {
+      "ms": "≈ {value} ms",
+      "seconds": "≈ {value} 秒",
+      "minutes": "≈ {value} 分钟",
+      "hours": "≈ {value} 小时"
+    }
+  },
+  "attribution": {
+    "title": "Git 署名",
+    "hint": "写入 `settings.json` 的 `attribution`。使用默认时不写字段；禁用时显式写入空字符串。",
+    "mode": "署名模式",
+    "useClaudeCodeDefault": "使用 Claude Code 默认",
+    "custom": "自定义",
+    "disabled": "禁用署名",
+    "defaultHint": "不写入 attribution 字段，由 Claude Code 使用自身默认行为。",
+    "disabledHint": "保存后会写入空字符串，明确关闭 Claude Code 的提交/PR 署名。",
+    "commit": "提交署名",
+    "commitHint": "添加到 git commit 的文本。",
+    "pr": "PR 署名",
+    "prHint": "添加到 PR 描述的文本，留空则不写入 PR 署名。"
+  },
+  "modelOverrides": {
+    "title": "模型映射",
+    "hint": "显示名称只影响 /model 菜单：标「自动」的跟随所选模型，手动改过即固定，清空则不写入。1M 仅为上下文能力声明。",
+    "autoTag": "自动",
+    "autoTagTitle": "跟随所选模型的网关名称，切模型会同步更新",
+    "restoreAuto": "改回自动",
+    "restoreAutoTitle": "改回跟随所选模型的网关名称",
+    "typedPlaceholder": "不设置显示名称",
+    "fetchModels": "获取模型列表",
+    "role": "模型角色",
+    "displayName": "显示名称",
+    "actualModel": "实际请求模型",
+    "declare1m": "声明支持 1M",
+    "displayPlaceholder": "例如 DeepSeek V4 Pro",
+    "actualPlaceholder": "实际调用的模型名称",
+    "fallback": "默认兜底模型",
+    "fallbackPlaceholder": "例如: opus[1m] 或留空",
+    "fallbackHint": "仅在 Claude Code 请求没有明确落到 Sonnet、Opus 或 Haiku 角色时使用；通常可以留空。"
+  },
+  "runtime": {
+    "title": "Claude Code 运行参数",
+    "hint": "写入 `settings.json` 的 `env`；留空则使用 Claude Code 默认值",
+    "maxOutputTokens": "最大输出 Tokens",
+    "maxOutputTokensHint": "限制单次响应输出上限",
+    "disableExperimentalBetas": "禁用实验 Beta",
+    "disableExperimentalBetasHint": "关闭实验性 Beta 功能",
+    "disableNonessentialTraffic": "关闭非必要流量",
+    "disableNonessentialTrafficHint": "减少后台与非关键网络请求",
+    "useClaudeDefault": "使用 Claude 默认"
+  },
+  "scopeAllocation": {
+    "title": "项目作用域",
+    "subtitle": "按打开目录自动切换 API 配置",
+    "createScope": "新建作用域",
+    "inheritGlobal": "未配置 / 继承全局",
+    "dirsCount": "{count} 目录",
+    "bindDirsTitle": "点击立即绑定项目目录",
+    "unboundDirs": "未绑定目录",
+    "manageDirsTitle": "管理绑定目录",
+    "createAndBind": "新建并绑定配置...",
+    "noDirsBound": "未绑定任何目录",
+    "dirsTooltip": "已绑定 {count} 个目录：",
+    "emptyTitle": "暂无项目专属作用域",
+    "emptyDesc": "为特定目录创建作用域后，进入该项目时 SeshBuddy 会自动切换并应用专属 API 配置。",
+    "statusExisting": "已有配置",
+    "statusExistingTooltip": "项目目录中已存在 API 配置{detail}，当前未绑定，将继承全局",
+    "statusExistingDetail": "（{detail}）",
+    "statusDiverged": "配置偏离",
+    "statusDivergedTooltip": "目录 {detail} 的磁盘配置与已绑定配置不一致（可能被手动修改）",
+    "statusDirsInconsistent": "目录不一致",
+    "statusDirsInconsistentTooltip": "{count} 个目录配置不一致"
+  },
+  "rawEditor": {
+    "tomlTitle": "原生 TOML 配置文件",
+    "jsonTitle": "原生 JSON 配置文件",
+    "scopeProject": "项目级",
+    "formatJsonTitle": "格式化 JSON",
+    "save": "保存更改",
+    "saved": "已保存",
+    "saving": "保存中...",
+    "loadFailed": "加载配置失败: {error}",
+    "invalidJson": "JSON 格式无效: {error}",
+    "formatInvalid": "JSON 格式无效，无法格式化: {error}",
+    "saveFailed": "保存失败: {error}",
+    "projectDirPath": "项目目录/.claude/settings.json",
+    "projectConfigPath": "项目配置"
+  }
+}

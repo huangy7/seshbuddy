@@ -1,0 +1,67 @@
+{
+  "selectionPill": {
+    "selected": "Ausgewählt",
+    "clearSelection": "Auswahl aufheben",
+    "selectAllMessages": "Alle Nachrichten auswählen",
+    "deselectAll": "Alle abwählen",
+    "plainText": "Nur Text (.txt)",
+    "jsonData": "JSON-Daten",
+    "rawJsonlStream": "Roher JSONL-Stream",
+    "pngLongImage": "Langes PNG-Bild in hoher Auflösung"
+  },
+  "imageFullscreen": {
+    "zoomOut": "Verkleinern (-)",
+    "resetZoom": "Klicken zum Zurücksetzen des Zooms (0)",
+    "fit": "Einpassen",
+    "zoomIn": "Vergrößern (+)",
+    "fitToWindow": "An Fenster anpassen",
+    "copiedSvg": "SVG-Quelltext kopiert",
+    "copySvg": "SVG-Quelltext kopieren",
+    "downloadSvg": "SVG-Datei herunterladen"
+  },
+  "imagePart": {
+    "downloadImage": "Bild herunterladen"
+  },
+  "messageHeader": {
+    "tokenInput": "Eingabe (Upstream): {count}",
+    "tokenOutput": "Ausgabe (Downstream): {count}",
+    "tokenCacheRead": "Cache lesen: {count} ({rate}% Treffer)",
+    "tokenCacheWrite": "Cache schreiben: {count}",
+    "modelTooltip": "Modell: {model}",
+    "forkFromHere": "Von hier fortfahren (Fork)",
+    "identityResolving": "Sitzungsidentität wird ermittelt",
+    "addBookmark": "Lesezeichen hinzufügen",
+    "removeBookmark": "Lesezeichen entfernen",
+    "viewApiRequest": "API-Anfrage anzeigen"
+  },
+  "toolGroup": {
+    "fullContentFailed": "Vollständiger Inhalt konnte nicht geladen werden, Vorschau wird angezeigt",
+    "loadingFullContent": "Vollständiger Inhalt wird geladen…",
+    "openSubagentInNewTab": "Subagent in neuem Tab öffnen"
+  },
+  "thinkingPart": {
+    "collapse": "Einklappen",
+    "expand": "Ausklappen",
+    "thinkingProcess": "Denkprozess",
+    "wordCount": "{count} Wörter"
+  },
+  "apiDetail": {
+    "notFound": "Keine passende API-Anfrage gefunden",
+    "request": "Anfrage",
+    "response": "Antwort",
+    "body": "Body",
+    "headers": "Headers"
+  },
+  "svgCard": {
+    "defaultTitle": "Diagramm",
+    "switchToChart": "Zur Diagrammansicht wechseln",
+    "viewSource": "SVG-Quelltext anzeigen",
+    "preview": "Größer anzeigen",
+    "downloadSvg": "SVG herunterladen"
+  },
+  "avatar": {
+    "roleUser": "Benutzer",
+    "roleAssistant": "AI-Assistent",
+    "providerTooltip": "Anbieter: {provider}"
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "language": {
+    "title": "Language",
+    "hint": "Interface language. Changes apply immediately; no restart needed.",
+    "en": "English",
+    "zh": "简体中文",
+    "ja": "日本語",
+    "de": "Deutsch"
+  },
+  "select": {
+    "placeholder": "Select…",
+    "empty": "No options"
+  },
+  "terminal": {
+    "systemTerminal": "System terminal",
+    "restoreSplit": "Restore split (double-click title bar / Esc)",
+    "tempFullscreen": "Temporary fullscreen (double-click title bar / ⌘⇧Enter)",
+    "splitRight": "Split right (⌘D)",
+    "splitDown": "Split down (⌘⇧D)",
+    "closeSplit": "Close split (⌘W)",
+    "resizeHint": "Drag to resize splits; double-click to even them out"
+  },
+  "copyButton": {
+    "copied": "Copied to clipboard",
+    "copy": "Copy content"
+  },
+  "searchBar": {
+    "shortcutMac": "Search everywhere (⌘ ⇧ F)",
+    "shortcutOther": "Search everywhere (Ctrl + Shift + F)",
+    "placeholder": "Search conversations…",
+    "clear": "Clear search"
+  },
+  "chatSearchBar": {
+    "placeholder": "Search in conversation…",
+    "noMatches": "No matches",
+    "caseSensitive": "Match case (Alt+C)",
+    "wholeWord": "Match whole word (Alt+W)",
+    "previous": "Previous (Shift+Enter)",
+    "next": "Next (Enter)",
+    "close": "Close (Esc)"
+  },
+  "chatView": {
+    "widgetExportLabel": "[Chart: {title}]",
+    "capturingImage": "Rendering full-resolution image, please wait…",
+    "exportImageFailed": "Failed to export image",
+    "allTypesHidden": "All message types are hidden",
+    "streamingProgress": "Streaming… messages received: {count}",
+    "loadMore": "Load more… (or click to load manually)",
+    "pngImage": "PNG Image",
+    "svgImage": "SVG Image"
+  },
+  "scrollToBottom": {
+    "newMessages": "New messages: {count}",
+    "newMessagesCapped": "New messages: 99+",
+    "titleUnread": "New messages — click to scroll to bottom",
+    "titleScrollToEnd": "Scroll to bottom",
+    "titleScrollToTop": "Scroll to top"
+  },
+  "timelineView": {
+    "loading": "Loading…",
+    "empty": "No user messages",
+    "imagePreview": "📷 Image",
+    "imageCount": "📷 {count} images",
+    "agentCall": "[Agent Call]"
+  },
+  "monacoEditor": {
+    "conflictTitle": "File conflict",
+    "conflictMessage": "The file was modified by another program.\n\nChoosing \"Load external version\" will discard your unsaved changes.",
+    "loadExternal": "Load external version",
+    "keepLocal": "Keep local changes",
+    "binaryPreviewUnsupported": "Binary files can't be previewed in the code editor",
+    "readFileFailed": "Unable to read file contents"
+  },
+  "mdPreview": {
+    "reload": "Reload",
+    "source": "Source",
+    "split": "Split view",
+    "preview": "Preview"
+  },
+  "imagePreview": {
+    "zoomOut": "Zoom out",
+    "originalSize": "Original size (100%)",
+    "fit": "Fit",
+    "zoomIn": "Zoom in",
+    "fitToWindow": "Fit to window",
+    "loadFailed": "Unable to load image",
+    "tooLargeTitle": "Image too large — preview skipped",
+    "tooLargeDesc": "Images over 100MB are not decoded to avoid stalling; open them with your system image viewer."
+  },
+  "sessionAnalytics": {
+    "title": "Session analytics",
+    "subtitle": "Full message stream for “{name}”",
+    "totalTokens": "Total tokens",
+    "analyzedMessages": "Messages analyzed: {count}",
+    "toolCalls": "Tool calls",
+    "toolTypeCount": "Tool types: {count}",
+    "timeSpan": "Time span",
+    "firstToLast": "First to last message",
+    "averageTokens": "Average tokens",
+    "perAssistantTurn": "Per assistant turn",
+    "toolDistribution": "Tool call distribution",
+    "toolDistributionHint": "Call count aggregated by tool type",
+    "otherTools": "Other tools",
+    "noToolCalls": "No tool calls recorded in this session",
+    "tokenTimeline": "Token timeline",
+    "tokenTimelineHint": "Input, output and cache for each model call",
+    "selectedRange": "Selected range",
+    "rangeTotal": "Range total",
+    "inputTokens": "Input tokens",
+    "outputTokens": "Output tokens",
+    "cacheTokens": "Cache tokens",
+    "cumulativeToHere": "Cumulative so far",
+    "cumulativeLegend": "Cumulative",
+    "peakTurn": "Heaviest turn",
+    "peakTurnValue": "Message #{index} · {tokens}",
+    "topTool": "Top tool",
+    "none": "None",
+    "cacheHitRate": "Cache hit rate"
+  },
+  "breadcrumb": {
+    "loading": "Loading…",
+    "empty": "Empty"
+  },
+  "relativeTime": {
+    "justNow": "Just now",
+    "minutesAgo": "{count} min ago",
+    "hoursAgo": "{count} h ago",
+    "daysAgo": "{count} d ago"
+  },
+  "markdownLink": {
+    "outsideProject": "Blocked: the link points outside the project directory",
+    "missingProjectPath": "Can't open the relative link: project path is missing",
+    "unsupportedView": "Local relative links can't be opened in this view"
+  },
+  "mermaid": {
+    "fullscreen": "View fullscreen",
+    "exitFullscreen": "Exit fullscreen (Esc)",
+    "copySource": "Copy Mermaid source",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetZoom": "Reset zoom"
+  },
+  "svg": {
+    "defaultTitle": "SVG chart"
+  },
+  "reqMessages": {
+    "thinkingLabel": "> [Thinking]:",
+    "truncatedSuffix": "\n\n... [Auto-collapsed overflow, {count} characters total]",
+    "imageContentLabel": "[Image Content]",
+    "systemPromptHeading": "=== SYSTEM PROMPT ===",
+    "toolUseLabel": "> [Tool Use] {name}:",
+    "unknownToolName": "unknown",
+    "errorTag": " [Error]",
+    "toolResultLabel": "> [Tool Result{tag}]:"
+  },
+  "toolResult": {
+    "truncatedSuffix": "[Content too long, truncated by the system to avoid UI freeze]"
+  },
+  "modelPricing": {
+    "tooltip": "{id} · {price} per M"
+  },
+  "jsonViewer": {
+    "empty": "(empty)"
+  }
+}

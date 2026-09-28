@@ -1,0 +1,344 @@
+{
+  "page": {
+    "title": "API profiles",
+    "cliAriaLabel": "API profile CLI",
+    "import": "Import",
+    "importTitle": "Import API profile backup",
+    "importFromFile": "Import from file…",
+    "importFromClipboard": "Import from clipboard",
+    "export": "Export",
+    "exportTitle": "Export API profile backup",
+    "exportToFile": "Export to file…",
+    "copyToClipboard": "Copy to clipboard"
+  },
+  "proxyBanner": "The API proxy is enabled. The Base URL temporarily points to 127.0.0.1:{port} and is restored automatically once the proxy is turned off.",
+  "nameRequired": "Profile name cannot be empty",
+  "nameConflict": "A profile with this name already exists; use a different name",
+  "newProfileName": "New profile",
+  "scope": {
+    "global": "Global"
+  },
+  "field": {
+    "mainModel": "Main model",
+    "timeout": "Timeout",
+    "traffic": "Traffic",
+    "reasoning": "Reasoning",
+    "token": "Token",
+    "effort": "Effort",
+    "beta": "Beta",
+    "key": "Key"
+  },
+  "cardHint": {
+    "claude": "Saving the profile cascades to every bound scope; other settings.json fields such as hooks are kept as they are",
+    "codex": "Saving the profile syncs it to the Codex config file; the rest of config.toml / auth.json is kept as it is"
+  },
+  "connectionHint": {
+    "claude": "Service endpoint compatible with the Claude API; do not end it with a slash",
+    "codex": "base_url of the current provider; do not end it with a slash"
+  },
+  "apiKeyPlaceholder": {
+    "claude": "sk-ant-... or a JWT token",
+    "codex": "sk-... or a JWT token"
+  },
+  "modelGroup": {
+    "others": "Others"
+  },
+  "fetchModels": {
+    "missingKey": "Enter an API Key first",
+    "success": "Models fetched: {count} ({latency}ms)",
+    "failed": "Failed to fetch the model list"
+  },
+  "codexToml": {
+    "officialComment": "# Codex Official (official ChatGPT authentication mode)\n# Credentials live in auth.json\n# config.toml keeps the official defaults\n"
+  },
+  "codexProvider": {
+    "title": "Codex Provider",
+    "hint": "The model is written to `model`, and the Base URL to `model_providers.{provider}.base_url`."
+  },
+  "dialog": {
+    "importFailed": "Import failed",
+    "common": {
+      "nameLabel": "Scope name",
+      "nameRequired": "Scope name cannot be empty",
+      "nameReserved": "Name cannot be 'global'",
+      "nameDuplicate": "A scope with this name already exists",
+      "projectDirsLabel": "Bound project directories",
+      "browse": "Browse…",
+      "emptyProjects": "No scanned project directories yet. Click “Browse…” to add one manually.",
+      "chooseDirTitle": "Choose a project directory",
+      "missingDirTitle": "The local directory no longer exists or was removed",
+      "staleBadge": "Stale",
+      "pathMissing": "{path} (local directory does not exist)",
+      "pathCopied": "Path copied",
+      "copyFullPath": "Copy full path",
+      "dirMissingTitle": "Directory does not exist (click to copy the path)",
+      "openInFileManagerTitle": "Open in Finder / file manager",
+      "closeNotice": "Close notice",
+      "openFailed": "Failed to open: {error}",
+      "openFailedMissing": "Failed to open: the local directory no longer exists or was removed (the path was copied automatically)",
+      "fileManagerUnavailable": "Unable to open the file manager"
+    },
+    "scopeCreate": {
+      "title": "New project scope",
+      "nameTip": "Select a directory below to fill this in automatically",
+      "namePlaceholder": "e.g. Work, ProjectA (filled in automatically from a selected directory)",
+      "nameEmptyHint": "Enter a scope name (or select a project directory to fill it in)",
+      "creating": "Creating…",
+      "creatingButton": "Creating…",
+      "createFailed": "Failed to create",
+      "detectTitle": "Existing config found in the project",
+      "detecting": "Detecting…",
+      "officialDefault": "(official default)",
+      "matchedProfileTitle": "Same as “{name}” in the profile library",
+      "noMatch": "No match",
+      "inconsistentWarning": "The directories hold different configs; applying will overwrite all of them",
+      "bindToProfile": "Bind to the existing profile “{name}”",
+      "importAsNew": "Import as a new profile and bind",
+      "ignoreForNow": "Ignore and configure later"
+    },
+    "scopeEdit": {
+      "title": "Manage project scope",
+      "namePlaceholder": "e.g. Work, ProjectA",
+      "nameEmptyHint": "Enter a scope name",
+      "saving": "Saving…",
+      "updateFailed": "Failed to update"
+    },
+    "scopeDelete": {
+      "title": "Delete scope",
+      "message": "Delete the scope “{name}”? This clears the scope's profile binding, but does not delete profiles from the global profile library or remove the project files from disk.",
+      "cleanDisk": "Also clean up the API config that SeshBuddy wrote into the project directories"
+    },
+    "importConflict": {
+      "title": "Review imported API profiles",
+      "summary": "Profiles found: {total}{conflicts}{scopes}.",
+      "summaryConflicts": ", local name clashes: {count}",
+      "summaryScopes": ", scopes: {count}",
+      "batchLabel": "Set all conflicts to:",
+      "batchOverwrite": "Overwrite all",
+      "batchRename": "Rename all",
+      "batchSkip": "Skip all",
+      "scopeSectionTitle": "Scope restore",
+      "boundTo": "→ Bound to “{name}”",
+      "colScope": "Scope",
+      "colStatus": "Status",
+      "colAction": "Action",
+      "renamePlaceholder": "New name",
+      "confirm": "Confirm import",
+      "action": {
+        "overwrite": "Overwrite",
+        "skip": "Skip",
+        "add": "Add",
+        "addCopy": "Add a copy"
+      },
+      "status": {
+        "existing": "Existing",
+        "nameConflict": "Name conflict",
+        "newScope": "New scope",
+        "newProfile": "New profile"
+      }
+    }
+  },
+  "exportClipboard": {
+    "message": "The backup contains the full API configuration of every CLI, including plaintext Keys/Tokens. Other applications can read the clipboard, so handle it with care and clear it promptly.",
+    "ok": "Copy anyway"
+  },
+  "exportFile": {
+    "message": "The backup file contains the full API configuration of every CLI, including plaintext Keys/Tokens. Keep the exported JSON file safe.",
+    "title": "Export backup warning",
+    "ok": "Export anyway"
+  },
+  "importClipboard": {
+    "readFailed": "Unable to read the clipboard: {error}",
+    "empty": "The clipboard is empty; copy a profile backup JSON first",
+    "emptyTitle": "Cannot import",
+    "invalid": "The clipboard does not hold a valid profile backup: {error}"
+  },
+  "importFile": {
+    "invalidFormat": "The backup file format is invalid",
+    "empty": "The backup file contains no API profiles",
+    "emptyTitle": "File is empty"
+  },
+  "toast": {
+    "backupCopied": "Backup copied to the clipboard",
+    "clipboardWriteFailed": "Failed to write to the clipboard",
+    "exported": "Backup exported",
+    "imported": "Profiles restored from the backup",
+    "profileDeleted": "Profile \"{name}\" deleted",
+    "profileRenamed": "Profile renamed to \"{name}\"",
+    "savedAndBound": "Profile saved and bound to the scope",
+    "savedCascaded": "Profile saved; scopes updated automatically: {count}",
+    "saved": "Profile saved",
+    "savedAndApplied": "Profile \"{name}\" saved and applied",
+    "globalSwitched": "Global profile switched to \"{name}\"",
+    "scopeApplied": "Profile \"{name}\" applied to scope \"{scope}\"",
+    "scopeInherited": "Scope \"{scope}\" inherits the global profile again",
+    "scopeCreated": "Scope \"{name}\" created{action}",
+    "scopeUpdated": "Scope \"{name}\" updated",
+    "scopeDeleted": "Scope \"{name}\" deleted"
+  },
+  "scopeCreate": {
+    "boundSuffix": ", profile \"{name}\" bound",
+    "importedSuffix": ", existing project config imported as \"{name}\" and bound"
+  },
+  "error": {
+    "profileExists": "Profile \"{name}\" already exists",
+    "scopeCreateFailed": "Failed to create the scope",
+    "scopeUpdateFailed": "Failed to update the scope",
+    "scopeDeleteFailed": "Failed to delete the scope"
+  },
+  "list": {
+    "sectionTitle": "Global profile library",
+    "autoWriteHint": "Written automatically once active",
+    "settingsChipTitle": "Click to view and edit the native config file",
+    "popoverTitle": "Native config file",
+    "editTomlInApp": "Edit TOML in the app",
+    "editJsonInApp": "Edit JSON in the app",
+    "editTomlInAppDesc": "Edit the Codex config file directly",
+    "editJsonInAppDesc": "Edit the Claude config file directly",
+    "openInExplorer": "Open in File Explorer",
+    "openInFinder": "Open in Finder",
+    "openInFileManager": "Open in file manager",
+    "openInFileManagerDesc": "Reveal in the system file directory",
+    "copyPathDesc": "Copy the absolute path to the clipboard",
+    "createProfile": "New profile",
+    "emptyTitle": "No profiles available",
+    "emptyDesc": "Click “New profile” in the top right or “Import” at the top to add an API profile.",
+    "officialBadge": "Official",
+    "globalActive": "Active globally",
+    "globalActiveTitle": "Currently the globally active profile",
+    "cardTitleActive": "Currently active globally (click ✏️ on the right to edit)",
+    "cardTitleSetGlobal": "Click to make “{name}” the globally active profile",
+    "scopeChipTitle": "In use by the “{name}” project scope; click to jump",
+    "editProfile": "Edit profile",
+    "duplicateProfile": "Duplicate profile",
+    "deleteProfile": "Delete profile",
+    "defaultModel": "Default ({model})",
+    "modelMapping": "Model mapping:\n{lines}",
+    "customModelMapping": "Custom model mapping",
+    "tooltipEndpoint": "Endpoint: {value}",
+    "tooltipMainModel": "Main model: {value}",
+    "officialDefault": "Official default",
+    "systemDefault": "System default",
+    "pathCopiedToast": "Full config file path copied to clipboard",
+    "openFailedNotCreated": "Failed to open: the config file or directory has not been created yet (the path was copied automatically)"
+  },
+  "editorHeader": {
+    "back": "Back to library",
+    "untitled": "Edit profile",
+    "form": "Form",
+    "tomlPreview": "TOML preview",
+    "jsonPreview": "JSON preview"
+  },
+  "deleteConfirm": {
+    "title": "Confirm deletion",
+    "message": "Delete the profile “{name}”? This cannot be undone."
+  },
+  "connection": {
+    "name": "Profile name",
+    "namePlaceholder": "e.g. deepseek, kimi, work-claude",
+    "nameHint": "Give the profile an easy-to-remember name, used when picking it from the list and in scopes",
+    "title": "Connection",
+    "apiKey": "API Key",
+    "hide": "Hide",
+    "show": "Show",
+    "baseUrl": "Request URL (Base URL)",
+    "effortLevel": "Effort Level (thinking effort)",
+    "effortPlaceholder": "Leave empty to use the default (e.g. medium)",
+    "commonOptions": "Common options",
+    "currentCustom": "Current custom value",
+    "timeout": "API timeout (ms)",
+    "current": "Current",
+    "reasoningEffort": "Reasoning effort",
+    "reasoningHint": "Applies only to newly started or resumed Codex sessions",
+    "useCodexDefault": "Use Codex default",
+    "defaultOption": "Default",
+    "newProfileInitial": "N",
+    "timeoutFormat": {
+      "ms": "≈ {value} ms",
+      "seconds": "≈ {value} s",
+      "minutes": "≈ {value} min",
+      "hours": "≈ {value} h"
+    }
+  },
+  "attribution": {
+    "title": "Git attribution",
+    "hint": "Written to `attribution` in `settings.json`. With the default the field is not written; with disabled an empty string is written explicitly.",
+    "mode": "Attribution mode",
+    "useClaudeCodeDefault": "Use Claude Code default",
+    "custom": "Custom",
+    "disabled": "Disable attribution",
+    "defaultHint": "The `attribution` field is not written; Claude Code uses its own default behaviour.",
+    "disabledHint": "Saving writes an empty string, explicitly turning off Claude Code commit/PR attribution.",
+    "commit": "Commit attribution",
+    "commitHint": "Text added to the git commit.",
+    "pr": "PR attribution",
+    "prHint": "Text added to the PR description; leave empty to write no PR attribution."
+  },
+  "modelOverrides": {
+    "title": "Model mapping",
+    "hint": "Display names only affect the /model menu: rows marked Auto follow the selected model, editing one pins it, and clearing it writes nothing. 1M only declares context capability.",
+    "autoTag": "Auto",
+    "autoTagTitle": "Follows the gateway name of the selected model and updates when you switch",
+    "restoreAuto": "Restore automatic",
+    "restoreAutoTitle": "Go back to following the gateway name of the selected model",
+    "typedPlaceholder": "No display name",
+    "fetchModels": "Fetch model list",
+    "role": "Model role",
+    "displayName": "Display name",
+    "actualModel": "Actual request model",
+    "declare1m": "Declare 1M support",
+    "displayPlaceholder": "e.g. DeepSeek V4 Pro",
+    "actualPlaceholder": "Model name actually requested",
+    "fallback": "Default fallback model",
+    "fallbackPlaceholder": "e.g. opus[1m] or leave empty",
+    "fallbackHint": "Used only when a Claude Code request does not clearly map to the Sonnet, Opus or Haiku role; it can usually be left empty."
+  },
+  "runtime": {
+    "title": "Claude Code runtime parameters",
+    "hint": "Written to `env` in `settings.json`; leave empty to use the Claude Code defaults",
+    "maxOutputTokens": "Max output tokens",
+    "maxOutputTokensHint": "Caps the output of a single response",
+    "disableExperimentalBetas": "Disable experimental betas",
+    "disableExperimentalBetasHint": "Turns off experimental beta features",
+    "disableNonessentialTraffic": "Disable non-essential traffic",
+    "disableNonessentialTrafficHint": "Reduces background and non-critical network requests",
+    "useClaudeDefault": "Use Claude default"
+  },
+  "scopeAllocation": {
+    "title": "Project scopes",
+    "subtitle": "Switch API profiles automatically based on the open directory",
+    "createScope": "New scope",
+    "inheritGlobal": "Not configured / inherit global",
+    "dirsCount": "Dirs: {count}",
+    "bindDirsTitle": "Click to bind a project directory now",
+    "unboundDirs": "No directory bound",
+    "manageDirsTitle": "Manage bound directories",
+    "createAndBind": "Create and bind a profile…",
+    "noDirsBound": "No directories bound",
+    "dirsTooltip": "Directories bound: {count}",
+    "emptyTitle": "No project-specific scopes yet",
+    "emptyDesc": "Once you create a scope for a specific directory, SeshBuddy switches to and applies that API profile automatically when you enter the project.",
+    "statusExisting": "Config exists",
+    "statusExistingTooltip": "An API config already exists in the project directory{detail}; it is currently unbound and will inherit the global profile",
+    "statusExistingDetail": " ({detail})",
+    "statusDiverged": "Config diverged",
+    "statusDivergedTooltip": "The on-disk config for directory {detail} does not match the bound profile (it may have been edited manually)",
+    "statusDirsInconsistent": "Directories inconsistent",
+    "statusDirsInconsistentTooltip": "{count} directories have inconsistent configs"
+  },
+  "rawEditor": {
+    "tomlTitle": "Native TOML config file",
+    "jsonTitle": "Native JSON config file",
+    "scopeProject": "Project",
+    "formatJsonTitle": "Format JSON",
+    "save": "Save changes",
+    "saved": "Saved",
+    "saving": "Saving…",
+    "loadFailed": "Failed to load the config: {error}",
+    "invalidJson": "Invalid JSON: {error}",
+    "formatInvalid": "Invalid JSON, cannot format: {error}",
+    "saveFailed": "Failed to save: {error}",
+    "projectDirPath": "Project directory/.claude/settings.json",
+    "projectConfigPath": "Project config"
+  }
+}

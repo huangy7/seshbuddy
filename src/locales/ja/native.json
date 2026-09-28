@@ -1,0 +1,6 @@
+{
+  "updateNotificationTitle": "SeshBuddy の新バージョンがあります",
+  "updateNotificationBody": "v{version} がリリースされました。クリックして SeshBuddy で詳細を確認してください。",
+  "assistantWindowTitle": "SeshBuddy アシスタント",
+  "contextMenuOpenWith": "Claude Code で開く"
+}

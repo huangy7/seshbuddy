@@ -1,0 +1,6 @@
+{
+  "updateNotificationTitle": "SeshBuddy update available",
+  "updateNotificationBody": "v{version} has been released. Click to open SeshBuddy for details.",
+  "assistantWindowTitle": "SeshBuddy Assistant",
+  "contextMenuOpenWith": "Open with Claude Code"
+}

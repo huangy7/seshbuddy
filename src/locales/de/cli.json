@@ -1,0 +1,36 @@
+{
+  "installHint": {
+    "claude": {
+      "windows": "Claude Code CLI wurde nicht gefunden. Bitte zuerst installieren.\n\nInstallation: npm install -g {'@'}anthropic-ai/claude-code\n\nUnter Windows liegt die ausführbare Datei üblicherweise unter `%APPDATA%\\npm\\claude.cmd`; wird sie trotzdem nicht erkannt, prüfen Sie, ob dieses Verzeichnis im PATH liegt.",
+      "unix": "Claude Code CLI wurde nicht gefunden. Bitte zuerst installieren.\n\nInstallation: npm install -g {'@'}anthropic-ai/claude-code\n\nNode.js wird vorausgesetzt."
+    },
+    "codex": {
+      "windows": "Codex CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass `codex` oder `%APPDATA%\\npm\\codex.cmd` verfügbar ist.",
+      "unix": "Codex CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `codex` im PATH liegt."
+    },
+    "gemini": {
+      "windows": "Gemini CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass `gemini` verfügbar ist.",
+      "unix": "Gemini CLI wurde nicht gefunden. Bitte zuerst installieren.\n\nInstallation: npm install -g {'@'}google/gemini-cli"
+    },
+    "workbuddy": "Die WorkBuddy-Desktop-App wurde nicht gefunden. Bitte zuerst installieren (/Applications/WorkBuddy.app).",
+    "antigravity": {
+      "windows": "Antigravity CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass `agy` verfügbar ist.",
+      "unix": "Antigravity CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `agy` im PATH liegt."
+    }
+  },
+  "permissionLabel": {
+    "claude": "Berechtigungsprüfungen überspringen",
+    "codex": "Genehmigungen und Sandbox umgehen",
+    "gemini": "YOLO-Modus",
+    "workbuddy": "",
+    "dsh": ""
+  },
+  "permissionHint": {
+    "claude": "Wenn aktiviert, fügen neue oder fortgesetzte Sitzungen automatisch --dangerously-skip-permissions hinzu.",
+    "codex": "Wenn aktiviert, fügt Codex automatisch --dangerously-bypass-approvals-and-sandbox hinzu und startet mit den lockersten Berechtigungen.",
+    "gemini": "Wenn aktiviert, fügt Gemini automatisch -y (YOLO-Modus) hinzu und überspringt alle Werkzeugbestätigungen.",
+    "workbuddy": "WorkBuddy wird durch Öffnen der WorkBuddy-App fortgesetzt; Berechtigungs-Flags spielen keine Rolle.",
+    "dsh": "DSH-Sitzungen liegen im Web und können nicht in einem lokalen Terminal fortgesetzt werden."
+  },
+  "installDsh": "DSH installieren"
+}

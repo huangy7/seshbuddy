@@ -1,0 +1,153 @@
+{
+  "common": {
+    "close": "Schließen",
+    "cancel": "Abbrechen",
+    "copied": "Kopiert",
+    "copyFailed": "Kopieren fehlgeschlagen",
+    "copyCommand": "Befehl kopieren",
+    "launchMode": "Startmodus",
+    "terminal": "Terminal",
+    "agent": "Agent",
+    "apiProfile": "API-Profil",
+    "apiProfilePlaceholder": "API-Profil auswählen...",
+    "apiProfileEmpty": "Keine API-Profile verfügbar"
+  },
+  "newSession": {
+    "title": "Neue Sitzung",
+    "projectDir": "Projektverzeichnis",
+    "browseTitle": "Projektverzeichnis auswählen",
+    "projectPlaceholder": "Projektverzeichnis auswählen...",
+    "projectEmpty": "Keine zuletzt verwendeten Projekte",
+    "browse": "Lokalen Datenträger durchsuchen...",
+    "cliType": "CLI-Typ",
+    "createInAgent": "In Agent erstellen",
+    "createInTerminal": "Im Terminal erstellen"
+  },
+  "resumeSession": {
+    "title": "Sitzung fortsetzen",
+    "archiveNotice": "Diese Sitzung ist archiviert. Beim Fortsetzen werden die Quelldateien aus dem Snapshot auf den lokalen Datenträger entpackt."
+  },
+  "input": {
+    "placeholder": "Namen eingeben...",
+    "confirm": "OK"
+  },
+  "exportSession": {
+    "title": "Sitzung exportieren",
+    "scope": "Exportumfang",
+    "scopeAllTitle": "Alle Nachrichten",
+    "scopeAllDesc": "Den vollständigen Sitzungsverlauf exportieren",
+    "scopeSelectionTitle": "Nachrichten auswählen",
+    "scopeSelectionDesc": "Nachrichten manuell für den Export auswählen; Export als Bild wird unterstützt",
+    "format": "Exportformat",
+    "enterSelection": "Auswahl starten"
+  },
+  "feedback": {
+    "title": "Feedback & Community",
+    "subtitle": "SeshBuddy ist Open Source — jedes Feedback landet direkt im GitHub-Community-Tracker",
+    "bugTitle": "Fehlerbericht einreichen",
+    "bugDesc": "Fehler, Absturz oder Darstellungsproblem? Reiche einen Fehlerbericht auf GitHub ein",
+    "featureTitle": "Funktion vorschlagen",
+    "featureDesc": "Schlage eine neue AI-CLI, neue Sitzungsanalysen oder Verbesserungen der Oberfläche vor",
+    "searchTitle": "Bestehende Issues & Diskussionen durchsuchen",
+    "searchDesc": "Prüfe, ob dasselbe Problem bereits gemeldet oder eine Übergangslösung veröffentlicht wurde",
+    "footerTip": "Ein Klick öffnet die GitHub-Seite im Standardbrowser",
+    "diagTitle": "### Diagnose der Laufzeitumgebung (Environment Diagnostics)",
+    "diagApp": "- **App-Version**: {app} v{version} (Tauri v{tauri})",
+    "diagAppFallback": "- **App-Version**: {value}",
+    "diagUnknownEnv": "Unbekannt (nicht in der Desktop-App)",
+    "diagOs": "- **Betriebssystem (OS)**: {osName} {osVersion} ({arch})",
+    "diagPlatform": "- **Plattform**: {platform}",
+    "diagKernel": "- **Kernel**: {kernel}",
+    "diagCpu": "- **Prozessor (CPU)**: {cpu} ({cores} Kerne)",
+    "diagMemory": "- **Arbeitsspeicher (Memory)**: {memory}",
+    "diagClis": "- **Erkannte AI-CLI-Status**:",
+    "diagUserAgent": "- **Browser-Engine (User Agent)**: {userAgent}",
+    "diagTimestamp": "- **Zeitpunkt (Timestamp)**: {timestamp}",
+    "cliInstalled": "installiert ✓",
+    "cliMissing": "nicht erkannt ✗",
+    "cliHasSessions": " (mit Sitzungsverlauf)",
+    "bugBody": "## Problembeschreibung\n\nBeschreibe das Problem und die Schritte zur Reproduktion...\n\n## Erwartetes Verhalten\n\nBeschreibe das erwartete Ergebnis...\n\n---\n{diagnostics}",
+    "featureBody": "## Hintergrund\n\nBeschreibe das Problem oder den Anwendungsfall...\n\n## Vorgeschlagene Lösung\n\nWie soll SeshBuddy diese Funktion umsetzen...\n\n---\n{signature}"
+  },
+  "pricing": {
+    "title": "Preiskatalog (Pricing Catalog)",
+    "modelCount": "Modelle: {count}",
+    "dataSource": "Datenquelle:",
+    "lastUpdated": "Zuletzt aktualisiert:",
+    "builtinOffline": "Offline enthalten",
+    "refreshTitle": "Aktuelle Preise von models.dev laden",
+    "refreshing": "Aktualisieren...",
+    "refresh": "Preise aktualisieren",
+    "scopeUsed": "Verwendete Modelle",
+    "scopeAll": "Gesamter Katalog",
+    "searchPlaceholder": "Modelle oder Anbieter suchen...",
+    "clearSearch": "Suche leeren",
+    "refreshFailed": "Aktualisierung fehlgeschlagen: {error}",
+    "emptyTitle": "Keine passenden Modelle",
+    "emptyHint": "Ändere den Suchbegriff oder wähle alle Anbieter aus",
+    "colModel": "Modell",
+    "colProvider": "Anbieter",
+    "colInput": "Eingabe / 1M Tokens",
+    "colOutput": "Ausgabe / 1M Tokens",
+    "colCacheWrite": "Cache-Schreiben / 1M",
+    "colCacheRead": "Cache-Lesen / 1M",
+    "loadMore": "Mehr anzeigen ({count} verbleibend)",
+    "footerCount": "Zeige {shown} / {total} Modelle",
+    "footerHint": "Preise in USD / 1M Tokens · beste Version wird automatisch zugeordnet",
+    "providerAll": "Alle Anbieter ({count})",
+    "providerModelCount": "Modelle: {count}",
+    "providerCurrentSession": "Aktuelle Sitzung",
+    "provider": {
+      "anthropic": "Anthropic",
+      "openai": "OpenAI",
+      "google": "Google",
+      "deepseek": "DeepSeek",
+      "moonshot-kimi": "Moonshot / Kimi",
+      "zhipu": "Zhipu / 智谱 GLM",
+      "alibaba": "Alibaba / 通义千问",
+      "minimax": "MiniMax",
+      "stepfun": "StepFun / 阶跃星辰",
+      "baichuan": "Baichuan / 百川",
+      "bytedance": "ByteDance / 豆包",
+      "tencent": "Tencent / 腾讯混元",
+      "baidu": "Baidu / 百度千帆",
+      "siliconflow": "SiliconFlow",
+      "meta": "Meta",
+      "mistral": "Mistral",
+      "groq": "Groq",
+      "xai": "xAI"
+    }
+  },
+  "apiDebug": {
+    "title": "API-Debug",
+    "titleWithCli": "{name} API-Debug",
+    "minimize": "Minimieren",
+    "restore": "Wiederherstellen",
+    "maximize": "Maximieren",
+    "runningInBackground": "Läuft im Hintergrund"
+  },
+  "whatsNew": {
+    "badge": "NEU",
+    "confirm": "Verstanden"
+  },
+  "deleteConfirm": {
+    "title": "Löschbestätigung",
+    "sessionMessage": "Die folgende Unterhaltung löschen?\n\n{title}\n\nDie Originaldatei wird in den Papierkorb verschoben; Archive, Snapshots und Indizes in SeshBuddy werden ebenfalls gelöscht.",
+    "projectMessage": "Alle Unterhaltungen des folgenden Projekts löschen?\n\n{path}\n({count} Unterhaltung insgesamt)\n\nDie Originaldateien werden in den Papierkorb verschoben; Archive, Snapshots und Indizes in SeshBuddy werden ebenfalls gelöscht. | Alle Unterhaltungen des folgenden Projekts löschen?\n\n{path}\n({count} Unterhaltungen insgesamt)\n\nDie Originaldateien werden in den Papierkorb verschoben; Archive, Snapshots und Indizes in SeshBuddy werden ebenfalls gelöscht.",
+    "batchTitle": "Bestätigung der Stapellöschung",
+    "batchMessage": "Die ausgewählte Unterhaltung löschen?\n\nDie Originaldateien werden in den Papierkorb verschoben; Archive, Snapshots und Indizes in SeshBuddy werden ebenfalls gelöscht. | Die {count} ausgewählten Unterhaltungen löschen?\n\nDie Originaldateien werden in den Papierkorb verschoben; Archive, Snapshots und Indizes in SeshBuddy werden ebenfalls gelöscht."
+  },
+  "diffTooLarge": {
+    "message": "Die Datei ist zu groß (über 1 MB), um den Diff anzuzeigen"
+  },
+  "closeTerminal": {
+    "title": "Terminal schließen",
+    "message": "Diese Terminal-Sitzung schließen? Der Prozess wird beendet."
+  },
+  "closeFile": {
+    "title": "Datei schließen",
+    "message": "Diese Datei hat ungespeicherte Änderungen. Vor dem Schließen speichern?",
+    "confirm": "Speichern und schließen",
+    "discard": "Änderungen verwerfen"
+  }
+}

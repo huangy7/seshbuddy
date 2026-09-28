@@ -1,0 +1,179 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  # 版本校验与 draft 预建都收在这里，而不是留在 matrix 的每条腿里。四条腿并发时，
+  # 两次 ensure draft 会同时读到「该 tag 尚无 release」，而 GitHub 允许多个 draft
+  # 共用同一个 tag，于是两次 gh release create --draft 都会成功：产物与 latest.json
+  # 被劈进两个 draft，谁都不完整。draft 只由一个 job 建、且在任何构建开始之前建完，
+  # 这个窗口就不存在了。版本校验同理，只该跑一次，不必每条腿各跑一次。
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # tag 只决定 release 的名字，产物版本却完全取自 package.json
+      # （tauri.conf.json 声明 version: "../package.json"），两者没有任何机制去对齐。
+      # 于是 v0.2.0 的 tag 配上仍是 0.1.0 的 package.json 也能一路绿灯：release 叫
+      # SeshBuddy v0.2.0，里面却是 SeshBuddy_0.1.0_*，latest.json 报的也是 0.1.0。
+      # 后果不是名字难看，而是更新端点对已装用户永远返回 0.1.0 —— 客户端判定自己
+      # 已是最新，静默地永远收不到这次更新。这类问题只在用户侧暴露，CI 无从察觉，
+      # 因此必须在这里硬性拦住。
+      # 放在昂贵构建之前：不一致一分钟内即中止，不必等约 30 分钟的编译。
+      # 显式指定 bash —— Windows 腿默认 pwsh，同文件建 draft / 验签两步同理。
+      - name: verify tag matches package version
+        shell: bash
+        run: |
+          # 工作流过滤器是 v*，走到这里本不该有例外。真出现了（如误推裸版本号 tag），
+          # 说明 tag 生成方式已偏离约定，直接按不一致处理，不做静默的裸串比较。
+          # 变量一律用 ${} 包起来：中文标点紧跟变量名时，bash 会把多字节字符当成
+          # 标识符的一部分吞掉，导致变量解析为空并输出乱码（如 ${PKG_VERSION}，）。
+          case "${GITHUB_REF_NAME}" in
+            v*) ;;
+            *)
+              echo "[FAIL] tag '${GITHUB_REF_NAME}' 不以 v 开头，无法解析出发布版本号"
+              echo "       约定的发布 tag 形如 v0.2.0；请改用带 v 前缀的 tag 重新发布。"
+              exit 1
+              ;;
+          esac
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "${TAG_VERSION}" != "${PKG_VERSION}" ]; then
+            echo "[FAIL] tag 版本与 package.json 版本不一致"
+            echo "       tag:          ${GITHUB_REF_NAME} -> ${TAG_VERSION}"
+            echo "       package.json: ${PKG_VERSION}"
+            echo "       产物版本只取自 package.json，继续发布将产出名为 ${GITHUB_REF_NAME}"
+            echo "       却内含 ${PKG_VERSION} 版本的 release：更新端点（latest.json）会一直"
+            echo "       报 ${PKG_VERSION}，已安装该版本的用户判定自己已是最新，永远收不到更新。"
+            echo "       请把 package.json 的 version 改为 ${TAG_VERSION} 后重新打 tag。"
+            exit 1
+          fi
+          echo "[INFO] tag 与 package.json 版本一致：${PKG_VERSION}"
+
+      # 预建 draft release：tauri-action 在 draft 不存在时会自己调 create-a-release，
+      # 但那一步在仓库级工作流默认权限为只读时会被拒（Resource not accessible by
+      # integration），即便 job 级的 permissions 已声明 contents: write。
+      # 这里用同一个 token 先把 draft 建出来 —— 既绕开那次调用，也让权限问题在
+      # 昂贵的构建之前就暴露。构建失败留下的空 draft 可被下次重跑直接复用。
+      # 本步在 prepare 这个独立 job 里跑，矩阵各腿启动时 draft 必已存在，
+      # 并发创建的窗口在结构上就不存在；末尾的 `|| gh release view` 仅作兜底。
+      - name: ensure draft release exists
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "[INFO] draft release $GITHUB_REF_NAME 已存在，复用"
+            exit 0
+          fi
+          gh release create "$GITHUB_REF_NAME" \
+            --draft \
+            --title "SeshBuddy $GITHUB_REF_NAME" \
+            --notes "See the assets to download this version and install." \
+          || gh release view "$GITHUB_REF_NAME" >/dev/null
+
+  release:
+    needs: prepare
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      # macOS 只发两条 per-arch 腿，universal 刻意不发布：tauri-action 判断「原生
+      # x86_64 更新包是否已存在」时，拿的是硬编码 token x86_64，而 Tauri 给该目标
+      # 产出的文件名里写的是 x64 —— 两边永远对不上，探针便认定原生 Intel 包不存在，
+      # 于是把 latest.json 的 darwin-x86_64 键改写成 universal 包自己的 URL。更新
+      # 仍能装上，Intel 用户却每次都要多下近乎一倍体积（实测 universal 31MB
+      # 对 per-arch 16MB）。少一条腿就少一个覆盖者，两个 per-arch 键各自指向自己的包。
+      # 需要 universal 包的用户可在本机按 tauri build --target
+      # universal-apple-darwin 自行构建。
+      matrix:
+        include:
+          - platform: 'macos-latest'
+            args: '--target aarch64-apple-darwin'
+          - platform: 'macos-latest'
+            args: '--target x86_64-apple-darwin'
+          - platform: 'windows-latest'
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+    # tauri-action 会经 beforeBuildCommand 触发 npm run build，也就是本仓库的
+    # 生产构建（Monaco + Mermaid + KaTeX，主包 4MB+）。它的内存峰值超过 Node 默认
+    # 堆上限，在 runner 上会以 SIGABRT / core dumped 结束（ci.yml 里同样放宽过）。
+    # 放在 job 级是为了让 tauri-action 及其子进程一并继承。
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      # 用 npm ci 而非 npm install：后者可能解析出与 lockfile 不同的依赖树，
+      # 那会让发布产物与 CI 已验证过的不是同一份依赖。
+      - name: install frontend dependencies
+        run: npm ci
+
+      # 发布前先确认 secret 里的私钥与 tauri.conf.json pin 的公钥配对。
+      # 配错不会有任何报错，只会产出一个签名无效的更新包 —— 到用户更新失败才发现。
+      - name: verify updater signing key
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          printf 'seshbuddy-updater-key-check' > "$RUNNER_TEMP/probe.txt"
+          npx tauri signer sign "$RUNNER_TEMP/probe.txt"
+          node scripts/verify-updater-key.mjs \
+            "$RUNNER_TEMP/probe.txt" "$RUNNER_TEMP/probe.txt.sig" \
+            src-tauri/tauri.conf.json
+
+      # 这里不再单独构建 seshbuddy-proxy：tauri build 会触发 beforeBuildCommand →
+      # npm run build:proxy，由 scripts/stage-sidecar.mjs 按 TAURI_ENV_TARGET_TRIPLE
+      # 自行构建并摆放（universal 目标需要三份，见 DEVELOPMENT.md）。
+      - name: build and release Tauri app
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          # 该输入默认 false，产物就只以 Release asset 形式存在。首次干跑中两个平台
+          # 都构建成功（.dmg 与已签名更新包俱在），建 release 那次调用却被拒，约 30 分钟
+          # 构建产物随之全部无法取回。开启后产物同时上传为 workflow artifact，
+          # 即使发布步骤失败也仍可下载、排障与重发。
+          uploadWorkflowArtifacts: 'true'
+          # 两条 macOS 腿产出的 .app 包基名都是 SeshBuddy.app，本身不含架构信息。
+          # 不指定命名模式时，tauri-action 对这类产物直接取文件基名作工作流产物名，
+          # 于是同一次 run 里两个 job 上传出两个同名 artifact，upload-artifact@v4
+          # 以 409 拒绝后到者，其构建产物在 Actions 页面全部丢失、无从排障。
+          # 把 platform 与 arch 纳入命名即可让两腿互不相同。本输入只管 Actions 页面
+          # 的中间产物名，与 Release 资产的下载文件名是两套。
+          workflowArtifactNamePattern: '[name]_[version]_[platform]_[arch][ext]'
+          # 资产名不带版本号，官网可直接写死 releases/latest/download/<固定名>。
+          # 名字必须在各矩阵腿之间唯一：tauri-action 遇同名资产先删后传，撞名会静默丢包。
+          releaseAssetNamePattern: '[name]_[arch][setup][ext]'
+          tagName: ${{ github.ref_name }}
+          releaseName: 'SeshBuddy ${{ github.ref_name }}'
+          releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}

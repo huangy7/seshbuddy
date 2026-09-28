@@ -1,0 +1,159 @@
+{
+  "onboarding": {
+    "languageTitle": "言語を選択",
+    "languageHint": "SeshBuddy の表示言語を選択します。後から設定で変更できます。",
+    "sourcesTitle": "セッションの取得元を選択",
+    "sourcesHint": "表示したい CLI セッションを選択します。後から設定で変更できます。",
+    "hasSessions": "セッションあり",
+    "noSessions": "セッションはまだありません",
+    "back": "戻る",
+    "next": "続ける",
+    "finish": "SeshBuddy を始める",
+    "saving": "保存中…",
+    "statusErrorTitle": "設定状態を確認できません",
+    "statusErrorHint": "再試行するか、既定の設定で続けてください。次回の起動時に再確認します。",
+    "retry": "再試行",
+    "continueDefault": "既定の設定を使う",
+    "saveError": "選択を保存できませんでした。再試行してください。"
+  },
+  "boot": {
+    "deepIndexing": "初回の詳細インデックスを実行しています…",
+    "probingCli": "CLI 実行環境を検出しています…",
+    "syncingConfig": "プロジェクト設定を同期しています…",
+    "scanning": "セッションとインデックスを走査しています…",
+    "ready": "ワークスペースの準備が完了しました",
+    "starting": "SeshBuddy を起動しています…",
+    "splashAria": "SeshBuddy を起動中",
+    "brandSubtitle": "AI セッションエクスプローラー & ワークベンチ"
+  },
+  "about": {
+    "updateSettings": "アップデート設定",
+    "autoCheck": "自動でアップデートを確認",
+    "autoCheckHint": "有効にすると、バックグラウンドで定期的に新しいバージョンを確認します。",
+    "autoCheckEnabled": "自動アップデート確認を有効にしました。",
+    "autoCheckDisabled": "自動アップデート確認を無効にしました。",
+    "changelog": "更新履歴",
+    "currentVersion": "現在のバージョン",
+    "changeCount": "変更 {count} 件",
+    "showOlder": "以前のバージョンを表示 ({count})",
+    "checking": "アップデートを確認しています…",
+    "checkingShort": "確認中…",
+    "checkNow": "アップデートを確認",
+    "ready": "準備完了です。アップデートを確認できます。",
+    "upToDate": "最新バージョンです。",
+    "updateAvailable": "新しいバージョン v{version} があります。「ダウンロードしてインストール」をクリックしてアップグレードしてください。",
+    "downloading": "インストーラーをダウンロードしています…",
+    "downloadingWithSize": "インストーラーをダウンロードしています… {downloaded} MB",
+    "downloadingWithProgress": "インストーラーをダウンロードしています… {percent}% ({downloaded} / {total} MB)",
+    "downloadingShort": "ダウンロード中…",
+    "downloadAndInstall": "ダウンロードしてインストール",
+    "installingQuit": "アプリを終了してインストールを開始します。しばらくお待ちください…",
+    "installingRestart": "インストール完了後にアプリが自動的に再起動します。しばらくお待ちください…",
+    "installing": "アップデートをインストールしています。しばらくお待ちください…",
+    "viewReleaseNotes": "リリースノートを表示",
+    "hideNotes": "説明を閉じる",
+    "feedback": "フィードバック",
+    "feedbackTitle": "フィードバック (GitHub Issues)"
+  },
+  "dialog": {
+    "notice": "お知らせ",
+    "error": "エラー",
+    "forkFailed": "Fork に失敗しました",
+    "forkSession": "セッションを Fork",
+    "launchFailed": "起動に失敗しました",
+    "resumeFailed": "再開に失敗しました",
+    "newSessionUnsupported": "{cli} は SeshBuddy からの新規会話作成に対応していません。{cli} 側で作成してください。",
+    "renameSession": "会話の名前を変更",
+    "renameTab": "タブの名前を変更",
+    "renameSessionDescription": "この会話の表示名を設定します（空欄で保存すると既定名に戻ります）。",
+    "renameTabDescription": "このタブの表示名を設定します（空欄で保存すると既定名に戻ります）。",
+    "renamePlaceholder": "新しい名前を入力。空欄で保存すると既定名に戻ります…",
+    "save": "保存",
+    "cancelPermanent": "永久保持を解除しますか？",
+    "retentionImmediate": "現在の設定では通常のアーカイブは即時削除されます",
+    "retentionDays": "現在の保持期間は {days} 日です",
+    "retentionWarning": "元の会話ファイルはすでに存在せず、永久保持を解除するとこのアーカイブは直ちに削除対象になります（{retention}）。続行すると、この会話は次回のクリーンアップで履歴から削除され、閲覧できなくなります。"
+  },
+  "ctxMenu": {
+    "select": "この会話を選択",
+    "deselect": "選択を解除",
+    "star": "スターを付ける",
+    "unstar": "スターを外す",
+    "rename": "名前を変更",
+    "copy": "コピー",
+    "copySessionId": "会話 ID",
+    "copySessionPath": "会話のパス",
+    "resume": "再開",
+    "blockFolder": "所属フォルダーをブロック",
+    "deleteSession": "この会話を削除",
+    "newSession": "新しい会話",
+    "selectProject": "このプロジェクトの会話をすべて選択",
+    "deselectProject": "このプロジェクトの会話の選択を解除",
+    "blockProjectFolder": "このフォルダーをブロック",
+    "deleteProjectSessions": "このプロジェクトの会話をすべて削除"
+  },
+  "session": {
+    "untitled": "無題の会話"
+  },
+  "filter": {
+    "ariaLabel": "メッセージ種別のフィルター",
+    "count": "メッセージ数: {count}",
+    "user": "ユーザー",
+    "assistant": "アシスタント",
+    "thinking": "思考ブロック"
+  },
+  "batch": {
+    "selected": "{count} 件の会話を選択中",
+    "selectAll": "すべて選択",
+    "deselectAll": "すべて選択解除",
+    "export": "エクスポート",
+    "exportTooltip": "一括エクスポート",
+    "mergedExport": "まとめてエクスポート",
+    "separateExport": "個別にエクスポート",
+    "delete": "削除",
+    "deleteTooltip": "一括削除",
+    "backHome": "ホームに戻る",
+    "exitSelection": "複数選択を終了",
+    "exportOutcome": {
+      "single": "セッションをエクスポートしました。",
+      "merged": "{count} 件のセッションを 1 つのファイルにまとめてエクスポートしました。",
+      "separate": "{count} 件のセッションを個別にエクスポートしました。"
+    }
+  },
+  "systemContextMenu": {
+    "registeredMacos": "コンテキストメニューを登録しました。Finder でフォルダを右クリックし、「クイックアクション」または「サービス」から Claude Code を選んでください。",
+    "registeredWindows": "コンテキストメニューを登録しました。エクスプローラーでフォルダの空白部分またはフォルダ項目を右クリックして Claude Code を起動できます。Windows では既定で cmd の新しいウィンドウを使い、Windows Terminal には依存しません。",
+    "unregistered": "コンテキストメニューの登録を解除しました。"
+  },
+  "sidebar": {
+    "ariaLabel": "右サイドバー",
+    "modeAriaLabel": "サイドバーのモード",
+    "project": "プロジェクト",
+    "timeline": "タイムライン",
+    "collapse": "サイドバーを折りたたむ",
+    "timelineEmpty": "履歴の会話を開くと利用できます"
+  },
+  "update": {
+    "available": "v{version} が公開されました。クリックして詳細を確認してください。"
+  },
+  "toast": {
+    "crashRecovery": "アプリの異常な再読み込みを検出しました。自動的に復元しました。"
+  },
+  "error": {
+    "renderTitle": "レンダリングエラー",
+    "renderDetail": "{err}\n\nコンポーネント位置: {info}\nコンポーネントチェーン: {chain}\n\nスタック:\n{stack}",
+    "renderMessage": "レンダリングエラーが発生しました: {detail}\n\nアプリを再起動するか、開発者にお問い合わせください。",
+    "unknownComponent": "不明"
+  },
+  "changelog": {
+    "v0_1_0": {
+      "multicli": "マルチ CLI セッションブラウザー：6 つの CLI のセッションを 1 つのツリーに",
+      "fulltextSearch": "全文検索：プロンプト・返信・ツール呼び出し・コードブロックをローカルインデックスで網羅",
+      "proxy": "API リバースプロキシとトラフィック表示：リクエスト/レスポンス本文・所要時間・token 使用量をローカルで確認",
+      "editor": "Monaco エディターと Git Diff：並列差分とシンタックスハイライト",
+      "assistant": "デスクトップアシスタント：履歴セッションに質問、回答には出典が付きます",
+      "performance": "大会話のパフォーマンス：1 GB のセッションも開くときに固まりません",
+      "updater": "アプリ内更新：GitHub Releases 経由で配信"
+    }
+  }
+}

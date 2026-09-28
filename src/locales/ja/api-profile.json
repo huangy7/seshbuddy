@@ -1,0 +1,344 @@
+{
+  "page": {
+    "title": "API プロファイル",
+    "cliAriaLabel": "API プロファイル CLI",
+    "import": "インポート",
+    "importTitle": "API プロファイルのバックアップをインポート",
+    "importFromFile": "ファイルからインポート…",
+    "importFromClipboard": "クリップボードからインポート",
+    "export": "エクスポート",
+    "exportTitle": "API プロファイルのバックアップをエクスポート",
+    "exportToFile": "ファイルへエクスポート…",
+    "copyToClipboard": "クリップボードにコピー"
+  },
+  "proxyBanner": "API プロキシが有効です。Base URL は一時的に 127.0.0.1:{port} を指しており、プロキシを無効にすると自動的に元に戻ります。",
+  "nameRequired": "プロファイル名を入力してください",
+  "nameConflict": "同名のプロファイルが既に存在します。別の名前を使用してください",
+  "newProfileName": "新しいプロファイル",
+  "scope": {
+    "global": "グローバル"
+  },
+  "field": {
+    "mainModel": "メインモデル",
+    "timeout": "タイムアウト",
+    "traffic": "トラフィック",
+    "reasoning": "推論",
+    "token": "トークン",
+    "effort": "Effort",
+    "beta": "Beta",
+    "key": "キー"
+  },
+  "cardHint": {
+    "claude": "保存するとバインド済みのスコープへ自動的にカスケード同期されます。hooks など他の settings.json フィールドはそのまま保持されます",
+    "codex": "保存すると Codex の設定ファイルへ自動的に同期されます。config.toml / auth.json の他の内容はそのまま保持されます"
+  },
+  "connectionHint": {
+    "claude": "Claude API 互換のサービスエンドポイント。末尾にスラッシュを付けないでください",
+    "codex": "現在の Provider の base_url。末尾にスラッシュを付けないでください"
+  },
+  "apiKeyPlaceholder": {
+    "claude": "sk-ant-... または JWT トークン",
+    "codex": "sk-... または JWT トークン"
+  },
+  "modelGroup": {
+    "others": "その他"
+  },
+  "fetchModels": {
+    "missingKey": "先に API Key を入力してください",
+    "success": "{count} 個のモデルを取得しました（{latency}ms）",
+    "failed": "モデル一覧の取得に失敗しました"
+  },
+  "codexToml": {
+    "officialComment": "# Codex Official（公式 ChatGPT 認証モード）\n# 認証情報は auth.json で管理\n# config.toml は公式のデフォルト設定を維持\n"
+  },
+  "codexProvider": {
+    "title": "Codex プロバイダー",
+    "hint": "モデルは `model` に、Base URL は `model_providers.{provider}.base_url` に書き込まれます。"
+  },
+  "dialog": {
+    "importFailed": "インポートに失敗しました",
+    "common": {
+      "nameLabel": "スコープ名",
+      "nameRequired": "スコープ名を入力してください",
+      "nameReserved": "名前に 'global' は使用できません",
+      "nameDuplicate": "同名のスコープが既に存在します",
+      "projectDirsLabel": "バインドするプロジェクトディレクトリ",
+      "browse": "参照…",
+      "emptyProjects": "スキャン済みのプロジェクトディレクトリがありません。「参照…」から手動で追加してください。",
+      "chooseDirTitle": "プロジェクトディレクトリを選択",
+      "missingDirTitle": "ローカルディレクトリが存在しないか、削除されています",
+      "staleBadge": "無効",
+      "pathMissing": "{path}（ローカルディレクトリが存在しません）",
+      "pathCopied": "パスをコピーしました",
+      "copyFullPath": "フルパスをコピー",
+      "dirMissingTitle": "ディレクトリが存在しません（クリックでパスをコピー）",
+      "openInFileManagerTitle": "Finder / ファイルマネージャーで開く",
+      "closeNotice": "通知を閉じる",
+      "openFailed": "オープンに失敗しました：{error}",
+      "openFailedMissing": "オープンに失敗しました：ローカルディレクトリが存在しないか、削除されています（パスは自動的にコピーされました）",
+      "fileManagerUnavailable": "ファイルマネージャーを開けません"
+    },
+    "scopeCreate": {
+      "title": "プロジェクトスコープの新規作成",
+      "nameTip": "下のディレクトリを選択すると自動入力されます",
+      "namePlaceholder": "例: Work, ProjectA（ディレクトリ選択で自動入力）",
+      "nameEmptyHint": "スコープ名を入力してください（またはプロジェクトディレクトリを選択して自動入力）",
+      "creating": "作成中…",
+      "creatingButton": "作成中…",
+      "createFailed": "作成に失敗しました",
+      "detectTitle": "プロジェクトに既存の設定があります",
+      "detecting": "検出中…",
+      "officialDefault": "（公式デフォルト）",
+      "matchedProfileTitle": "プロファイルライブラリの「{name}」と同じ",
+      "noMatch": "一致なし",
+      "inconsistentWarning": "ディレクトリごとに設定が異なります。適用するとすべてのディレクトリが上書きされます",
+      "bindToProfile": "既存のプロファイル「{name}」にバインド",
+      "importAsNew": "新しいプロファイルとしてインポートしてバインド",
+      "ignoreForNow": "無視して後で設定する"
+    },
+    "scopeEdit": {
+      "title": "プロジェクトスコープの管理",
+      "namePlaceholder": "例: Work, ProjectA",
+      "nameEmptyHint": "スコープ名を入力してください",
+      "saving": "保存中…",
+      "updateFailed": "更新に失敗しました"
+    },
+    "scopeDelete": {
+      "title": "スコープを削除",
+      "message": "スコープ「{name}」を削除しますか？削除するとこのスコープのプロファイルバインドが解除されますが、グローバルプロファイルライブラリのプロファイルは削除されず、ディスク上のプロジェクトファイルも物理的に削除されません。",
+      "cleanDisk": "SeshBuddy がプロジェクトディレクトリに書き込んだ API 設定も同時に削除する"
+    },
+    "importConflict": {
+      "title": "インポートする API プロファイルの確認",
+      "summary": "{total} 件のプロファイルが見つかりました{conflicts}{scopes}。",
+      "summaryConflicts": "、うち {count} 件はローカルと同名",
+      "summaryScopes": "、スコープ {count} 件を含む",
+      "batchLabel": "競合項目の一括設定：",
+      "batchOverwrite": "すべて上書き",
+      "batchRename": "すべてリネーム",
+      "batchSkip": "すべてスキップ",
+      "scopeSectionTitle": "スコープの復元",
+      "boundTo": "→ 「{name}」にバインド",
+      "colScope": "スコープ",
+      "colStatus": "状態",
+      "colAction": "処理",
+      "renamePlaceholder": "新しい名前",
+      "confirm": "インポートを確定",
+      "action": {
+        "overwrite": "上書き",
+        "skip": "スキップ",
+        "add": "追加",
+        "addCopy": "複製を追加"
+      },
+      "status": {
+        "existing": "既存",
+        "nameConflict": "名前の競合",
+        "newScope": "新規スコープ",
+        "newProfile": "新規プロファイル"
+      }
+    }
+  },
+  "exportClipboard": {
+    "message": "バックアップには全 CLI の完全な API 設定と平文の Key/Token が含まれます。クリップボードの内容は他のアプリから読み取られる可能性があるため、慎重に扱い、使用後は速やかに消去してください。",
+    "ok": "コピーを続行"
+  },
+  "exportFile": {
+    "message": "バックアップファイルには全 CLI の完全な API 設定と平文の Key/Token が含まれます。エクスポートした JSON ファイルは安全に保管してください。",
+    "title": "バックアップのエクスポート警告",
+    "ok": "エクスポートを続行"
+  },
+  "importClipboard": {
+    "readFailed": "クリップボードを読み取れません：{error}",
+    "empty": "クリップボードが空です。先にプロファイルのバックアップ JSON をコピーしてください",
+    "emptyTitle": "インポートできません",
+    "invalid": "クリップボードの内容は有効なプロファイルのバックアップではありません：{error}"
+  },
+  "importFile": {
+    "invalidFormat": "バックアップファイルの形式が正しくありません",
+    "empty": "バックアップファイルに API プロファイルが含まれていません",
+    "emptyTitle": "ファイルが空です"
+  },
+  "toast": {
+    "backupCopied": "バックアップをクリップボードにコピーしました",
+    "clipboardWriteFailed": "クリップボードへの書き込みに失敗しました",
+    "exported": "バックアップをエクスポートしました",
+    "imported": "バックアップからプロファイルを復元しました",
+    "profileDeleted": "プロファイル「{name}」を削除しました",
+    "profileRenamed": "プロファイルの名前を「{name}」に変更しました",
+    "savedAndBound": "プロファイルを保存し、スコープにバインドしました",
+    "savedCascaded": "プロファイルを保存し、{count} 個のスコープを自動的に更新しました",
+    "saved": "プロファイルを保存しました",
+    "savedAndApplied": "プロファイル「{name}」を保存して適用しました",
+    "globalSwitched": "グローバル設定を「{name}」に切り替えました",
+    "scopeApplied": "スコープ「{scope}」にプロファイル「{name}」を適用しました",
+    "scopeInherited": "スコープ「{scope}」はグローバル設定の継承に戻りました",
+    "scopeCreated": "スコープ「{name}」を作成しました{action}",
+    "scopeUpdated": "スコープ「{name}」を更新しました",
+    "scopeDeleted": "スコープ「{name}」を削除しました"
+  },
+  "scopeCreate": {
+    "boundSuffix": "、プロファイル「{name}」をバインドしました",
+    "importedSuffix": "、プロジェクト既存の設定を「{name}」としてインポートしてバインドしました"
+  },
+  "error": {
+    "profileExists": "プロファイル「{name}」は既に存在します",
+    "scopeCreateFailed": "スコープの作成に失敗しました",
+    "scopeUpdateFailed": "スコープの更新に失敗しました",
+    "scopeDeleteFailed": "スコープの削除に失敗しました"
+  },
+  "list": {
+    "sectionTitle": "グローバルプロファイルライブラリ",
+    "autoWriteHint": "有効化後に自動書き込み",
+    "settingsChipTitle": "クリックしてネイティブ設定ファイルを表示・編集",
+    "popoverTitle": "ネイティブ設定ファイル",
+    "editTomlInApp": "アプリ内で TOML を編集",
+    "editJsonInApp": "アプリ内で JSON を編集",
+    "editTomlInAppDesc": "Codex のネイティブ設定ファイルを直接編集",
+    "editJsonInAppDesc": "Claude のネイティブ設定ファイルを直接編集",
+    "openInExplorer": "エクスプローラーで開く",
+    "openInFinder": "Finder で開く",
+    "openInFileManager": "ファイルマネージャーで開く",
+    "openInFileManagerDesc": "システムのファイルディレクトリを表示",
+    "copyPathDesc": "絶対パスをクリップボードにコピー",
+    "createProfile": "新規プロファイル",
+    "emptyTitle": "利用可能なプロファイルがありません",
+    "emptyDesc": "右上の「新規プロファイル」または上部の「インポート」から API プロファイルを追加してください。",
+    "officialBadge": "公式",
+    "globalActive": "グローバル有効",
+    "globalActiveTitle": "現在グローバルで有効なプロファイル",
+    "cardTitleActive": "現在グローバルで有効なプロファイル（右側の ✏️ で編集）",
+    "cardTitleSetGlobal": "クリックすると「{name}」をグローバル有効なプロファイルに設定します",
+    "scopeChipTitle": "「{name}」プロジェクトスコープで使用中。クリックで移動",
+    "editProfile": "プロファイルを編集",
+    "duplicateProfile": "プロファイルを複製",
+    "deleteProfile": "プロファイルを削除",
+    "defaultModel": "デフォルト ({model})",
+    "modelMapping": "モデルマッピング:\n{lines}",
+    "customModelMapping": "カスタムモデルマッピング",
+    "tooltipEndpoint": "エンドポイント: {value}",
+    "tooltipMainModel": "メインモデル: {value}",
+    "officialDefault": "公式デフォルト",
+    "systemDefault": "システムデフォルト",
+    "pathCopiedToast": "設定ファイルのフルパスをクリップボードにコピーしました",
+    "openFailedNotCreated": "オープンに失敗しました：設定ファイルまたはディレクトリがまだ作成されていません（パスは自動的にコピーされました）"
+  },
+  "editorHeader": {
+    "back": "プロファイルライブラリに戻る",
+    "untitled": "プロファイルを編集",
+    "form": "フォーム",
+    "tomlPreview": "TOML プレビュー",
+    "jsonPreview": "JSON プレビュー"
+  },
+  "deleteConfirm": {
+    "title": "削除の確認",
+    "message": "プロファイル「{name}」を削除しますか？この操作は取り消せません。"
+  },
+  "connection": {
+    "name": "プロファイル名",
+    "namePlaceholder": "例: deepseek, kimi, work-claude",
+    "nameHint": "一覧やスコープから選びやすい名前を付けてください",
+    "title": "接続",
+    "apiKey": "APIキー",
+    "hide": "非表示",
+    "show": "表示",
+    "baseUrl": "リクエスト先 (Base URL)",
+    "effortLevel": "Effort Level (思考の強度)",
+    "effortPlaceholder": "空欄なら既定値を使用 (例: medium)",
+    "commonOptions": "よく使うオプション",
+    "currentCustom": "現在のカスタム値",
+    "timeout": "API タイムアウト (ms)",
+    "current": "現在",
+    "reasoningEffort": "推論の強度",
+    "reasoningHint": "新規起動または再開した Codex にのみ適用されます",
+    "useCodexDefault": "Codex の既定値を使用",
+    "defaultOption": "既定",
+    "newProfileInitial": "新",
+    "timeoutFormat": {
+      "ms": "≈ {value} ms",
+      "seconds": "≈ {value} 秒",
+      "minutes": "≈ {value} 分",
+      "hours": "≈ {value} 時間"
+    }
+  },
+  "attribution": {
+    "title": "Git 署名",
+    "hint": "`settings.json` の `attribution` に書き込まれます。既定ではフィールドを書かず、無効時は空文字列を明示的に書き込みます。",
+    "mode": "署名モード",
+    "useClaudeCodeDefault": "Claude Code の既定値を使用",
+    "custom": "カスタム",
+    "disabled": "署名を無効化",
+    "defaultHint": "attribution フィールドを書かず、Claude Code 自身の既定動作を使用します。",
+    "disabledHint": "保存時に空文字列を書き込み、Claude Code のコミット/PR 署名を明示的にオフにします。",
+    "commit": "コミット署名",
+    "commitHint": "git commit に追加されるテキスト。",
+    "pr": "PR 署名",
+    "prHint": "PR 説明に追加されるテキスト。空欄なら PR 署名を書き込みません。"
+  },
+  "modelOverrides": {
+    "title": "モデルマッピング",
+    "hint": "表示名は /model メニューにのみ影響します。「自動」の行は選択中モデルに追従し、手動で変更すると固定され、空にすると書き込まれません。1M はコンテキスト能力の宣言のみです。",
+    "autoTag": "自動",
+    "autoTagTitle": "選択中モデルのゲートウェイ名に追従し、モデル切替時に同期します",
+    "restoreAuto": "自動に戻す",
+    "restoreAutoTitle": "選択中モデルのゲートウェイ名に追従する状態へ戻す",
+    "typedPlaceholder": "表示名を設定しない",
+    "fetchModels": "モデル一覧を取得",
+    "role": "モデルロール",
+    "displayName": "表示名",
+    "actualModel": "実際にリクエストするモデル",
+    "declare1m": "1M 対応を宣言",
+    "displayPlaceholder": "例: DeepSeek V4 Pro",
+    "actualPlaceholder": "実際に呼び出すモデル名",
+    "fallback": "既定のフォールバックモデル",
+    "fallbackPlaceholder": "例: opus[1m]、または空欄",
+    "fallbackHint": "Claude Code のリクエストが Sonnet・Opus・Haiku のいずれのロールにも明確に該当しない場合にのみ使用されます。通常は空欄で構いません。"
+  },
+  "runtime": {
+    "title": "Claude Code 実行パラメータ",
+    "hint": "`settings.json` の `env` に書き込まれます。空欄なら Claude Code の既定値を使用します",
+    "maxOutputTokens": "最大出力トークン",
+    "maxOutputTokensHint": "1 回のレスポンスの出力上限を制限します",
+    "disableExperimentalBetas": "実験的 Beta を無効化",
+    "disableExperimentalBetasHint": "実験的な Beta 機能をオフにします",
+    "disableNonessentialTraffic": "非必須トラフィックを無効化",
+    "disableNonessentialTrafficHint": "バックグラウンドおよび重要度の低いネットワークリクエストを削減します",
+    "useClaudeDefault": "Claude の既定値を使用"
+  },
+  "scopeAllocation": {
+    "title": "プロジェクトスコープ",
+    "subtitle": "開いているディレクトリに応じて API プロファイルを自動で切り替えます",
+    "createScope": "新規スコープ",
+    "inheritGlobal": "未設定 / グローバルを継承",
+    "dirsCount": "ディレクトリ {count} 件",
+    "bindDirsTitle": "クリックしてプロジェクトディレクトリを今すぐバインド",
+    "unboundDirs": "ディレクトリ未バインド",
+    "manageDirsTitle": "バインド済みディレクトリを管理",
+    "createAndBind": "プロファイルを作成してバインド…",
+    "noDirsBound": "ディレクトリがバインドされていません",
+    "dirsTooltip": "バインド済みディレクトリ: {count}",
+    "emptyTitle": "プロジェクト専用スコープはまだありません",
+    "emptyDesc": "特定のディレクトリにスコープを作成すると、そのプロジェクトに入ったときに SeshBuddy が専用の API プロファイルへ自動で切り替えて適用します。",
+    "statusExisting": "設定あり",
+    "statusExistingTooltip": "プロジェクトディレクトリに API 設定が既に存在します{detail}。現在は未バインドで、グローバルを継承します",
+    "statusExistingDetail": "（{detail}）",
+    "statusDiverged": "設定が乖離",
+    "statusDivergedTooltip": "ディレクトリ {detail} のディスク上の設定がバインド済みプロファイルと一致しません（手動で変更された可能性があります）",
+    "statusDirsInconsistent": "ディレクトリが不一致",
+    "statusDirsInconsistentTooltip": "{count} 個のディレクトリで設定が一致していません"
+  },
+  "rawEditor": {
+    "tomlTitle": "ネイティブ TOML 設定ファイル",
+    "jsonTitle": "ネイティブ JSON 設定ファイル",
+    "scopeProject": "プロジェクト",
+    "formatJsonTitle": "JSON を整形",
+    "save": "変更を保存",
+    "saved": "保存しました",
+    "saving": "保存中…",
+    "loadFailed": "設定の読み込みに失敗しました：{error}",
+    "invalidJson": "JSON 形式が無効です：{error}",
+    "formatInvalid": "JSON 形式が無効なため整形できません：{error}",
+    "saveFailed": "保存に失敗しました：{error}",
+    "projectDirPath": "プロジェクトディレクトリ/.claude/settings.json",
+    "projectConfigPath": "プロジェクト設定"
+  }
+}

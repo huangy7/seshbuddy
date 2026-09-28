@@ -1,0 +1,165 @@
+{
+  "language": {
+    "title": "界面语言",
+    "hint": "界面显示使用的语言。切换后立即生效，无需重启。",
+    "en": "English",
+    "zh": "简体中文",
+    "ja": "日本語",
+    "de": "Deutsch"
+  },
+  "select": {
+    "placeholder": "请选择...",
+    "empty": "无可选数据"
+  },
+  "terminal": {
+    "systemTerminal": "系统终端",
+    "restoreSplit": "还原分屏 (双击标题栏 / Esc)",
+    "tempFullscreen": "临时全屏 (双击标题栏 / ⌘⇧Enter)",
+    "splitRight": "向右分屏 (⌘D)",
+    "splitDown": "向下分屏 (⌘⇧D)",
+    "closeSplit": "关闭分屏 (⌘W)",
+    "resizeHint": "拖拽调整分屏大小，双击均分"
+  },
+  "copyButton": {
+    "copied": "已复制到剪贴板",
+    "copy": "复制内容"
+  },
+  "searchBar": {
+    "shortcutMac": "全局搜索 (⌘ ⇧ F)",
+    "shortcutOther": "全局搜索 (Ctrl + Shift + F)",
+    "placeholder": "搜索会话...",
+    "clear": "清除搜索"
+  },
+  "chatSearchBar": {
+    "placeholder": "在会话中搜索...",
+    "noMatches": "无匹配",
+    "caseSensitive": "区分大小写 (Alt+C)",
+    "wholeWord": "全词匹配 (Alt+W)",
+    "previous": "上一个 (Shift+Enter)",
+    "next": "下一个 (Enter)",
+    "close": "关闭 (Esc)"
+  },
+  "chatView": {
+    "widgetExportLabel": "[图表: {title}]",
+    "capturingImage": "正在生成高清长图，请稍候...",
+    "exportImageFailed": "导出图片失败",
+    "allTypesHidden": "所有消息类型已隐藏",
+    "streamingProgress": "正在流式加载…已接收 {count} 条消息",
+    "loadMore": "加载更多... (或点击手动加载)",
+    "pngImage": "PNG Image",
+    "svgImage": "SVG Image"
+  },
+  "scrollToBottom": {
+    "newMessages": "{count} 条新消息",
+    "newMessagesCapped": "99+ 条新消息",
+    "titleUnread": "有新消息，点击滚动到底部",
+    "titleScrollToEnd": "滚动到底部",
+    "titleScrollToTop": "滚动到顶部"
+  },
+  "timelineView": {
+    "loading": "加载中...",
+    "empty": "暂无用户消息",
+    "imagePreview": "📷 图片",
+    "imageCount": "📷 {count} 张图片",
+    "agentCall": "[Agent Call]"
+  },
+  "monacoEditor": {
+    "conflictTitle": "文件冲突",
+    "conflictMessage": "文件已被外部程序修改。\n\n选择\"加载外部版本\"将丢失当前未保存的修改。",
+    "loadExternal": "加载外部版本",
+    "keepLocal": "保留本地修改",
+    "binaryPreviewUnsupported": "无法在代码编辑器中预览二进制文件",
+    "readFileFailed": "无法读取文件内容"
+  },
+  "mdPreview": {
+    "reload": "刷新 (Reload)",
+    "source": "源码 (Source)",
+    "split": "分栏 (Split View)",
+    "preview": "预览 (Preview)"
+  },
+  "imagePreview": {
+    "zoomOut": "缩小 (Zoom Out)",
+    "originalSize": "原始尺寸 (100%)",
+    "fit": "自适应",
+    "zoomIn": "放大 (Zoom In)",
+    "fitToWindow": "适应窗口 (Fit to Window)",
+    "loadFailed": "无法加载图片",
+    "tooLargeTitle": "图片过大，已跳过预览",
+    "tooLargeDesc": "超过 100MB 的图片为避免卡顿不予解码，请用系统看图工具打开"
+  },
+  "sessionAnalytics": {
+    "title": "会话分析",
+    "subtitle": "基于「{name}」的完整消息流",
+    "totalTokens": "总 tokens",
+    "analyzedMessages": "已分析 {count} 条消息",
+    "toolCalls": "工具调用",
+    "toolTypeCount": "{count} 类工具",
+    "timeSpan": "时间跨度",
+    "firstToLast": "首条到末条消息",
+    "averageTokens": "平均 tokens",
+    "perAssistantTurn": "每个助手回合",
+    "toolDistribution": "工具调用分布",
+    "toolDistributionHint": "按工具类型聚合调用次数",
+    "otherTools": "其他工具",
+    "noToolCalls": "此会话无工具调用记录",
+    "tokenTimeline": "Token 时间走势",
+    "tokenTimelineHint": "每次模型调用的输入、输出与缓存",
+    "selectedRange": "选中区间",
+    "rangeTotal": "区间总量",
+    "inputTokens": "输入 tokens",
+    "outputTokens": "输出 tokens",
+    "cacheTokens": "缓存 tokens",
+    "cumulativeToHere": "累计至此",
+    "cumulativeLegend": "累计",
+    "peakTurn": "最重回合",
+    "peakTurnValue": "消息 #{index} · {tokens}",
+    "topTool": "主导工具",
+    "none": "无",
+    "cacheHitRate": "缓存命中率"
+  },
+  "breadcrumb": {
+    "loading": "加载中…",
+    "empty": "暂无内容"
+  },
+  "relativeTime": {
+    "justNow": "刚刚",
+    "minutesAgo": "{count}分钟前",
+    "hoursAgo": "{count}小时前",
+    "daysAgo": "{count}天前"
+  },
+  "markdownLink": {
+    "outsideProject": "链接指向项目目录外，已阻止打开",
+    "missingProjectPath": "缺少项目路径，无法打开相对链接",
+    "unsupportedView": "当前视图无法打开本地相对链接"
+  },
+  "mermaid": {
+    "fullscreen": "全屏查看",
+    "exitFullscreen": "退出全屏 (Esc)",
+    "copySource": "复制 Mermaid 源码",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetZoom": "重置缩放"
+  },
+  "svg": {
+    "defaultTitle": "SVG 图表"
+  },
+  "reqMessages": {
+    "thinkingLabel": "> [Thinking 思考]:",
+    "truncatedSuffix": "\n\n... [已自动折叠超出部分，总计 {count} 字符]",
+    "imageContentLabel": "[Image Content]",
+    "systemPromptHeading": "=== SYSTEM PROMPT ===",
+    "toolUseLabel": "> [Tool Use] {name}:",
+    "unknownToolName": "unknown",
+    "errorTag": " [Error]",
+    "toolResultLabel": "> [Tool Result{tag}]:"
+  },
+  "toolResult": {
+    "truncatedSuffix": "[内容超长，已被系统截断以避免界面卡死]"
+  },
+  "modelPricing": {
+    "tooltip": "{id} · {price} per M"
+  },
+  "jsonViewer": {
+    "empty": "(empty)"
+  }
+}

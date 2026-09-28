@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "SeshBuddy",
+  "version": "../package.json",
+  "identifier": "com.seshbuddy.app",
+  "build": {
+    "beforeDevCommand": "npm run build:proxy && npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build:proxy && npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "title": "SeshBuddy",
+        "width": 1100,
+        "height": 740,
+        "minWidth": 700,
+        "minHeight": 500,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$HOME/**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "createUpdaterArtifacts": true,
+    "externalBin": [
+      "binaries/seshbuddy-proxy"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "12.0",
+      "signingIdentity": "-"
+    }
+  },
+  "plugins": {
+    "opener": {},
+    "updater": {
+      "active": true,
+      "dialog": false,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUwQUMzMUY1M0M4REZGRUIKUldUci80MDg5VEdzVUZMR21DUkZiaTU0UmxidXpPUEJKblI5MlhtdmFNR21ZTUlmZHBqUnZ3dnoK",
+      "endpoints": [
+        "https://github.com/huangy7/seshbuddy/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}

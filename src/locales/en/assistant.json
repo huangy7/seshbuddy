@@ -1,0 +1,111 @@
+{
+  "messageList": {
+    "summarySteps": "Steps completed: {count}",
+    "summaryNotes": "Notes: {count}",
+    "summaryNotesOnly": "Process notes: {count}",
+    "summaryDuration": "Took {duration}",
+    "emptyTitle": "What can I help you with?",
+    "emptyPinHint": "Starting with {profile} · pinned after sending",
+    "suggestionProfile": "Generate a user profile from my conversations",
+    "suggestionSearch": "Search conversations mentioning “refactoring”",
+    "suggestionWeekly": "Summarize this week's progress",
+    "profilePrompt": "Based on my full conversation history, generate a structured user profile report. Cover the following dimensions:\n\n1. **Core personality traits**: From my question style, focus areas and phrasing habits, distill 3-5 core personality tags (such as results-driven, detail-oriented, highly curious) and cite actual statements from the conversations as evidence.\n\n2. **Communication style and preferences**: Analyze how I prefer to communicate — logic-driven or divergent? Concise answers or in-depth explanations? Any implicit preferences about response formatting?\n\n3. **Professional domains and tech stack**: Distill the technical domains, toolchains and areas of expertise I touch most often, and assess my proficiency in each.\n\n4. **Work habits and thinking patterns**: How do I break problems down? Do I lean top-down or bottom-up? Any clear decision-making style or blind spots?\n\n5. **Estimated MBTI leaning**: From the analysis above, infer my most likely MBTI type and give a leaning judgement and confidence level for each dimension.\n\n6. **Best practices for working with AI**: Based on the profile above, give 3-5 concrete suggestions on how I can collaborate with AI more effectively.\n\nBase the analysis on the actual conversation content; avoid vague, horoscope-style descriptions. If a dimension lacks enough data, mark it as \"low confidence\".",
+    "thinking": "Thinking…",
+    "thoughtFor": "Thought for {duration}",
+    "stopped": "Stopped",
+    "copyMarkdownTitle": "Copy full Markdown",
+    "usageTooltip": "Context total {total} (new input {input} · cache read {cacheRead} · cache write {cacheWrite}) · output {output}"
+  },
+  "input": {
+    "quickPhrases": "Quick phrases",
+    "slashTip": "↑↓ to select · Enter to insert",
+    "noPhraseMatch": "No matching quick phrases",
+    "placeholder": "Ask anything… (type / for quick phrases)",
+    "usageTooltip": "Total output tokens across all turns in this conversation",
+    "cumulative": "Cumulative",
+    "stopTitle": "Stop generating"
+  },
+  "quickPhrases": {
+    "empty": "No quick phrases yet — create one below",
+    "edit": "Edit",
+    "create": "+ New quick phrase",
+    "editTitle": "Edit quick phrase",
+    "createTitle": "New quick phrase",
+    "namePlaceholder": "Name (e.g. Review yesterday's work)",
+    "contentPlaceholder": "Prompt content; supported variables: {variables}",
+    "deleteConfirm": "Delete quick phrase “{name}”?"
+  },
+  "history": {
+    "title": "Conversation history",
+    "empty": "No conversation history yet",
+    "untitled": "Untitled",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last7Days": "Past 7 days",
+    "earlier": "Earlier",
+    "deleteConversation": "Delete conversation",
+    "deleteTitle": "Confirm deletion",
+    "deleteConfirm": "Delete conversation “{title}”?"
+  },
+  "phraseVariables": {
+    "today": "today",
+    "yesterday": "yesterday",
+    "thisMonday": "this Monday",
+    "thisFriday": "this Friday",
+    "lastMonday": "last Monday",
+    "lastFriday": "last Friday"
+  },
+  "cacheBackfill": {
+    "indexBuilding": "Building full-text index…",
+    "backfilling": "Backfilling cache…",
+    "failed": "Cache backfill failed: {error}",
+    "dismiss": "Got it",
+    "enableIndexHint": "Enable the full-text index so the assistant can search the text of every conversation",
+    "enableIndex": "Enable full-text index",
+    "ignore": "Ignore",
+    "pendingHint": "Conversations without text cache: {pending} (cached: {cached})",
+    "startBackfill": "Backfill in background"
+  },
+  "modelPicker": {
+    "defaultModel": "Default model",
+    "followConfig": "Follow config",
+    "chipTitleSelected": "Current model: {label} ({id})",
+    "chipTitleFollow": "Current model: follow config ({hint})",
+    "mainModel": "Main model ({model})",
+    "noOverride": "No model overrides in the current config"
+  },
+  "profilePicker": {
+    "lockedTitle": "This conversation is bound to this profile; switch in a new conversation",
+    "switchTitle": "Switch model profile",
+    "select": "Select profile",
+    "empty": "No profiles available"
+  },
+  "app": {
+    "newConversation": "New conversation",
+    "newConversationGlyph": "+",
+    "pinWindow": "Pin window",
+    "unpinWindow": "Unpin window",
+    "engineMissing": "claude CLI not detected. Install it before using the assistant."
+  },
+  "activity": {
+    "list": "List conversations",
+    "search": "Search conversation content",
+    "read": "Read conversation text",
+    "run": "Run command",
+    "targetQuoted": "“{target}”",
+    "listing": "Listing conversations…",
+    "searching": "Searching conversation content…",
+    "reading": "Reading conversation text…",
+    "running": "Running command…",
+    "thinking": "Thinking…"
+  },
+  "error": {
+    "unknown": "Unknown error",
+    "engineFailed": "Assistant engine failed",
+    "listenerTimeout": "Event listener registration timed out (3s)",
+    "listenerFailed": "Failed to register the event listener: {error}",
+    "historyLoadFailed": "Failed to load history: {error}",
+    "cliMissing": "Claude CLI not detected. Install and configure it first.",
+    "turnInProgress": "The previous reply is still in progress. Please wait."
+  }
+}

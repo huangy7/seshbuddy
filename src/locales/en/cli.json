@@ -1,0 +1,36 @@
+{
+  "installHint": {
+    "claude": {
+      "windows": "Claude Code CLI not found. Install it first.\n\nInstall: npm install -g {'@'}anthropic-ai/claude-code\n\nOn Windows the executable is usually `%APPDATA%\\npm\\claude.cmd`; if it still isn't detected, make sure that directory is on PATH.",
+      "unix": "Claude Code CLI not found. Install it first.\n\nInstall: npm install -g {'@'}anthropic-ai/claude-code\n\nNode.js is required first."
+    },
+    "codex": {
+      "windows": "Codex CLI not found. Install it first and make sure `codex` or `%APPDATA%\\npm\\codex.cmd` is available.",
+      "unix": "Codex CLI not found. Install it first and make sure the `codex` command is on PATH."
+    },
+    "gemini": {
+      "windows": "Gemini CLI not found. Install it first and make sure `gemini` is available.",
+      "unix": "Gemini CLI not found. Install it first.\n\nInstall: npm install -g {'@'}google/gemini-cli"
+    },
+    "workbuddy": "WorkBuddy desktop app not found. Install it first (/Applications/WorkBuddy.app).",
+    "antigravity": {
+      "windows": "Antigravity CLI not found. Install it first and make sure `agy` is available.",
+      "unix": "Antigravity CLI not found. Install it first and make sure the `agy` command is on PATH."
+    }
+  },
+  "permissionLabel": {
+    "claude": "Skip permission checks",
+    "codex": "Bypass approvals and sandbox",
+    "gemini": "YOLO mode",
+    "workbuddy": "",
+    "dsh": ""
+  },
+  "permissionHint": {
+    "claude": "When enabled, new or resumed sessions automatically include --dangerously-skip-permissions.",
+    "codex": "When enabled, Codex automatically includes --dangerously-bypass-approvals-and-sandbox, starting with the loosest permissions.",
+    "gemini": "When enabled, Gemini automatically includes -y (YOLO mode), skipping all tool confirmations.",
+    "workbuddy": "WorkBuddy resumes by opening the WorkBuddy app; no permission flags are involved.",
+    "dsh": "DSH sessions live on the web and cannot be resumed in a local terminal."
+  },
+  "installDsh": "Install DSH"
+}

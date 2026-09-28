@@ -1,0 +1,87 @@
+{
+  "app.batch.exportOutcome.merged": {
+    "action": "pluralize",
+    "reason": "可达真缺陷：en「Merged {count} sessions into one file.」在 count=1 下渲染成 `Merged 1 sessions into one file.`、de 同句渲染成 `1 Sitzungen in eine Datei zusammengeführt.`（实测，`node scripts/i18n-locale-scan.mjs --plural`）。可达性实测：调用点 useSessions.ts:1578 的 `batchExportSessions` 只排除 `count === 0`（:1563），而批量工具栏的显示条件是 `selectedSessionIdentities.length > 0`（App.vue:2031），选中 1 条会话即可走通。已把 en/de 改成 `|`-form；zh「已合并导出 {count} 个会话。」与 ja「{count} 件のセッションを 1 つのファイルにまとめてエクスポートしました。」无屈折，按 R2 保持逐字。",
+    "reachable": true
+  },
+  "app.batch.exportOutcome.separate": {
+    "action": "pluralize",
+    "reason": "可达真缺陷：en「Exported {count} sessions separately.」在 count=1 下渲染成 `Exported 1 sessions separately.`、de 同句渲染成 `1 Sitzungen einzeln exportiert.`（实测，`node scripts/i18n-locale-scan.mjs --plural`）。可达性与上一条同源：useSessions.ts:1563 只排除 `count === 0`，App.vue:2031 的工具栏在选中 1 条时即出现。已把 en/de 改成 `|`-form；zh「已分别导出 {count} 个会话。」与 ja「{count} 件のセッションを個別にエクスポートしました。」无屈折，按 R2 保持逐字。",
+    "reachable": true
+  },
+  "api-log.skillPanel.invokedCountTitle": {
+    "action": "pluralize",
+    "reason": "可达真缺陷：en「Called {count} times in this request」在 count=1 下渲染成 `Called 1 times`（实测），调用点 ApiLogSkillPanel.vue:80 的 :title 绑定，count 为单条请求内该技能的调用次数，调用一次即 count=1。de 同句「1-mal aufgerufen」无屈折问题，ja「1 回」无屈折；zh 取值「本次请求中累计调用 {count} 次」≠ en，按 R2 保持逐字。",
+    "reachable": true
+  },
+  "api-log.trafficPanel.errorCount": {
+    "action": "keep",
+    "reason": "假阳性：de「1 Fehler」是候选生成器的形态误报——Fehler 单复数同形，`1 Fehler` 是正确的德语。en「1 ERR」无屈折、zh「1 ERR」同、ja「1 エラー」无屈折。单数下成立，不改。",
+    "reachable": true
+  },
+  "api-profile.scopeAllocation.statusDirsInconsistentTooltip": {
+    "action": "keep",
+    "reason": "当前不可达（实测）：en「{count} directories have inconsistent configs」在 count=1 下渲染成 `1 directories have inconsistent configs`、de 渲染成 `1 Verzeichnisse haben unterschiedliche Konfigurationen`（实测，`node scripts/i18n-locale-scan.mjs --plural`），语法确实不成立；但 count 的来源是后端 `get_scope_dir_status_with` 回的结构化 detail（`ScopeDirDetail::DirsInconsistent.dirs` 的长度），而该状态只在「有配置的目录 ≥ 2 且彼此不同」时置出——故 count ≥ 2，count=1 不可达。**这条不可达性有测试钉住**：`commands/profile.rs` 的 `test_scope_dir_status_inconsistent_guard` 直接调 `get_scope_dir_status_with`，断言「只有一个目录有配置」必须落在 `unboundWithConfig`（实测：把谓词改写成只看「有没有配置」→ 该用例变红，恢复后 md5 不变）。zh「{count} 个目录配置不一致」逐字取自被删的后端句子（R2），ja「{count} 個のディレクトリで設定が一致していません」无屈折，均不加复数形式。若将来放宽该守卫或前端改从别处取 count，需按 R2 四语一并转复数。",
+    "reachable": false
+  },
+  "chat.thinkingPart.wordCount": {
+    "action": "keep",
+    "reason": "当前不可达（实测）：en「{count} words」在 count=1 下渲染成 `1 words`、de 为 `1 Wörter`，语法确实不成立；但调用点 ChatThinkingPart.vue:35 的判据是 `if (words > 10)`，渲染该键时 words ≥ 11，count=1 不可达。**注意 zh 取值与 en 逐字相同**（均为 `{count} words`），若将来该判据放宽，需按 R2 四语一并转复数。",
+    "reachable": false
+  },
+  "common.relativeTime.daysAgo": {
+    "action": "pluralize",
+    "reason": "可达真缺陷：de「vor {count} Tag(en)」是带字面 `(en)` 的对冲写法，用户在「1 天前」会看到 `vor 1 Tag(en)`（实测 count=1 渲染）。调用点 format.ts:57，days ∈ [1,29] 时命中，days=1 是常态。en「{count} d ago」/ja「{count}日前」/zh「{count}天前」无屈折问题，只需改 de；zh ≠ en，按 R2 保持逐字。",
+    "reachable": true
+  },
+  "common.reqMessages.truncatedSuffix": {
+    "action": "keep",
+    "reason": "当前不可达（实测）：en「…{count} characters total」在 count=1 下渲染成 `1 characters total`，语法确实不成立；但调用点 reqMessages.ts:148-152 的 count 是 `fullLen = outputText.length`，而该分支的进入条件是 `fullLen > MAX_PREVIEW_TEXT_LENGTH`（=32768），故 count ≥ 32769，count=1 不可达。",
+    "reachable": false
+  },
+  "common.timelineView.imageCount": {
+    "action": "keep",
+    "reason": "当前不可达（实测）：en「📷 {count} images」/de「📷 {count} Bilder」在 count=1 下语法不成立；但 TimelineView.vue:50 首次图片走 `imageCount: 1`（不渲染文案），调用 t() 的是 :84-86 的合并分支，只有 `prev.imageCount !== undefined` 时才执行，即 count ≥ 2。",
+    "reachable": false
+  },
+  "dialogs.deleteConfirm.batchMessage": {
+    "action": "pluralize",
+    "reason": "可达真缺陷：de「Die {count} ausgewählten Unterhaltungen löschen?」在 count=1 下渲染成 `Die 1 ausgewählten Unterhaltungen löschen?`（实测）。调用点 useSessions.ts:1447-1452，count = 选中的会话数，判据只排除 0，选中 1 条即 count=1。en「Delete the {count} selected conversations?」同为复数形态，一并转复数；zh「确定要删除选中的 {count} 个对话吗？」≠ en，按 R2 保持逐字。",
+    "reachable": true
+  },
+  "dialogs.deleteConfirm.projectMessage": {
+    "action": "pluralize",
+    "reason": "可达真缺陷：en「({count} conversations in total)」在 count=1 下渲染成 `(1 conversations in total)`、de「({count} Unterhaltungen insgesamt)」渲染成 `(1 Unterhaltungen insgesamt)`（实测）。调用点 useSessions.ts:982-988，count = 该项目下的会话数，单会话项目即 count=1。zh「（共 {count} 个对话）」≠ en，按 R2 保持逐字。",
+    "reachable": true
+  },
+  "session.agentPanel.daysAgo": {
+    "action": "delete",
+    "reason": "死键：`--orphans` 实测在 src/（排除 *.test.ts）里 0 处引用。计划 5 的 T7 把相对时间统一到 formatRelativeTime 之后遗留，与 session.gitPanel.daysAgo 成对（同组的 common.relativeTime.daysAgo 是 survivor，仍在用）。de 取值「vor {count} Tag(en)」的不安全问题随之消失。",
+    "reachable": false
+  },
+  "session.gitPanel.daysAgo": {
+    "action": "delete",
+    "reason": "死键：`--orphans` 实测在 src/（排除 *.test.ts）里 0 处引用；与 session.agentPanel.daysAgo 成对，都是计划 5 的 T7 遗留的相对时间键。de「vor {count} Tag(en)」的不安全问题随之消失。",
+    "reachable": false
+  },
+  "session.gitPanel.fileCount": {
+    "action": "pluralize",
+    "reason": "可达真缺陷：en「{count} files」在 count=1 下渲染成 `1 files`、de「{count} Datei(en)」渲染成 `1 Datei(en)`（带字面 (en)），实测。调用点 GitPanel.vue:302 的工具栏计数，count = 本次 git status 的条目数，改动 1 个文件即 count=1。**注意 zh 取值与 en 逐字相同**（均为 `{count} files`），按 R2 四语一并转复数（zh 与 en 取同一份英文复数串）。",
+    "reachable": true
+  },
+  "session.sessionTree.loadingListCount": {
+    "action": "keep",
+    "reason": "假阳性：de「Unterhaltungsliste wird geladen… {count} empfangen」里的 `empfangen` 是分词不是名词，`1 empfangen` 正确；en「Loading conversation list… {count} received」同理。计数与名词不相邻，单数下成立。",
+    "reachable": true
+  },
+  "session.globalSearch.indexNeededMany": {
+    "action": "keep",
+    "reason": "当前不可达（实测）：en「A search index is needed for {count} CLIs」/ de「Für {count} CLIs muss ein Suchindex erstellt werden」在 count=1 下语法不成立；但调用点 GlobalSearch.vue 的 buildRequestTitle 把 `items.length === 1` 单独走 indexNeeded / indexNeededUpdate，**只有 count ≥ 2 才会取到本键**。zh「需要为 {count} 个 CLI 建立搜索索引」无屈折，ja 同。若将来该分支改成单个也走这里，需按 R2 四语一并转复数。",
+    "reachable": false
+  },
+  "session.globalSearch.indexNeededManyUpdate": {
+    "action": "keep",
+    "reason": "当前不可达（实测）：en「A search index update is needed for {count} CLIs」/ de「Für {count} CLIs muss der Suchindex aktualisiert werden」在 count=1 下语法不成立；但调用点 GlobalSearch.vue 的 buildRequestTitle 把 `items.length === 1` 单独走 indexNeeded / indexNeededUpdate，**只有 count ≥ 2 才会取到本键**。zh「需要为 {count} 个 CLI 更新搜索索引」无屈折，ja 同。若将来该分支改成单个也走这里，需按 R2 四语一并转复数。",
+    "reachable": false
+  }
+}
