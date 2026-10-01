@@ -189,17 +189,14 @@ pub(crate) fn attribute_rebuild_error(e: Box<dyn std::error::Error>) -> AppError
 
 /// Create the system tray icon with menu.
 pub fn create_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(target_os = "macos")]
-    const TRAY_ICON_BYTES: &[u8] = include_bytes!("../icons/tray-icon-template.png");
-    #[cfg(not(target_os = "macos"))]
-    const TRAY_ICON_BYTES: &[u8] = include_bytes!("../icons/tray-icon.png");
+    const TRAY_ICON_BYTES: &[u8] = include_bytes!("../icons/tray-mascot.png");
     let icon = Image::from_bytes(TRAY_ICON_BYTES)?;
     let handle = app.handle().clone();
     let menu = build_tray_menu(app, None)?;
 
     TrayIconBuilder::with_id("main")
         .icon(icon)
-        .icon_as_template(cfg!(target_os = "macos"))
+        .icon_as_template(false)
         .tooltip("SeshBuddy")
         .menu(&menu)
         .show_menu_on_left_click(false)

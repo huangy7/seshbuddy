@@ -49,6 +49,7 @@ Thumbs.db
 .agents/
 .agent/
 .claude/
+.worktrees/
 
 # 静态分析工具的输出目录
 # vite dev 的 watcher 同样忽略它 —— 不忽略会在分析期间跑爆文件句柄与内存
