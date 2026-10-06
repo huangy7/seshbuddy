@@ -375,25 +375,10 @@
         let compressed = zstd::encode_all(std::io::Cursor::new(content.as_bytes()), 3).unwrap();
         fs::write(&session_file, compressed).unwrap();
 
-        // 快照前置的 Dsh 路径覆盖状态，测后恢复；并清理测试写入的 Dsh 索引行
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("dsh").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Dsh,
-            Some(root.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Dsh, root.path());
 
         let result = scan_projects_inner_for_cli(CliKind::Dsh, None, None, true).unwrap();
-
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Dsh, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Dsh, None).unwrap(),
-        }
-        if let Ok(conn) = app_db::conn() {
-            let _ = app_db::clear_session_index_inner(&conn, "dsh");
-        }
+        clear_dsh_index_rows();
 
         assert_eq!(result.total_sessions, 1);
         assert_eq!(result.projects.len(), 1);
@@ -430,21 +415,9 @@
         let compressed = zstd::encode_all(std::io::Cursor::new(content.as_bytes()), 3).unwrap();
         fs::write(&session_file, compressed).unwrap();
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("dsh").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Dsh,
-            Some(root.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Dsh, root.path());
 
         let result = scan_projects_inner_for_cli(CliKind::Dsh, None, None, true).unwrap();
-
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Dsh, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Dsh, None).unwrap(),
-        }
         clear_dsh_index_rows();
 
         assert_eq!(result.total_sessions, 1, "只有新代文件的会话必须被扫到");
@@ -489,14 +462,7 @@
         )
         .unwrap();
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("dsh").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Dsh,
-            Some(root.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Dsh, root.path());
 
         // 模拟换代前的存量索引：旧代路径上已有一条记录
         let mut legacy_record = list_record(legacy_file.to_str().unwrap(), 1);
@@ -524,11 +490,6 @@
                 .filter(|path| path.starts_with(&root_prefix))
                 .collect()
         };
-
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Dsh, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Dsh, None).unwrap(),
-        }
         clear_dsh_index_rows();
 
         assert_eq!(result.total_sessions, 1, "同一会话目录只能贡献一条记录");
@@ -569,14 +530,7 @@
         fs::write(&legacy_file, &compressed).unwrap();
         fs::write(&current_file, compressed).unwrap();
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("dsh").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Dsh,
-            Some(root.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Dsh, root.path());
 
         let mut legacy_record = list_record(legacy_file.to_str().unwrap(), 1);
         legacy_record.session_id = "s1".to_string();
@@ -597,11 +551,6 @@
                 .filter(|path| path.starts_with(&root_prefix))
                 .collect()
         };
-
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Dsh, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Dsh, None).unwrap(),
-        }
         clear_dsh_index_rows();
 
         assert_eq!(result.total_sessions, 1);
@@ -641,14 +590,7 @@
         )
         .unwrap();
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("dsh").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Dsh,
-            Some(root.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Dsh, root.path());
 
         // 陈旧行：会话目录已不存在，且没有归档快照保护
         let stale_file = root
@@ -675,10 +617,6 @@
                 .collect()
         };
 
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Dsh, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Dsh, None).unwrap(),
-        }
         clear_dsh_index_rows();
 
         assert_eq!(result.total_sessions, 1);
@@ -764,14 +702,7 @@
             files.push(file);
         }
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("dsh").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Dsh,
-            Some(root.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Dsh, root.path());
         for (idx, file) in files.iter().enumerate() {
             let record = list_record(file.to_str().unwrap(), idx as i64 + 1);
             app_db::upsert_session_list_index(CliKind::Dsh, &[record]).unwrap();
@@ -780,11 +711,11 @@
         mark_session_index_revision_current(CliKind::Dsh);
 
         // 让其中一个项目目录不可读（以 root 运行测试时 chmod 不生效，用例退化为恒真，不会误报）
-        let locked = root.path().join("sessions").join("--Users-x-projB--");
+        let _locked = root.path().join("sessions").join("--Users-x-projB--");
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            fs::set_permissions(&locked, fs::Permissions::from_mode(0o000)).unwrap();
+            fs::set_permissions(&_locked, fs::Permissions::from_mode(0o000)).unwrap();
         }
 
         let scanned = scan_projects_inner_for_cli(CliKind::Dsh, None, None, false);
@@ -793,7 +724,7 @@
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            fs::set_permissions(&locked, fs::Permissions::from_mode(0o755)).unwrap();
+            fs::set_permissions(&_locked, fs::Permissions::from_mode(0o755)).unwrap();
         }
         scanned.unwrap();
 
@@ -809,11 +740,6 @@
                 .filter(|path| path.starts_with(&root_prefix))
                 .collect()
         };
-
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Dsh, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Dsh, None).unwrap(),
-        }
         clear_dsh_index_rows();
 
         assert_eq!(
@@ -904,6 +830,19 @@
     /// 版本记成当前值，其余 CLI 随后读到「不落后」而跳过全量重建。
     #[test]
     fn session_index_revision_gates_full_rebuild_per_cli() {
+        struct SettingCleanupGuard(String);
+        impl Drop for SettingCleanupGuard {
+            fn drop(&mut self) {
+                if let Ok(conn) = app_db::conn() {
+                    let _ = conn.execute(
+                        "DELETE FROM app_settings WHERE key = ?1",
+                        rusqlite::params![&self.0],
+                    );
+                }
+            }
+        }
+        let _cleanup = SettingCleanupGuard(session_index_revision_key(CliKind::Dsh));
+
         mark_session_index_revision_current(CliKind::Dsh);
         mark_session_index_revision_current(CliKind::Claude);
         assert!(
@@ -928,14 +867,6 @@
 
         mark_session_index_revision_current(CliKind::Dsh);
         assert!(!session_index_revision_outdated(CliKind::Dsh));
-
-        // 复位测试写入的 DSH 版本键，避免给后续用例留下「落后」状态
-        if let Ok(conn) = app_db::conn() {
-            let _ = conn.execute(
-                "DELETE FROM app_settings WHERE key = ?1",
-                rusqlite::params![session_index_revision_key(CliKind::Dsh)],
-            );
-        }
     }
 
     /// 空会话（只有 header + 策略事件、无 surface 消息）不进列表，
@@ -962,24 +893,10 @@
         let compressed = zstd::encode_all(std::io::Cursor::new(content.as_bytes()), 3).unwrap();
         fs::write(&session_file, compressed).unwrap();
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("dsh").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Dsh,
-            Some(root.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Dsh, root.path());
 
         let result = scan_projects_inner_for_cli(CliKind::Dsh, None, None, true).unwrap();
-
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Dsh, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Dsh, None).unwrap(),
-        }
-        if let Ok(conn) = app_db::conn() {
-            let _ = app_db::clear_session_index_inner(&conn, "dsh");
-        }
+        clear_dsh_index_rows();
 
         assert_eq!(
             result.total_sessions, 0,
@@ -1009,28 +926,14 @@
         let compressed = zstd::encode_all(std::io::Cursor::new(content.as_bytes()), 3).unwrap();
         fs::write(&session_file, compressed).unwrap();
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("dsh").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Dsh,
-            Some(root.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Dsh, root.path());
 
         let scan_result = scan_projects_inner_for_cli(CliKind::Dsh, None, None, true).unwrap();
         let snapshot_result = crate::cli_registry::source_for(CliKind::Dsh)
             .snapshot(&HashMap::new(), 0, 100)
             .unwrap()
             .expect("索引应有该行");
-
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Dsh, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Dsh, None).unwrap(),
-        }
-        if let Ok(conn) = app_db::conn() {
-            let _ = app_db::clear_session_index_inner(&conn, "dsh");
-        }
+        clear_dsh_index_rows();
 
         // 目录名 --Users-x-proj-- 解码兜底（decode 保留 -- 产生的双斜杠）
         let expected_key = session_mod::decode_project_dir("--Users-x-proj--");
@@ -1099,14 +1002,7 @@
         )
         .unwrap();
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("codex").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Codex,
-            Some(data_dir.to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Codex, &data_dir);
 
         let scan_result = scan_projects_inner_for_cli(CliKind::Codex, None, None, true).unwrap();
 
@@ -1142,10 +1038,6 @@
             .unwrap()
             .expect("索引应有该行");
 
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Codex, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Codex, None).unwrap(),
-        }
         clear_codex_index_rows();
 
         assert_eq!(scan_result.total_sessions, 3);
@@ -1484,14 +1376,7 @@
         )
         .unwrap();
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("claude").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Claude,
-            Some(data_dir.to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Claude, &data_dir);
 
         let scan_result = scan_projects_inner_for_cli(CliKind::Claude, None, None, true).unwrap();
         let snapshot_result = crate::cli_registry::source_for(CliKind::Claude)
@@ -1499,10 +1384,6 @@
             .unwrap()
             .expect("索引应有该行");
 
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Claude, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Claude, None).unwrap(),
-        }
         clear_claude_index_rows();
 
         assert_eq!(scan_result.projects.len(), 1);
@@ -1676,14 +1557,7 @@
             .unwrap();
         }
 
-        let prev_override = app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get("opencode").cloned());
-        cli::set_cli_data_dir_override(
-            CliKind::Opencode,
-            Some(temp.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard = cli::CliDataDirOverrideGuard::set(CliKind::Opencode, temp.path());
         clear_opencode_index_rows();
 
         // 真实入口：扫描先把索引写满，快照再读同一份索引 —— 两条装配路径。
@@ -1694,11 +1568,6 @@
             .expect("读取列表索引")
             .expect("扫描已写入索引，快照不应缺席");
 
-        // 先复位覆盖、再清索引：临时目录马上被删，覆盖不能留在指向它的值上。
-        match prev_override {
-            Some(path) => cli::set_cli_data_dir_override(CliKind::Opencode, Some(path)).unwrap(),
-            None => cli::set_cli_data_dir_override(CliKind::Opencode, None).unwrap(),
-        }
         clear_opencode_index_rows();
 
         let scan_ids: Vec<String> = scanned
