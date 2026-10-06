@@ -9,7 +9,7 @@ import { t } from "../i18n";
  *
  * 与 Rust 侧的一致性由 `enumParity` 的 parity 测试钉住（判据取自 `CliKind::id()`）。
  */
-export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity"] as const;
+export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode"] as const;
 
 export type CliId = (typeof CLI_IDS)[number];
 
@@ -34,6 +34,12 @@ export interface CliDefinition {
   supportsUsageStats: boolean;
   supportsApiProfiles: boolean;
   supportsApiLogs: boolean;
+  /**
+   * 能否删除本 CLI 的会话。文件型源的会话是一个文件，删除即移入回收站；
+   * 库型源（OpenCode）的会话是数据库里的行，删除要改库，尚未提供 —— 置 false，
+   * 前端不提供删除入口，后端也会把请求判失败而不是谎报成功。
+   */
+  supportsDelete: boolean;
 }
 
 export interface CliStatus {
@@ -97,6 +103,10 @@ function defaultCliDataDir(id: CliId): string {
       win: "%USERPROFILE%\\.gemini\\antigravity-cli",
       unix: "~/.gemini/antigravity-cli",
     },
+    opencode: {
+      win: "%USERPROFILE%\\.local\\share\\opencode",
+      unix: "~/.local/share/opencode",
+    },
   };
   return IS_WINDOWS ? dirs[id].win : dirs[id].unix;
 }
@@ -111,8 +121,10 @@ function defaultCliDataSource(id: CliId): string {
     workbuddy: "projects",
     dsh: "sessions",
     antigravity: "brain",
+    // 库型源没有会话子目录：会话是数据目录下 SQLite 库里的行，数据源就是数据目录本身。
+    opencode: "",
   };
-  return `${base}${sep}${subdir[id]}${sep}`;
+  return subdir[id] ? `${base}${sep}${subdir[id]}${sep}` : base;
 }
 
 export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
@@ -132,6 +144,7 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     supportsUsageStats: true,
     supportsApiProfiles: true,
     supportsApiLogs: true,
+    supportsDelete: true,
   },
   codex: {
     id: "codex",
@@ -149,6 +162,7 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     supportsUsageStats: true,
     supportsApiProfiles: true,
     supportsApiLogs: true,
+    supportsDelete: true,
   },
   gemini: {
     id: "gemini",
@@ -166,6 +180,7 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     supportsUsageStats: true,
     supportsApiProfiles: false,
     supportsApiLogs: false,
+    supportsDelete: true,
   },
   workbuddy: {
     id: "workbuddy",
@@ -183,6 +198,7 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     supportsUsageStats: false,
     supportsApiProfiles: false,
     supportsApiLogs: false,
+    supportsDelete: true,
   },
   dsh: {
     id: "dsh",
@@ -200,6 +216,7 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     supportsUsageStats: true,
     supportsApiProfiles: false,
     supportsApiLogs: false,
+    supportsDelete: true,
   },
   antigravity: {
     id: "antigravity",
@@ -217,6 +234,26 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     supportsUsageStats: true,
     supportsApiProfiles: false,
     supportsApiLogs: false,
+    supportsDelete: true,
+  },
+  opencode: {
+    id: "opencode",
+    name: "OpenCode",
+    command: "opencode",
+    dataSourcePath: defaultCliDataSource("opencode"),
+    dataDirPath: defaultCliDataDir("opencode"),
+    installHintKey: "cli.installHint.opencode",
+    permissionLabelKey: "cli.permissionLabel.opencode",
+    permissionHintKey: "cli.permissionHint.opencode",
+    // 库型源：会话行在库里，但启动是命令行（新建裸启、恢复带 `-s <id>`）；用量在 session 表里。
+    supportsNewSession: true,
+    supportsResumeSession: true,
+    supportsContextMenu: false,
+    supportsInPlaceFork: false,
+    supportsUsageStats: true,
+    supportsApiProfiles: false,
+    supportsApiLogs: false,
+    supportsDelete: false,
   },
 };
 

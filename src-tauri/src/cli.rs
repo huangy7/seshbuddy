@@ -38,7 +38,7 @@ macro_rules! cli_kinds {
     };
 }
 
-cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity);
+cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity, Opencode);
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CliStatus {
@@ -66,6 +66,7 @@ impl CliKind {
             Self::WorkBuddy => "workbuddy",
             Self::Dsh => "dsh",
             Self::Antigravity => "antigravity",
+            Self::Opencode => "opencode",
         }
     }
 
@@ -117,11 +118,24 @@ pub fn list_cli_statuses() -> Vec<CliStatus> {
 /// 该 CLI 是否存在可恢复的会话。
 /// 优先读会话索引计数;若索引暂不可用(如新接入的 Dsh 尚未建索引),
 /// 回退到目录级探测:sessions_dir 存在且非空。
+///
+/// 库型源（`sessions_subdir: None`）没有会话目录，`read_dir` 探测对它恒为假 ——
+/// 于是「有会话但索引未建」的库型源会被整块过滤出可见 CLI。此时改问源本身：
+/// `discover` 能枚举出定位符即视为有会话。分支按描述符判定，六个文件型源
+/// 仍走「索引计数 → read_dir」原路，行为逐字节不变。
 pub fn has_sessions(kind: CliKind) -> bool {
     if let Ok(count) = crate::app_db::count_session_list_index(kind) {
         if count > 0 {
             return true;
         }
+    }
+    if crate::cli_registry::descriptor_for(kind).file_root.sessions_subdir.is_none() {
+        return crate::cli_registry::source_for(kind)
+            .discover()
+            .map(|discovered| !discovered.locators.is_empty())
+            // 库打不开/查询失败按「没有会话」处理：这里只用于前端是否展示该 CLI，
+            // 判错方向的代价是不显示一个暂时读不到的源，远低于读不到即误删的清理路径。
+            .unwrap_or(false);
     }
     let dir = match sessions_dir(kind) {
         Ok(d) => d,
@@ -229,6 +243,16 @@ fn read_cli_path_overrides() -> HashMap<String, String> {
 fn write_cli_path_overrides(overrides: &HashMap<String, String>) -> AppResult<()> {
     app_db::write_cli_path_overrides(overrides)
 }
+
+/// OpenCode 数据目录覆盖是进程级共享状态：写它的测试与读真实库的冒烟测试并行会互相
+/// 看到对方的数据目录，一方断言真、一方断言假。两条测试共用此锁串行化。
+///
+/// 其余 CLI 的同类覆盖测试都在各自模块内用局部锁，只有这里的写者与读者分处两个模块，
+/// 故锁放在覆盖状态的定义处供两边引用。
+#[cfg(test)]
+pub(crate) static OPENCODE_DATA_DIR_OVERRIDE_TEST_LOCK: std::sync::LazyLock<
+    std::sync::Mutex<()>,
+> = std::sync::LazyLock::new(|| std::sync::Mutex::new(()));
 
 fn normalize_cli_data_dir(value: &str) -> AppResult<String> {
     let trimmed = value.trim();
@@ -907,6 +931,22 @@ mod tests {
         let dir = sessions_dir(CliKind::Antigravity).unwrap();
         assert_eq!(dir.file_name().unwrap().to_str(), Some("brain"));
     }
+
+    /// 库型源没有会话子目录：`sessions_dir` 对它报错，而 `list_cli_path_configs`
+    /// 必须**跳过**它，不能让它经 `?` 短路整张表 —— 短路会让六个文件型源的路径配置
+    /// 一起消失。本测试同时钉住这两侧：报错是刻意的，跳过是承重的。
+    #[test]
+    fn path_configs_skip_kinds_without_sessions_subdir() {
+        assert!(sessions_dir(CliKind::Opencode).is_err(), "库型源不该有会话目录");
+
+        let configs = list_cli_path_configs().expect("不应因库型源没有会话目录而整体失败");
+        let ids: Vec<&str> = configs.iter().map(|config| config.id.as_str()).collect();
+        assert!(!ids.contains(&"opencode"), "库型源没有会话目录，不该出现在路径配置里：{ids:?}");
+        for expected in ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity"] {
+            assert!(ids.contains(&expected), "文件型源 {expected} 的路径配置被库型源短路了：{ids:?}");
+        }
+    }
+
     #[test]
     fn cli_status_carries_antigravity() {
         let statuses = list_cli_statuses();

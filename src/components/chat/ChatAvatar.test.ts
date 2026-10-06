@@ -1,6 +1,7 @@
 import { describe, expect, it, afterEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { setLocale } from "../../i18n";
+import { CLI_IDS } from "../../types/cli";
 import ChatAvatar from "./ChatAvatar.vue";
 
 // 本文件只钉两件在迁移里容易被静默改坏的事：四个分支的**回退顺序**，以及
@@ -53,6 +54,16 @@ describe("ChatAvatar 头像 tooltip", () => {
       expect(provider).toContain("codex");
       expect(fallback.length).toBeGreaterThan(0);
       expect(user.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("每个 CLI id 都映射到官方品牌标，不得落到通用兜底", () => {
+    // 品牌表是手写的，漏登记一个 CLI **不会编译失败** —— 只会静默显示成通用图标，
+    // 而通用图标看起来完全正常。遍历 CLI_IDS 逼作者给每个新 CLI 补上品牌矢量。
+    for (const id of CLI_IDS) {
+      const wrapper = mount(ChatAvatar, { props: { role: "assistant", cliId: id } });
+      expect(wrapper.find(".ai-icon").exists(), `${id} 落到了通用兜底图标`).toBe(false);
+      expect(wrapper.find(".brand-svg").exists(), `${id} 没有品牌标`).toBe(true);
     }
   });
 });

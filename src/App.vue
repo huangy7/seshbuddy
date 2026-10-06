@@ -1097,17 +1097,23 @@ function onContextMenuSession(
         icon: "folder-x",
         action: () => blockFolder(projectPath),
       },
-      { label: "", action: () => {}, separator: true },
-      {
-        id: "deleteSession",
-        label: t("app.ctxMenu.deleteSession"),
-        icon: "trash-2",
-        danger: true,
-        action: async () => {
-          const deleted = await deleteSession({ cliId, filePath }, displayName);
-          if (deleted) closeTabsBySessionIdentity(identity);
-        },
-      },
+      // 库型源（OpenCode）没有可删的文件：删除入口连同其分隔线一并隐藏，
+      // 与 `supportsResumeSession` 同一处能力门。后端也会把这类请求判失败而非谎报成功。
+      ...(getCliDefinition(cliId).supportsDelete
+        ? [
+            { label: "", action: () => {}, separator: true },
+            {
+              id: "deleteSession",
+              label: t("app.ctxMenu.deleteSession"),
+              icon: "trash-2",
+              danger: true,
+              action: async () => {
+                const deleted = await deleteSession({ cliId, filePath }, displayName);
+                if (deleted) closeTabsBySessionIdentity(identity);
+              },
+            },
+          ]
+        : []),
     ],
   };
 }
@@ -1645,6 +1651,7 @@ function onKeyDown(e: KeyboardEvent) {
       tab?.type === "history" &&
       tab.sessionPath &&
       tab.cliId &&
+      getCliDefinition(tab.cliId).supportsDelete &&
       !(e.target instanceof HTMLInputElement) &&
       !(e.target instanceof HTMLTextAreaElement)
     ) {

@@ -66,6 +66,13 @@ fn build_runtime(app: AppHandle) -> AppResult<SessionIndexWatcherRuntime> {
 
     let mut watchers = Vec::new();
     for kind in crate::cli::CliKind::ALL.iter().copied() {
+        // 库型源没有会话子目录：会话变化不来自文件系统，没有可监听的文件树。
+        // 必须先跳过 —— 若继续走到 `sessions_dir(kind)`，它会以「无会话目录」报错
+        // 并中止整轮装配，连带让其余六个文件型源的监听一起装不上。
+        if !watches_filesystem(kind) {
+            continue;
+        }
+
         let data_dir = cli::data_dir(kind)?;
         if !data_dir.exists() {
             tracing::info!(
@@ -127,6 +134,13 @@ fn build_runtime(app: AppHandle) -> AppResult<SessionIndexWatcherRuntime> {
         _watchers: watchers,
         _refresh_tx: refresh_tx,
     })
+}
+
+/// 该 CLI 的会话是否以文件形式落盘、从而需要文件系统监听。
+///
+/// 库型源没有会话子目录，其会话变化不来自文件系统 —— 由 `build_runtime` 据此跳过。
+fn watches_filesystem(kind: CliKind) -> bool {
+    crate::cli_registry::descriptor_for(kind).file_root.sessions_subdir.is_some()
 }
 
 fn is_relevant_session_index_event(event: &Event, kind: CliKind, sessions_dir: &Path) -> bool {
@@ -248,6 +262,25 @@ mod tests {
     use super::*;
     use notify::event::{CreateKind, ModifyKind, RemoveKind};
     use std::path::PathBuf;
+
+    /// 库型源没有会话子目录：`sessions_dir` 对它报错，监听装配必须**跳过**它，
+    /// 不能让它中止整轮装配 —— 中止会让六个文件型源的监听一起装不上。
+    /// 本测试同时钉住两侧：报错是刻意的，跳过是承重的。
+    #[test]
+    fn library_sources_are_skipped_by_the_watcher() {
+        assert!(cli::sessions_dir(CliKind::Opencode).is_err(), "库型源不该有会话目录");
+        assert!(!watches_filesystem(CliKind::Opencode), "库型源不该装配文件监听");
+        for kind in [
+            CliKind::Claude,
+            CliKind::Codex,
+            CliKind::Gemini,
+            CliKind::WorkBuddy,
+            CliKind::Dsh,
+            CliKind::Antigravity,
+        ] {
+            assert!(watches_filesystem(kind), "{kind:?} 是文件型源，必须装配监听");
+        }
+    }
 
     #[test]
     fn background_scans_require_an_explicit_cli_selection() {

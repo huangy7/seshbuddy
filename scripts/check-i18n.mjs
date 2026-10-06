@@ -344,9 +344,11 @@ const RUST_PENDING_EXCEPTIONS = [
   // 删掉条目，规则 2 立刻把它的夹具判成硬编码中文；它也**不能靠迁移离开**（没有可迁的文案）。
   // 收口时试过让闸门按 `#[cfg(test)] mod X;` 自动认出这类文件，**已回退**（判据被五个可编译的
   // 反例打穿，理由见本表表头）。`parser/parse_bench.rs` 形状相同，紧邻的条目同理。
-  // 计数是 42（行号/条数在 `6d0fb1b0` 上量得）：计划 10 的 T6 往本文件加索引用例时一并加了
-  // 断言消息，31 → 42 是多重集差分、无删除。
-  { path: "src-tauri/src/commands/session_index/tests.rs", residual: 42 },
+  // 计数是 69：计划 10 的 T6 往本文件加索引用例时一并加了断言消息（31 → 42，行号/条数在
+  // `6d0fb1b0` 上量得）；接入 OpenCode 时新增的扫描、可见性、检索候选与子会话用例又加了
+  // 27 条断言消息（42 → 69）。两次都是多重集差分、无删除，全部是断言消息与夹具数据，
+  // 没有一条面向用户。
+  { path: "src-tauri/src/commands/session_index/tests.rs", residual: 69 },
   // `db/session_archive.rs`：**残 1 条，属 E 类（非 UI 载体）**，行号在 `6d0fb1b0` 上量得：
   // `:525-526` 的两行 `-- 自定义名以 …` 是 `list_archived_sessions_inner`（`:506`）里那段
   // `r#"…"#` SQL（`:511-530`）内部的**注释**。

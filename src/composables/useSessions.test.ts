@@ -53,6 +53,7 @@ function cliOption(
     supportsUsageStats: false,
     supportsApiProfiles: false,
     supportsApiLogs: false,
+    supportsDelete: true,
     hasSessions: true,
     hasBinary: true,
     ...overrides,

@@ -10,7 +10,8 @@ use crate::cli::CliKind;
 use super::descriptor::CliDescriptor;
 use super::source::CliSource;
 use super::sources::{
-    AntigravitySource, ClaudeSource, CodexSource, DshSource, GeminiSource, WorkBuddySource,
+    AntigravitySource, ClaudeSource, CodexSource, DshSource, GeminiSource, OpencodeSource,
+    WorkBuddySource,
 };
 
 /// 按枚举取源。穷尽 `match`：新增变体而不在此登记，编译不过。
@@ -22,6 +23,7 @@ pub(crate) fn source_for(kind: CliKind) -> &'static dyn CliSource {
         CliKind::WorkBuddy => &WorkBuddySource,
         CliKind::Dsh => &DshSource,
         CliKind::Antigravity => &AntigravitySource,
+        CliKind::Opencode => &OpencodeSource,
     }
 }
 
@@ -56,6 +58,8 @@ mod tests {
             ("/Users/x/.workbuddy/projects/p/a.jsonl", CliKind::WorkBuddy),
             ("/Users/x/.dsh/sessions/a/session.jsonl", CliKind::Dsh),
             ("/Users/x/.gemini/antigravity-cli/brain/s1/transcript.jsonl", CliKind::Antigravity),
+            // 库型源：会话身份是 `cli://opencode/<id>` 虚拟键，不是文件路径。
+            ("cli://opencode/ses_x", CliKind::Opencode),
             // 边界案例：`antigravity-cli-tools` 只是名字里带了同一串字符，
             // 并不是 Antigravity 的数据目录。若排除方按裸子串否决，这条路径会
             // 「无人认领」而静默落到兜底项 —— 归属必须仍留在 Gemini。
