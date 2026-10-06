@@ -2,6 +2,7 @@ use crate::error::{AppError, AppResult};
 use super::format_timestamp;
 use crate::app_db;
 use crate::cli::{self, CliKind};
+use crate::cli_registry::{source_for, SessionLocator};
 use crate::history;
 use crate::parser;
 use crate::session::{self, ChatMessage, ContentPart, SearchResult, UsageRecord};
@@ -88,9 +89,12 @@ pub async fn load_session_stream(
     let skip_sidechain = skip_sidechain_filter.unwrap_or(false);
 
     streaming::spawn_streaming_task(app, SESSION_STREAM_TOPIC, request_id, move |app, topic, request_id| {
-        // 文件不存在 -> 走归档兜底
-        if !Path::new(&file_path).exists() {
-            let kind = CliKind::from_id(cli_id.as_deref()).unwrap_or(CliKind::Claude);
+        // 会话归属的 CLI。解析不出时沿用旧行为落到 Claude —— 与下面的失败方向一致：
+        // 认不出 CLI 意味着「不认识这个 CLI」，而不是「会话没了」，不能据此判会话不存在。
+        let kind = CliKind::from_id(cli_id.as_deref()).unwrap_or(CliKind::Claude);
+        // 会话不存在 -> 走归档兜底。判定经注册表：库型会话（`cli://…`）没有文件，
+        // 裸 `Path::exists()` 会把它们一律当成「文件不存在」而误报会话丢失。
+        if !source_for(kind).exists(&SessionLocator::decode(kind, &file_path)) {
             match app_db::read_archived_session_content(kind.id(), &file_path) {
                 Ok(Some(data)) => {
                     let content = match String::from_utf8(data) {
@@ -328,7 +332,7 @@ pub fn batch_export_sessions(
 /// rewrites every kept line's `sessionId` to a fresh UUID, writes a new file next
 /// to the original, and returns the new session ID.
 /// 递归复制目录（file-history 快照用，目标已存在时跳过整体拷贝）
-fn copy_dir_recursive(src: &Path, dst: &Path) -> std::io::Result<()> {
+pub(crate) fn copy_dir_recursive(src: &Path, dst: &Path) -> std::io::Result<()> {
     fs::create_dir_all(dst)?;
     for entry in fs::read_dir(src)? {
         let entry = entry?;
@@ -412,7 +416,7 @@ fn fork_truncate_lines(
     Ok(kept)
 }
 
-fn sync_workbuddy_forked_session_to_db(
+pub(crate) fn sync_workbuddy_forked_session_to_db(
     db_path: &Path,
     old_id: &str,
     new_id: &str,
@@ -471,9 +475,10 @@ pub fn fork_session(
     use uuid::Uuid;
 
     let kind = CliKind::from_id(cli_id.as_deref())?;
-    if kind != CliKind::Claude && kind != CliKind::WorkBuddy {
+    // 守卫：没有分叉能力的 CLI 明确报错，错误码与改动前逐字相同
+    let Some(fork) = crate::cli_registry::source_for(kind).fork() else {
         return Err(AppError::coded("session.continue_unsupported").with("cli", kind.name()));
-    }
+    };
 
     // Validate file_path is within the CLI's sessions directory
     let sessions_root = cli::sessions_dir(kind)?;
@@ -505,41 +510,17 @@ pub fn fork_session(
         writeln!(writer, "{}", line)?;
     }
 
-    if kind == CliKind::Claude {
-        // 同步复制 /rewind 代码回滚快照（~/.claude/file-history/<旧id>/ → <新id>/），
-        // 让 fork 出的会话也能回滚代码；目录不存在或拷贝失败不阻断 fork
-        if let (Some(old_id), Ok(data_dir)) = (
-            original_path.file_stem().and_then(|s| s.to_str()),
-            cli::data_dir(kind),
-        ) {
-            let src_history = data_dir.join("file-history").join(old_id);
-            if src_history.is_dir() {
-                let dst_history = data_dir.join("file-history").join(&new_id);
-                if let Err(e) = copy_dir_recursive(&src_history, &dst_history) {
-                    eprintln!("[fork_session] file-history copy failed: {}", e);
-                }
-            }
-        }
-    } else if kind == CliKind::WorkBuddy {
-        // 同步注册到 WorkBuddy 本地 SQLite 数据库（~/.workbuddy/workbuddy.db）
-        if let (Some(old_id), Ok(data_dir)) = (
-            original_path.file_stem().and_then(|s| s.to_str()),
-            cli::data_dir(kind),
-        ) {
-            let db_path = data_dir.join("workbuddy.db");
-            if db_path.is_file() {
-                if let Err(e) = sync_workbuddy_forked_session_to_db(&db_path, old_id, &new_id) {
-                    eprintln!("[fork_session] WorkBuddy SQLite 注册失败: {}", e);
-                }
-            }
-        }
+    // 后置动作：原来的 if kind == Claude { ... } else if kind == WorkBuddy { ... }
+    // 换成一次调用。old_id 是原文件的词干。
+    if let Some(old_id) = original_path.file_stem().and_then(|s| s.to_str()) {
+        fork.after_fork(old_id, &new_id);
     }
 
     Ok(new_id)
 }
 
 #[derive(Debug, Clone)]
-struct AggregatedSessionSearch {
+pub(crate) struct AggregatedSessionSearch {
     session_path: String,
     snippet: String,
     matched_field: Option<session::MatchedField>,
@@ -805,7 +786,7 @@ fn fallback_session_id_from_path(file_path: &str) -> String {
         .to_string()
 }
 
-fn build_claude_search_results(
+pub(crate) fn build_claude_search_results(
     aggregated: Vec<AggregatedSessionSearch>,
     records: &HashMap<String, app_db::SessionListIndexRecord>,
     custom_names: &HashMap<String, String>,
@@ -858,21 +839,17 @@ fn build_claude_search_results(
         .collect()
 }
 
-fn build_codex_search_results(
+pub(crate) fn build_codex_search_results(
     aggregated: Vec<AggregatedSessionSearch>,
     records: &HashMap<String, app_db::SessionListIndexRecord>,
     custom_names: &HashMap<String, String>,
     session_map: &HashMap<String, history::HistoryEntry>,
+    // 该 CLI 的自定义标题表（`session_id → 标题`），没有则传空表。
+    titles: &HashMap<String, String>,
     kind: CliKind,
 ) -> Vec<SearchResult> {
     // 单次读取 Codex 索引 thread_name Map，整批搜索结果 O(1) 命中
     let codex_titles = parser::load_codex_index_titles();
-    // WorkBuddy 用户重命名在 workbuddy.db（sessions.custom_title），覆盖原生 AI 标题
-    let wb_titles = if kind == CliKind::WorkBuddy {
-        parser::load_workbuddy_custom_titles()
-    } else {
-        HashMap::new()
-    };
     aggregated
         .into_iter()
         .map(|entry| {
@@ -900,13 +877,13 @@ fn build_codex_search_results(
                         .and_then(|stem| stem.to_str())
                         .and_then(|stem| codex_titles.get(stem).map(String::as_str))
                 });
-            let title = wb_titles
+            let title = titles
                 .get(&session_id)
                 .or_else(|| {
                     Path::new(&entry.session_path)
                         .file_stem()
                         .and_then(|stem| stem.to_str())
-                        .and_then(|stem| wb_titles.get(stem))
+                        .and_then(|stem| titles.get(stem))
                 })
                 .map(String::as_str)
                 .or(title);
@@ -989,58 +966,9 @@ fn run_search_sessions_pipeline(kind: CliKind, trimmed: &str) -> AppResult<Vec<S
         .collect();
     let records = app_db::read_session_list_index_for_paths(kind, &resolved_paths)?;
 
-    let mut results = match kind {
-        CliKind::Claude => {
-            let history_path = cli::history_path(CliKind::Claude)?;
-            let (session_map, project_map) = history::parse_history(history_path.to_str().unwrap_or(""));
-            build_claude_search_results(
-                aggregated,
-                &records,
-                &custom_names,
-                &session_map,
-                &project_map,
-            )
-        }
-        CliKind::Codex => {
-            let history_path = cli::history_path(CliKind::Codex)?;
-            let session_map = history::parse_codex_history(history_path.to_str().unwrap_or(""));
-            build_codex_search_results(
-                aggregated,
-                &records,
-                &custom_names,
-                &session_map,
-                CliKind::Codex,
-            )
-        }
-        CliKind::Gemini => build_codex_search_results(
-            aggregated,
-            &records,
-            &custom_names,
-            &HashMap::new(),
-            CliKind::Gemini,
-        ),
-        CliKind::WorkBuddy => build_codex_search_results(
-            aggregated,
-            &records,
-            &custom_names,
-            &HashMap::new(),
-            CliKind::WorkBuddy,
-        ),
-        CliKind::Dsh => build_codex_search_results(
-            aggregated,
-            &records,
-            &custom_names,
-            &HashMap::new(),
-            CliKind::Dsh,
-        ),
-        CliKind::Antigravity => build_codex_search_results(
-            aggregated,
-            &records,
-            &custom_names,
-            &HashMap::new(),
-            CliKind::Antigravity,
-        ),
-    };
+    // 六臂分派归位到各源：用哪条装配路径、喂哪份 history 映射是各 CLI 的整形知识。
+    let mut results = crate::cli_registry::source_for(kind)
+        .build_search_results(aggregated, &records, &custom_names)?;
     stamp_results_cli_id(&mut results, kind);
     Ok(results)
 }
@@ -1290,8 +1218,8 @@ pub async fn get_usage_stats(cli_id: Option<String>) -> AppResult<Vec<UsageRecor
 }
 
 fn get_usage_stats_sync(kind: CliKind) -> AppResult<Vec<UsageRecord>> {
-    // WorkBuddy 无用用量数据；其余 CLI（Claude/Codex/Gemini/DSH）均有 extract_usage_records 实现
-    if kind == CliKind::WorkBuddy {
+    // 没有用量统计能力的 CLI 直接返回空，不再靠「返回空表」表达不支持。
+    if crate::cli_registry::source_for(kind).usage_stats().is_none() {
         return Ok(Vec::new());
     }
 

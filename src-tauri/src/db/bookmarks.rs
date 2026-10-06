@@ -1,4 +1,4 @@
-use super::{conn, now_rfc3339};
+use super::{conn, now_rfc3339, write_tx};
 use crate::cli::CliKind;
 use crate::error::AppResult;
 use rusqlite::params;
@@ -75,7 +75,7 @@ pub(crate) fn read_all_bookmarks() -> AppResult<Vec<BookmarkRecord>> {
 pub(crate) fn write_all_bookmarks(bookmarks: &[BookmarkRecord]) -> AppResult<()> {
     let normalized = normalize_bookmarks(bookmarks.to_vec());
     let mut conn = conn()?;
-    let tx = conn.transaction()?;
+    let tx = write_tx(&mut conn)?;
     tx.execute("DELETE FROM bookmarks", [])?;
 
     for bookmark in &normalized {

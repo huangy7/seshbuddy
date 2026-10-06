@@ -15,12 +15,22 @@ pub enum CliFormat {
 }
 
 impl CliFormat {
-    pub fn from_cli_id(id: &str) -> Self {
+    /// 认识的 id 映射到对应格式；其余返回 `None`。
+    ///
+    /// 不设兜底分支：调用方据此判定「该 CLI 能否提取」。若把不认识的 id 静默
+    /// 按某种格式解析，产出的是结构对不上却仍被写入缓存的内容，错误会一路
+    /// 藏到读取侧才暴露；在边界返回 `None` 让调用方各自决定报错还是跳过。
+    ///
+    /// **主应用已不再走这里** —— 它改问 `CliSource::transcript_format`，于是新 CLI
+    /// 忘了声明格式会**编译不过**，而不是在这里被静默判成 `None`。
+    /// 本函数保留给代理侧：那个 crate 看不到 `CliSource`，只能按 id 字符串映射。
+    pub fn from_cli_id(id: &str) -> Option<Self> {
         match id {
-            "codex" => CliFormat::Codex,
-            "gemini" => CliFormat::Gemini,
-            "workbuddy" => CliFormat::WorkBuddy,
-            _ => CliFormat::Claude,
+            "claude" => Some(CliFormat::Claude),
+            "codex" => Some(CliFormat::Codex),
+            "gemini" => Some(CliFormat::Gemini),
+            "workbuddy" => Some(CliFormat::WorkBuddy),
+            _ => None,
         }
     }
 }
@@ -436,9 +446,19 @@ mod multi_format_tests {
 
     #[test]
     fn from_cli_id_maps_formats() {
-        assert_eq!(CliFormat::from_cli_id("claude"), CliFormat::Claude);
-        assert_eq!(CliFormat::from_cli_id("codex"), CliFormat::Codex);
-        assert_eq!(CliFormat::from_cli_id("gemini"), CliFormat::Gemini);
-        assert_eq!(CliFormat::from_cli_id("workbuddy"), CliFormat::WorkBuddy);
+        assert_eq!(CliFormat::from_cli_id("claude"), Some(CliFormat::Claude));
+        assert_eq!(CliFormat::from_cli_id("codex"), Some(CliFormat::Codex));
+        assert_eq!(CliFormat::from_cli_id("gemini"), Some(CliFormat::Gemini));
+        assert_eq!(CliFormat::from_cli_id("workbuddy"), Some(CliFormat::WorkBuddy));
+    }
+
+    #[test]
+    fn from_cli_id_rejects_unknown_id() {
+        // 未知 id 必须显式返回 None，绝不静默落到某种格式：
+        // 静默回退会让不认识的 CLI 产出结构错位的内容并写入缓存。
+        assert_eq!(CliFormat::from_cli_id("dsh"), None);
+        assert_eq!(CliFormat::from_cli_id("antigravity"), None);
+        assert_eq!(CliFormat::from_cli_id(""), None);
+        assert_eq!(CliFormat::from_cli_id("Claude"), None); // id 区分大小写
     }
 }

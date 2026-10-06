@@ -1,4 +1,4 @@
-use super::conn;
+use super::{conn, write_tx};
 use crate::cli::CliKind;
 use crate::error::AppResult;
 use rusqlite::params;
@@ -252,7 +252,7 @@ pub(crate) fn replace_session_search_index_state(
     let now = super::now_rfc3339();
 
     for chunk in updates.chunks(STATE_WRITE_CHUNK_SIZE) {
-        let tx = conn.transaction()?;
+        let tx = write_tx(&mut conn)?;
         for update in chunk {
             tx.execute(
                 r#"
@@ -293,7 +293,7 @@ pub(crate) fn delete_session_search_paths(
 
     // Delete from SQLite
     let mut conn = conn()?;
-    let tx = conn.transaction()?;
+    let tx = write_tx(&mut conn)?;
 
     for session_path in session_paths {
         tx.execute(
@@ -325,7 +325,7 @@ pub(crate) fn delete_session_records(kind: CliKind, session_paths: &[String]) ->
     }
 
     let mut conn = conn()?;
-    let tx = conn.transaction()?;
+    let tx = write_tx(&mut conn)?;
 
     for session_path in session_paths {
         // 双轨墓碑防御：将待删除会话登记至 session_tombstones 墓碑表，
@@ -384,7 +384,10 @@ pub(crate) fn purge_search_orphans(cli_id: Option<&str>) -> AppResult<usize> {
                 continue;
             }
         }
-        if std::path::Path::new(&path).exists() {
+        // 存在性判定经注册表：库型会话（`cli://…`）没有文件，裸 `Path::exists()` 恒为 false
+        // 会把它们当孤儿清掉；`session_exists` 对虚拟定位符判「存在」，且 cli_id 认不出时
+        // 同样判「存在」—— 删除不可恢复，宁可漏删一行陈旧索引。
+        if super::session_exists(&cli, &path) {
             continue;
         }
         match super::read_archived_session_content(&cli, &path) {
@@ -406,7 +409,7 @@ pub(crate) fn purge_search_orphans(cli_id: Option<&str>) -> AppResult<usize> {
     }
     // SQLite 搜索状态同步删除
     let mut conn = conn()?;
-    let tx = conn.transaction()?;
+    let tx = write_tx(&mut conn)?;
     for (cli, path) in &pairs {
         tx.execute(
             "DELETE FROM session_search_index_state WHERE cli_id = ?1 AND session_path = ?2",

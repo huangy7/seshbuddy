@@ -60,3 +60,41 @@ export function tsUnionMembers(source: string, typeName: string): string[] {
   const body = source.slice(head.index + head[0].length, end);
   return [...body.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
 }
+
+/**
+ * 取 `pub fn id(self) -> &'static str { … }` 里 `=> "字面量"` 的取值集合 ——
+ * **线上 id 串的唯一来源**。
+ *
+ * ⚠️ **不能按枚举变体名折算**（`rustEnumVariants` 的那套 snake_case 口径）：变体名与
+ * 线上 id 不是同一条映射 —— `WorkBuddy` 的 id 是 `workbuddy` 而不是 `work_buddy`。
+ * 按折算口径比对会在两个集合都「看起来对」时静默判错，正是本模块要防的那类缺陷。
+ */
+export function rustCliIds(source: string): string[] {
+  const anchor = source.indexOf("pub fn id(self) -> &'static str {");
+  if (anchor < 0) return [];
+  const open = source.indexOf("{", anchor);
+  if (open < 0) return [];
+  let depth = 0;
+  let end = open;
+  for (; end < source.length; end++) {
+    if (source[end] === "{") depth++;
+    else if (source[end] === "}") {
+      depth--;
+      if (depth === 0) break;
+    }
+  }
+  const body = source.slice(open, end);
+  return [...body.matchAll(/=>\s*"([a-z0-9]+)"/g)].map((match) => match[1]);
+}
+
+/**
+ * 取 `export const <name> = [ … ] as const;` 里的字符串成员。
+ *
+ * 收窄派生的清单（`type X = (typeof ARR)[number]`）不是字符串联合，`tsUnionMembers`
+ * 抽不到；而它恰恰是前端唯一的手写清单，必须能被比对，否则 parity 只能覆盖一半。
+ */
+export function tsConstArrayMembers(source: string, constName: string): string[] {
+  const body = new RegExp(`export const ${constName} = \\[([\\s\\S]*?)\\] as const;`).exec(source)?.[1];
+  if (body === undefined) return [];
+  return [...body.matchAll(/"([a-z0-9]+)"/g)].map((match) => match[1]);
+}

@@ -2,9 +2,10 @@ use crate::error::{AppError, AppResult};
 use crate::app_db::{self, BookmarkRecord, FavoriteEntry};
 use crate::cli::{self, CliKind};
 use crate::cli_config::{
-    ensure_parent_dir, read_json_file, read_toml_file, settings_path_for, strip_bom,
-    unsupported_kind_error, write_atomically, write_json_file, write_toml_file,
+    read_json_file, read_toml_file, settings_file_name, settings_path_for, unsupported_kind_error,
+    write_json_file,
 };
+use crate::cli_registry::features::{ProfileScopeCtx, StoredProfile};
 use crate::commands::session::custom_session_name;
 use crate::tray;
 use chrono::Utc;
@@ -16,7 +17,7 @@ use std::path::PathBuf;
 const INTERNAL_PROFILE_META_KEY: &str = "__seshbuddyInternalProfileMeta";
 const INTERNAL_PROFILE_CONTENT_KEY: &str = "__seshbuddyInternalProfileContent";
 const INTERNAL_PROFILE_MANAGED_PATHS_KEY: &str = "managedPaths";
-const CLAUDE_MANAGED_PROFILE_PATHS: &[&str] = &[
+pub(crate) const CLAUDE_MANAGED_PROFILE_PATHS: &[&str] = &[
     "/env/ANTHROPIC_AUTH_TOKEN",
     "/env/ANTHROPIC_BASE_URL",
     "/env/ANTHROPIC_MODEL",
@@ -35,17 +36,6 @@ const CLAUDE_MANAGED_PROFILE_PATHS: &[&str] = &[
     "/attribution/commit",
     "/attribution/pr",
 ];
-const CODEX_MANAGED_PROFILE_PATHS: &[&str] = &[
-    "/codex/experimental_bearer_token",
-    "/codex/base_url",
-    "/codex/model",
-    "/codex/model_reasoning_effort",
-    "/codex/model_provider",
-    "/codex/provider_name",
-    "/codex/wire_api",
-    "/auth/OPENAI_API_KEY",
-];
-const CODEX_OFFICIAL_MANAGED_PROFILE_PATHS: &[&str] = &["/auth"];
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -67,14 +57,8 @@ pub struct ScopeBindingInfo {
     pub active_profile: Option<String>,
 }
 
-#[derive(Debug, Clone)]
-struct StoredProfile {
-    visible: Value,
-    managed_paths: Vec<String>,
-}
-
-
-fn codex_auth_path() -> AppResult<PathBuf> {
+/// Codex 的 auth.json 路径。官方档回填与登录态检测都要读它，故对能力实现开放。
+pub(crate) fn codex_auth_path() -> AppResult<PathBuf> {
     Ok(cli::data_dir(CliKind::Codex)?.join("auth.json"))
 }
 
@@ -95,7 +79,7 @@ fn validate_profile_name(name: String) -> AppResult<String> {
 /// 直接 `to_string()` 会让用户在「部分目录配置保存失败」的明细里看到
 /// `cli_config.permission_denied` 这样的码。故 `Coded` 只取它的 `detail` 参数——
 /// 那是底层 OS / 库文本，按 R3 不翻，本来就是要原样给用户看的那部分。
-fn error_reason(err: &AppError) -> String {
+pub(crate) fn error_reason(err: &AppError) -> String {
     match err {
         AppError::Coded { params, .. } => params.get("detail").cloned().unwrap_or_default(),
         other => other.to_string(),
@@ -108,7 +92,7 @@ fn error_reason(err: &AppError) -> String {
 /// 文案就定死在 Rust 里了，而 `coded()` 产出的是 `{code, params}` 不是字符串，
 /// 也塞不进 `Vec<String>`。故这里只把**不依赖语言的部分**（目录路径 + 底层原因）拼进
 /// 一个 `{details}` 参数，句子骨架交给 `errors.profile.partial_dir_save_failed` 的四份语言包。
-fn partial_dir_save_failed(failures: Vec<(String, String)>) -> AppError {
+pub(crate) fn partial_dir_save_failed(failures: Vec<(String, String)>) -> AppError {
     let details = failures
         .iter()
         .map(|(dir, reason)| {
@@ -123,35 +107,20 @@ fn partial_dir_save_failed(failures: Vec<(String, String)>) -> AppError {
     AppError::coded("profile.partial_dir_save_failed").with("details", details)
 }
 
-fn deep_merge_toml(target: &mut toml::Value, source: &toml::Value) {
-    if let (toml::Value::Table(target_table), toml::Value::Table(source_table)) = (target, source) {
-        for (key, source_val) in source_table {
-            match target_table.get_mut(key) {
-                Some(target_val)
-                    if matches!(target_val, toml::Value::Table(_))
-                        && matches!(source_val, toml::Value::Table(_)) =>
-                {
-                    deep_merge_toml(target_val, source_val);
-                }
-                _ => {
-                    target_table.insert(key.clone(), source_val.clone());
-                }
-            }
-        }
-    }
-}
-
 fn insert_json_string(target: &mut Map<String, Value>, key: &str, value: Option<&str>) {
     if let Some(value) = value.map(str::trim).filter(|value| !value.is_empty()) {
         target.insert(key.to_string(), Value::String(value.to_string()));
     }
 }
 
-const CODEX_OFFICIAL_PROFILE_NAME: &str = "Codex Official";
+pub(crate) const CODEX_OFFICIAL_PROFILE_NAME: &str = "Codex Official";
 
-/// 检查 auth.json Value 是否包含 OAuth 登录态（而非仅 API key）
-/// 参考 cc-switch: 只要有非 OPENAI_API_KEY、非 auth_mode 的有效字段即视为登录态
-fn codex_auth_has_login_material(auth: &Value) -> bool {
+/// 检查 auth.json Value 是否包含 OAuth 登录态（而非仅 API key）。
+///
+/// 官方登录态的特征是：除 `OPENAI_API_KEY` 与 `auth_mode` 之外，还存在至少一个有内容的
+/// 字段（access_token / refresh_token 等）。只看这两个字段之外是否非空，是因为无登录态时
+/// 它们可能以空串或空对象残留。
+pub(crate) fn codex_auth_has_login_material(auth: &Value) -> bool {
     let Some(obj) = auth.as_object() else {
         return false;
     };
@@ -179,7 +148,7 @@ fn value_has_content(value: &Value) -> bool {
     }
 }
 
-fn codex_settings_has_managed_provider_fields(settings: &Value) -> bool {
+pub(crate) fn codex_settings_has_managed_provider_fields(settings: &Value) -> bool {
     let Some(codex) = settings.get("codex").and_then(Value::as_object) else {
         return false;
     };
@@ -206,7 +175,7 @@ fn codex_settings_has_managed_provider_fields(settings: &Value) -> bool {
         .is_some()
 }
 
-fn codex_official_profile_content_from_live(settings: &Value) -> Value {
+pub(crate) fn codex_official_profile_content_from_live(settings: &Value) -> Value {
     let mut official = Map::new();
     if let Some(auth_obj) = settings
         .get("auth")
@@ -272,7 +241,7 @@ fn codex_profile_matches_live_settings(profile: &Value, settings: &Value) -> boo
     has_configured_field
 }
 
-fn set_matching_codex_profile_active(settings: &Value) -> AppResult<bool> {
+pub(crate) fn set_matching_codex_profile_active(settings: &Value) -> AppResult<bool> {
     for name in list_profiles_for(CliKind::Codex, None)? {
         if name == CODEX_OFFICIAL_PROFILE_NAME {
             continue;
@@ -291,7 +260,7 @@ fn set_matching_codex_profile_active(settings: &Value) -> AppResult<bool> {
     Ok(false)
 }
 
-fn read_codex_settings_value() -> AppResult<Value> {
+pub(crate) fn read_codex_settings_value() -> AppResult<Value> {
     let config = read_toml_file(&settings_path_for(CliKind::Codex)?)?;
     let auth = read_json_file(&codex_auth_path()?, "{}")?;
 
@@ -376,182 +345,6 @@ fn read_codex_settings_value() -> AppResult<Value> {
     Ok(Value::Object(root))
 }
 
-fn build_codex_toml_patch(content: &Value) -> toml::Value {
-    let mut root = toml::map::Map::new();
-
-    let Some(codex) = content.get("codex").and_then(|value| value.as_object()) else {
-        return toml::Value::Table(root);
-    };
-
-    if let Some(model) = codex
-        .get("model")
-        .and_then(|v| v.as_str())
-        .map(str::trim)
-        .filter(|v| !v.is_empty())
-    {
-        root.insert("model".to_string(), toml::Value::String(model.to_string()));
-    }
-    if let Some(effort) = codex
-        .get("model_reasoning_effort")
-        .and_then(|v| v.as_str())
-        .map(str::trim)
-        .filter(|v| !v.is_empty())
-    {
-        root.insert(
-            "model_reasoning_effort".to_string(),
-            toml::Value::String(effort.to_string()),
-        );
-    }
-
-    let provider_id = codex
-        .get("model_provider")
-        .and_then(|v| v.as_str())
-        .map(str::trim)
-        .filter(|v| !v.is_empty())
-        .unwrap_or("openai-chat-completions")
-        .to_string();
-
-    let mut provider_patch = toml::map::Map::new();
-    if let Some(name) = codex
-        .get("provider_name")
-        .and_then(|v| v.as_str())
-        .map(str::trim)
-        .filter(|v| !v.is_empty())
-    {
-        provider_patch.insert("name".to_string(), toml::Value::String(name.to_string()));
-    }
-    if let Some(base_url) = codex
-        .get("base_url")
-        .and_then(|v| v.as_str())
-        .map(str::trim)
-        .filter(|v| !v.is_empty())
-    {
-        provider_patch.insert(
-            "base_url".to_string(),
-            toml::Value::String(base_url.to_string()),
-        );
-    }
-    if let Some(wire_api) = codex
-        .get("wire_api")
-        .and_then(|v| v.as_str())
-        .map(str::trim)
-        .filter(|v| !v.is_empty())
-    {
-        provider_patch.insert(
-            "wire_api".to_string(),
-            toml::Value::String(wire_api.to_string()),
-        );
-    } else if !provider_patch.is_empty() {
-        provider_patch.insert(
-            "wire_api".to_string(),
-            toml::Value::String("responses".to_string()),
-        );
-    }
-
-    // 优先从 codex.experimental_bearer_token 提取 API Key，兼顾兼容历史配置中的 auth.OPENAI_API_KEY
-    let api_key = codex
-        .get("experimental_bearer_token")
-        .or_else(|| content.pointer("/auth/OPENAI_API_KEY"))
-        .and_then(|v| v.as_str())
-        .map(str::trim)
-        .filter(|v| !v.is_empty());
-
-    if let Some(key) = api_key {
-        provider_patch.insert(
-            "experimental_bearer_token".to_string(),
-            toml::Value::String(key.to_string()),
-        );
-        provider_patch.insert(
-            "requires_openai_auth".to_string(),
-            toml::Value::Boolean(true),
-        );
-    }
-
-    if !provider_patch.is_empty() {
-        root.insert(
-            "model_provider".to_string(),
-            toml::Value::String(provider_id.clone()),
-        );
-
-        let mut providers = toml::map::Map::new();
-        providers.insert(provider_id, toml::Value::Table(provider_patch));
-        root.insert("model_providers".to_string(), toml::Value::Table(providers));
-    }
-
-    toml::Value::Table(root)
-}
-
-fn apply_codex_settings_value(content: &Value) -> AppResult<()> {
-    let config_path = settings_path_for(CliKind::Codex)?;
-    let mut existing_config = read_toml_file(&config_path)?;
-    let patch = build_codex_toml_patch(content);
-    deep_merge_toml(&mut existing_config, &patch);
-
-    // 参考 cc-switch 官方登录保护机制：
-    // 第三方 API Key 已注入 config.toml 的 [model_providers.<id>].experimental_bearer_token 中。
-    // auth.json 专用于保留 ChatGPT / Codex 官方 OAuth 登录态（远程操作和官方插件强依赖）。
-    // 若现有 auth.json 已有官方 OAuth 登录态，切勿覆盖；
-    // 仅在无官方登录态且当前 Profile 提供自定义 auth 时才写入。
-    let auth_path = codex_auth_path()?;
-    let existing_auth = read_json_file(&auth_path, "{}").unwrap_or(Value::Object(Map::new()));
-
-    if !codex_auth_has_login_material(&existing_auth) {
-        if let Some(auth_obj) = content.get("auth").and_then(|value| value.as_object()) {
-            write_json_file(&auth_path, &Value::Object(auth_obj.clone()))?;
-        }
-    }
-
-    write_toml_file(&config_path, &existing_config)?;
-
-    Ok(())
-}
-
-/// 从 config.toml 中移除 `build_codex_toml_patch` 写入的管理字段，
-/// 保留 Codex 自身的 projects、tui、plugins 等字段
-fn clear_codex_managed_config_fields(config: &mut toml::Value) {
-    let toml::Value::Table(table) = config else {
-        return;
-    };
-
-    // 记录当前的 model_provider，用于清理对应的 [model_providers.<id>]
-    let provider_id = table
-        .get("model_provider")
-        .and_then(|v| v.as_str())
-        .map(str::to_string);
-
-    table.remove("model");
-    table.remove("model_reasoning_effort");
-    table.remove("model_provider");
-    table.remove("experimental_bearer_token");
-
-    // 清理 [model_providers.<id>]
-    if let Some(pid) = provider_id {
-        if let Some(toml::Value::Table(providers)) = table.get_mut("model_providers") {
-            providers.remove(&pid);
-            if providers.is_empty() {
-                table.remove("model_providers");
-            }
-        }
-    }
-}
-
-/// 应用 Codex Official profile：恢复 auth.json 中的 OAuth token，清除 config.toml 管理字段
-fn apply_codex_official_profile(content: &Value) -> AppResult<()> {
-    // 1. 写入 auth.json（恢复 OAuth token）
-    if let Some(auth_obj) = content.get("auth").and_then(|v| v.as_object()) {
-        let auth_path = codex_auth_path()?;
-        write_json_file(&auth_path, &Value::Object(auth_obj.clone()))?;
-    }
-
-    // 2. 清除 config.toml 中的管理字段
-    let config_path = settings_path_for(CliKind::Codex)?;
-    let mut config = read_toml_file(&config_path)?;
-    clear_codex_managed_config_fields(&mut config);
-    write_toml_file(&config_path, &config)?;
-
-    Ok(())
-}
-
 fn escape_json_pointer_segment(segment: &str) -> String {
     segment.replace('~', "~0").replace('/', "~1")
 }
@@ -608,7 +401,7 @@ fn collect_json_leaf_pointers(value: &Value, base: &str, output: &mut Vec<String
     }
 }
 
-fn normalized_json_leaf_pointers(value: &Value) -> Vec<String> {
+pub(crate) fn normalized_json_leaf_pointers(value: &Value) -> Vec<String> {
     let mut pointers = Vec::new();
     collect_json_leaf_pointers(value, "", &mut pointers);
     let mut unique = BTreeSet::new();
@@ -663,16 +456,10 @@ fn extract_managed_paths(meta: &Value, visible: &Value) -> Vec<String> {
 }
 
 fn allowed_profile_paths_for_name(kind: CliKind, name: Option<&str>) -> &'static [&'static str] {
-    match kind {
-        CliKind::Claude => CLAUDE_MANAGED_PROFILE_PATHS,
-        CliKind::Codex if name == Some(CODEX_OFFICIAL_PROFILE_NAME) => {
-            CODEX_OFFICIAL_MANAGED_PROFILE_PATHS
-        }
-        CliKind::Codex => CODEX_MANAGED_PROFILE_PATHS,
-        CliKind::Gemini => &[],
-        CliKind::WorkBuddy => &[],
-        CliKind::Dsh => &[],
-        CliKind::Antigravity => &[],
+    match crate::cli_registry::source_for(kind).api_profile() {
+        Some(feature) => feature.allowed_paths(name),
+        // 没有配置档能力时给空：不支持的 CLI 上没有任何路径被托管。
+        None => &[],
     }
 }
 
@@ -776,13 +563,13 @@ fn wrap_profile_content_for_name(
     Value::Object(root)
 }
 
-fn ensure_json_object(value: &mut Value) {
+pub(crate) fn ensure_json_object(value: &mut Value) {
     if !value.is_object() {
         *value = Value::Object(Map::new());
     }
 }
 
-fn set_json_pointer_value(target: &mut Value, pointer: &str, next_value: Value) {
+pub(crate) fn set_json_pointer_value(target: &mut Value, pointer: &str, next_value: Value) {
     let segments = parse_json_pointer(pointer);
     if segments.is_empty() {
         *target = next_value;
@@ -832,7 +619,7 @@ fn remove_json_pointer_segments(target: &mut Value, segments: &[String]) -> bool
     map.is_empty()
 }
 
-fn remove_json_pointer_value(target: &mut Value, pointer: &str) {
+pub(crate) fn remove_json_pointer_value(target: &mut Value, pointer: &str) {
     let segments = parse_json_pointer(pointer);
     if segments.is_empty() {
         *target = Value::Object(Map::new());
@@ -842,74 +629,25 @@ fn remove_json_pointer_value(target: &mut Value, pointer: &str) {
     let _ = remove_json_pointer_segments(target, &segments);
 }
 
-fn apply_claude_settings_value_to_path(settings_path: &PathBuf, content: &Value, managed_paths: &[String]) -> AppResult<()> {
-    ensure_parent_dir(settings_path)?;
-
-    let mut existing = if settings_path.exists() {
-        read_json_file(settings_path, "{}")?
-    } else {
-        Value::Object(Map::new())
-    };
-    ensure_json_object(&mut existing);
-
-    let paths = if managed_paths.is_empty() {
-        normalized_json_leaf_pointers(content)
-    } else {
-        managed_paths.to_vec()
-    };
-
-    for path in paths {
-        match content.pointer(&path) {
-            Some(value) => set_json_pointer_value(&mut existing, &path, value.clone()),
-            None => remove_json_pointer_value(&mut existing, &path),
-        }
-    }
-
-    write_json_file(settings_path, &existing)
-}
-
 fn read_settings_json_for(kind: CliKind) -> AppResult<String> {
-    match kind {
-        CliKind::Claude => {
-            let path = settings_path_for(kind)?;
-            if !path.exists() {
-                return Ok("{}".to_string());
-            }
-            fs::read_to_string(&path)
-                .map(strip_bom)
-                .map_err(|e| AppError::coded("profile.settings_read_failed").with("detail", e.to_string()))
-        }
-        CliKind::Codex => {
-            let value = read_codex_settings_value()?;
-            serde_json::to_string_pretty(&value).map_err(|e| AppError::coded("profile.serialize_failed").with("detail", e.to_string()))
-        }
-        CliKind::Gemini => Err(unsupported_kind_error(kind)),
-        CliKind::WorkBuddy => Err(unsupported_kind_error(kind)),
-        CliKind::Dsh => Err(unsupported_kind_error(kind)),
-        CliKind::Antigravity => Err(unsupported_kind_error(kind)),
-    }
+    crate::cli_registry::source_for(kind)
+        .api_profile()
+        .ok_or_else(|| unsupported_kind_error(kind))?
+        .read_settings()
 }
 
 fn write_settings_json_for(kind: CliKind, content: String) -> AppResult<()> {
-    let value: Value =
-        serde_json::from_str(&content).map_err(|e| AppError::coded("profile.content_parse_failed").with("detail", e.to_string()))?;
+    // **先校验内容、再查能力**，次序不可换：改动前就是先解析再分派，于是「不支持的 CLI +
+    // 畸形 JSON」报的是 `profile.content_parse_failed`，只有内容合法才轮到 `unsupported_kind`。
+    // 反过来会让这个组合的错误码变掉 —— 那是前端可见的行为变更。
+    // 能力实现内部会再解析一次，无害。
+    serde_json::from_str::<Value>(&content)
+        .map_err(|e| AppError::coded("profile.content_parse_failed").with("detail", e.to_string()))?;
 
-    match kind {
-        CliKind::Claude => {
-            let path = settings_path_for(kind)?;
-            ensure_parent_dir(&path)?;
-            write_atomically(&path, content.as_bytes())?;
-        }
-        CliKind::Codex => {
-            apply_codex_settings_value(&value)?;
-        }
-        CliKind::Gemini => return Err(unsupported_kind_error(kind)),
-        CliKind::WorkBuddy => return Err(unsupported_kind_error(kind)),
-        CliKind::Dsh => return Err(unsupported_kind_error(kind)),
-        CliKind::Antigravity => return Err(unsupported_kind_error(kind)),
-    }
-
-    Ok(())
+    crate::cli_registry::source_for(kind)
+        .api_profile()
+        .ok_or_else(|| unsupported_kind_error(kind))?
+        .write_settings(content)
 }
 
 fn list_profiles_for(kind: CliKind, _scope: Option<&str>) -> AppResult<Vec<String>> {
@@ -923,7 +661,12 @@ fn read_profile_for(kind: CliKind, name: String, _scope: Option<&str>) -> AppRes
     serde_json::to_string_pretty(&stored.visible).map_err(|e| AppError::coded("profile.serialize_failed").with("detail", e.to_string()))
 }
 
-fn save_profile_for_internal(
+/// 保存配置档并在需要时级联应用。Codex 的绑定路径要做「回填」与「按登录态建官方档」，
+/// 两处都靠它落库，故对能力实现开放。
+///
+/// **刻意接受的临时依赖方向**：`cli_registry::sources::codex` 因此反向依赖
+/// `commands::profile`。与代理能力那次同源；终态是把整个配置档层纳入源。
+pub(crate) fn save_profile_for_internal(
     kind: CliKind,
     name: String,
     content: String,
@@ -931,10 +674,10 @@ fn save_profile_for_internal(
     _scope: Option<&str>,
 ) -> AppResult<()> {
     let name = validate_profile_name(name)?;
-    if matches!(kind, CliKind::Codex)
-        && name == CODEX_OFFICIAL_PROFILE_NAME
-        && !allow_official_overwrite
-    {
+    let protected = crate::cli_registry::source_for(kind)
+        .api_profile()
+        .and_then(|f| f.protected_profile_name());
+    if protected == Some(name.as_str()) && !allow_official_overwrite {
         // 允许首次创建，但阻止覆盖更新
         if app_db::read_profile(kind, &name).is_ok() {
             return Err(AppError::coded("profile.builtin_cannot_overwrite"));
@@ -980,54 +723,19 @@ pub(crate) fn cascade_apply_profile_with(
 
     for scope_str in active_scopes {
         affected_scopes.push(scope_str.clone());
-        match kind {
-            CliKind::Claude => {
-                if scope_str == "global" {
-                    let settings_path = match global_override {
-                        Some(p) => p.clone(),
-                        None => settings_path_for(CliKind::Claude)?,
-                    };
-                    match apply_claude_settings_value_to_path(&settings_path, &stored.visible, &stored.managed_paths) {
-                        Ok(()) => success_count += 1,
-                        Err(e) => {
-                            tracing::warn!("Failed to cascade apply profile '{}' to global: {}", profile_name, e.diagnostic());
-                            failed_dirs.push(settings_path.to_string_lossy().to_string());
-                        }
-                    }
-                } else {
-                    let dirs = app_db::get_profile_tab_dirs_with(conn, &scope_str)?;
-                    for dir in dirs {
-                        let settings_path = PathBuf::from(&dir).join(".claude").join("settings.json");
-                        match apply_claude_settings_value_to_path(&settings_path, &stored.visible, &stored.managed_paths) {
-                            Ok(()) => success_count += 1,
-                            Err(e) => {
-                                tracing::warn!("Failed to cascade apply profile '{}' to dir '{}': {}", profile_name, dir, e.diagnostic());
-                                failed_dirs.push(dir);
-                            }
-                        }
-                    }
-                }
-            }
-            CliKind::Codex => {
-                if scope_str == "global" {
-                    let res = if profile_name == CODEX_OFFICIAL_PROFILE_NAME {
-                        apply_codex_official_profile(&stored.visible)
-                    } else {
-                        apply_codex_settings_value(&stored.visible)
-                    };
-                    match res {
-                        Ok(()) => success_count += 1,
-                        Err(e) => {
-                            tracing::warn!("Failed to cascade apply codex profile '{}': {}", profile_name, e.diagnostic());
-                            if let Ok(p) = settings_path_for(CliKind::Codex) {
-                                failed_dirs.push(p.to_string_lossy().to_string());
-                            }
-                        }
-                    }
-                }
-            }
-            CliKind::Gemini | CliKind::WorkBuddy | CliKind::Dsh | CliKind::Antigravity => {}
-        }
+        let Some(feature) = crate::cli_registry::source_for(kind).api_profile() else {
+            // 没有配置档能力的 CLI：没有任何作用域可应用，静默跳过（与改动前的空臂一致）。
+            continue;
+        };
+        let ctx = ProfileScopeCtx {
+            conn,
+            scope: &scope_str,
+            profile_name,
+            global_override: global_override.map(PathBuf::as_path),
+        };
+        let outcome = feature.apply_to_scope(&ctx, &stored)?;
+        success_count += outcome.success_count;
+        failed_dirs.extend(outcome.failed_dirs);
     }
 
     Ok(CascadeApplyResult {
@@ -1042,7 +750,7 @@ fn save_profile_for(kind: CliKind, name: String, content: String) -> AppResult<C
     cascade_apply_profile_for(kind, &name)
 }
 
-fn clean_claude_settings_for_unbind(settings_path: &PathBuf) -> AppResult<()> {
+pub(crate) fn clean_claude_settings_for_unbind(settings_path: &PathBuf) -> AppResult<()> {
     if !settings_path.exists() {
         return Ok(());
     }
@@ -1099,15 +807,16 @@ pub(crate) fn set_scope_binding_with(
             return Err(AppError::coded("profile.global_scope_needs_profile"));
         }
         app_db::clear_active_profile_with(conn, kind, Some(scope))?;
-        if kind == CliKind::Claude {
-            if let Ok(dirs) = app_db::get_profile_tab_dirs_with(conn, scope) {
-                for dir in &dirs {
-                    let settings_path = PathBuf::from(dir).join(".claude").join("settings.json");
-                    if settings_path.exists() {
-                        let _ = clean_claude_settings_for_unbind(&settings_path);
-                    }
-                }
-            }
+        if let Some(feature) = crate::cli_registry::source_for(kind).api_profile() {
+            let ctx = ProfileScopeCtx {
+                conn,
+                scope,
+                // 传空串而非原参数：走到这里只说明 `trim()` 后为空，原值可能是空白串，
+                // 与 `ProfileScopeCtx::profile_name` 文档承诺的「解绑路径上为空串」不符。
+                profile_name: "",
+                global_override: global_override.map(PathBuf::as_path),
+            };
+            feature.unbind_scope(&ctx)?;
         }
         return Ok(());
     }
@@ -1116,92 +825,18 @@ pub(crate) fn set_scope_binding_with(
     let profile_content = app_db::read_profile_with(conn, kind, &name)?;
     let stored = decode_stored_profile_for_name(kind, Some(&name), &profile_content)?;
 
-    match kind {
-        CliKind::Claude => {
-            if scope == "global" {
-                let settings_path = match global_override {
-                    Some(p) => p.clone(),
-                    None => settings_path_for(CliKind::Claude)?,
-                };
-                apply_claude_settings_value_to_path(&settings_path, &stored.visible, &stored.managed_paths)?;
-            } else {
-                let dirs = app_db::get_profile_tab_dirs_with(conn, scope)?;
-                if dirs.is_empty() {
-                    return Err(AppError::coded("profile.project_tab_no_dirs"));
-                }
-                let mut failures = Vec::new();
-                for dir in &dirs {
-                    let settings_path = PathBuf::from(dir).join(".claude").join("settings.json");
-                    if let Err(e) = apply_claude_settings_value_to_path(&settings_path, &stored.visible, &stored.managed_paths) {
-                        failures.push((dir.clone(), error_reason(&e)));
-                    }
-                }
-                if !failures.is_empty() {
-                    return Err(partial_dir_save_failed(failures));
-                }
-            }
-        }
-        CliKind::Codex => {
-            if scope != "global" {
-                return Err(AppError::coded("profile.codex_no_project_binding"));
-            }
-
-            // Backfill: 将当前 live 状态写回旧的 active profile
-            let active_name = app_db::get_active_profile_with(conn, CliKind::Codex, None).unwrap_or_default();
-            if !active_name.trim().is_empty() && active_name != name {
-                if let Ok(current_settings) = read_codex_settings_value() {
-                    let current_json =
-                        serde_json::to_string_pretty(&current_settings).unwrap_or_default();
-                    let allow_official_overwrite = active_name == CODEX_OFFICIAL_PROFILE_NAME;
-                    if let Err(e) = save_profile_for_internal(
-                        CliKind::Codex,
-                        active_name.clone(),
-                        current_json,
-                        allow_official_overwrite,
-                        None,
-                    ) {
-                        tracing::warn!("Backfill failed for profile '{}': {}", active_name, e.diagnostic());
-                    }
-                }
-            }
-
-            // 检测 OAuth 登录态，必要时自动创建 Codex Official profile
-            let auth_path = codex_auth_path().unwrap_or_default();
-            if let Ok(auth) = read_json_file(&auth_path, "{}") {
-                if codex_auth_has_login_material(&auth) {
-                    let official_exists = app_db::list_profiles_with(conn, CliKind::Codex)
-                        .unwrap_or_default()
-                        .iter()
-                        .any(|n| n == CODEX_OFFICIAL_PROFILE_NAME);
-                    if !official_exists {
-                        let official_content =
-                            codex_official_profile_content_from_live(&read_codex_settings_value().unwrap_or_default());
-                        let stored_json =
-                            serde_json::to_string_pretty(&official_content).unwrap_or_default();
-                        if let Err(e) = save_profile_for_internal(
-                            CliKind::Codex,
-                            CODEX_OFFICIAL_PROFILE_NAME.to_string(),
-                            stored_json,
-                            true,
-                            None,
-                        ) {
-                            tracing::warn!("Failed to create Codex Official profile: {}", e.diagnostic());
-                        }
-                    }
-                }
-            }
-
-            if name == CODEX_OFFICIAL_PROFILE_NAME {
-                apply_codex_official_profile(&stored.visible)?;
-            } else {
-                apply_codex_settings_value(&stored.visible)?;
-            }
-        }
-        CliKind::Gemini => return Err(unsupported_kind_error(kind)),
-        CliKind::WorkBuddy => return Err(unsupported_kind_error(kind)),
-        CliKind::Dsh => return Err(unsupported_kind_error(kind)),
-        CliKind::Antigravity => return Err(unsupported_kind_error(kind)),
-    }
+    // 绑定路径上没有能力的 CLI 必须**报错**而不是静默跳过：调用方以为自己绑定了，
+    // 若这里静默返回 Ok，磁盘上却什么都没发生，用户看到的是「绑定成功但配置没生效」。
+    let Some(feature) = crate::cli_registry::source_for(kind).api_profile() else {
+        return Err(unsupported_kind_error(kind));
+    };
+    let ctx = ProfileScopeCtx {
+        conn,
+        scope,
+        profile_name: &name,
+        global_override: global_override.map(PathBuf::as_path),
+    };
+    feature.bind_scope(&ctx, &stored)?;
 
     app_db::set_active_profile_with(conn, kind, &name, Some(scope))?;
     Ok(())
@@ -1267,43 +902,21 @@ fn delete_profile_for(kind: CliKind, name: String, _scope: Option<&str>) -> AppR
     app_db::delete_profile(kind, &name)
 }
 
-fn set_active_profile_for(kind: CliKind, name: &str, scope: Option<&str>) -> AppResult<()> {
+pub(crate) fn set_active_profile_for(kind: CliKind, name: &str, scope: Option<&str>) -> AppResult<()> {
     app_db::set_active_profile(kind, name, scope)
 }
 
-fn get_active_profile_for(kind: CliKind, scope: Option<&str>) -> AppResult<String> {
+pub(crate) fn get_active_profile_for(kind: CliKind, scope: Option<&str>) -> AppResult<String> {
     app_db::get_active_profile(kind, scope)
 }
 
 fn sync_active_profile_from_cli_for(kind: CliKind) -> AppResult<bool> {
-    if matches!(kind, CliKind::Codex) {
-        let current_settings = read_codex_settings_value()?;
-        let has_oauth = current_settings
-            .get("auth")
-            .is_some_and(codex_auth_has_login_material);
-        if has_oauth {
-            let official_settings = codex_official_profile_content_from_live(&current_settings);
-            let current_json = serde_json::to_string_pretty(&official_settings)
-                .map_err(|e| AppError::coded("profile.serialize_failed").with("detail", e.to_string()))?;
-            save_profile_for_internal(
-                CliKind::Codex,
-                CODEX_OFFICIAL_PROFILE_NAME.to_string(),
-                current_json,
-                true,
-                None,
-            )?;
-            if !codex_settings_has_managed_provider_fields(&current_settings) {
-                set_active_profile_for(CliKind::Codex, CODEX_OFFICIAL_PROFILE_NAME, None)?;
-            }
-            return Ok(true);
-        }
-
-        let active_name = get_active_profile_for(CliKind::Codex, None)?;
-        if active_name == CODEX_OFFICIAL_PROFILE_NAME {
-            if !set_matching_codex_profile_active(&current_settings)? {
-                app_db::clear_active_profile(CliKind::Codex, None)?;
-            }
-            return Ok(true);
+    // 有能力的 CLI 可能自带「从 live 反查活动档」的行为；返回 None 表示没有，
+    // 落到下面的通用回写路径。
+    let feature = crate::cli_registry::source_for(kind).api_profile();
+    if let Some(feature) = feature {
+        if let Some(synced) = feature.sync_active_from_live()? {
+            return Ok(synced);
         }
     }
 
@@ -1313,8 +926,8 @@ fn sync_active_profile_from_cli_for(kind: CliKind) -> AppResult<bool> {
     }
 
     let current_settings = read_settings_json_for(kind)?;
-    let allow_official_overwrite =
-        matches!(kind, CliKind::Codex) && active_name == CODEX_OFFICIAL_PROFILE_NAME;
+    let protected = feature.and_then(|f| f.protected_profile_name());
+    let allow_official_overwrite = protected == Some(active_name.as_str());
     save_profile_for_internal(
         kind,
         active_name,
@@ -1328,9 +941,10 @@ fn sync_active_profile_from_cli_for(kind: CliKind) -> AppResult<bool> {
 fn rename_profile_for(kind: CliKind, old_name: String, new_name: String, _scope: Option<&str>) -> AppResult<()> {
     let old_name = validate_profile_name(old_name)?;
     let new_name = validate_profile_name(new_name)?;
-    if matches!(kind, CliKind::Codex)
-        && (old_name == CODEX_OFFICIAL_PROFILE_NAME || new_name == CODEX_OFFICIAL_PROFILE_NAME)
-    {
+    let protected = crate::cli_registry::source_for(kind)
+        .api_profile()
+        .and_then(|f| f.protected_profile_name());
+    if protected == Some(old_name.as_str()) || protected == Some(new_name.as_str()) {
         return Err(AppError::coded("profile.builtin_cannot_rename"));
     }
     app_db::rename_profile(kind, &old_name, &new_name)
@@ -1471,70 +1085,22 @@ pub fn get_active_profile(cli_id: Option<String>, scope: Option<String>) -> AppR
 
 fn read_scope_settings_for(kind: CliKind, scope: Option<&str>) -> AppResult<String> {
     let scope_str = scope.unwrap_or("global");
-    if matches!(kind, CliKind::Codex) {
-        let path = settings_path_for(kind)?;
-        if !path.exists() {
-            return Ok(String::new());
-        }
-        return fs::read_to_string(&path)
-            .map(strip_bom)
-            .map_err(|e| AppError::coded("profile.settings_read_failed").with("detail", e.to_string()));
+    match crate::cli_registry::source_for(kind).api_profile() {
+        Some(feature) => feature.read_scope_settings(scope_str),
+        // 没有配置档能力的 CLI：整份设置读取里就会报不支持（与改动前一致）。
+        None => read_settings_json_for(kind),
     }
-
-    if scope_str == "global" || !matches!(kind, CliKind::Claude) {
-        return read_settings_json_for(kind);
-    }
-
-    let tabs = app_db::list_profile_tabs(kind.id())?;
-    let tab = tabs.iter().find(|t| t.id == scope_str);
-    if let Some(t) = tab {
-        for dir in &t.dirs {
-            let path = std::path::PathBuf::from(dir).join(".claude").join("settings.json");
-            if path.exists() {
-                if let Ok(content) = fs::read_to_string(&path).map(strip_bom) {
-                    return Ok(content);
-                }
-            }
-        }
-    }
-
-    Ok("{}".to_string())
 }
 
 fn write_scope_settings_for(kind: CliKind, scope: Option<&str>, content: String) -> AppResult<()> {
     let scope_str = scope.unwrap_or("global");
-    if matches!(kind, CliKind::Codex) {
-        content
-            .parse::<toml::Value>()
-            .map_err(|e| AppError::coded("profile.toml_invalid").with("detail", e.to_string()))?;
-        let path = settings_path_for(kind)?;
-        ensure_parent_dir(&path)?;
-        return write_atomically(&path, content.as_bytes());
+    match crate::cli_registry::source_for(kind).api_profile() {
+        Some(feature) => feature.write_scope_settings(scope_str, content),
+        // 没有配置档能力的 CLI：整份设置写入会**先校验内容、再报不支持**（与改动前一致）。
+        // 直接 `unsupported_kind_error` 会让「不支持的 CLI + 畸形 JSON」的错误码变掉 ——
+        // 那是前端可见的行为变更。
+        None => write_settings_json_for(kind, content),
     }
-
-    if scope_str == "global" || !matches!(kind, CliKind::Claude) {
-        return write_settings_json_for(kind, content);
-    }
-
-    let value: Value =
-        serde_json::from_str(&content).map_err(|e| AppError::coded("profile.content_parse_failed").with("detail", e.to_string()))?;
-
-    let tabs = app_db::list_profile_tabs(kind.id())?;
-    let tab = tabs.iter().find(|t| t.id == scope_str);
-    if let Some(t) = tab {
-        let mut failures = Vec::new();
-        for dir in &t.dirs {
-            let path = std::path::PathBuf::from(dir).join(".claude").join("settings.json");
-            if let Err(e) = write_json_file(&path, &value) {
-                failures.push((dir.clone(), error_reason(&e)));
-            }
-        }
-        if !failures.is_empty() {
-            return Err(partial_dir_save_failed(failures));
-        }
-    }
-
-    Ok(())
 }
 
 #[tauri::command]
@@ -1739,7 +1305,10 @@ pub fn match_profile_by_settings(
     settings_content: String,
 ) -> AppResult<Option<String>> {
     let kind = CliKind::from_id(cli_id.as_deref())?;
-    if !matches!(kind, CliKind::Claude) {
+    if !crate::cli_registry::source_for(kind)
+        .api_profile()
+        .is_some_and(|f| f.supports_project_scope())
+    {
         return Ok(None);
     }
     let settings: Value =
@@ -1758,7 +1327,10 @@ pub fn detect_scope_dirs_config(
     cli_id: Option<String>,
     dirs: Vec<String>,
 ) -> AppResult<Vec<DirConfigInfo>> {    let kind = CliKind::from_id(cli_id.as_deref())?;
-    if !matches!(kind, CliKind::Claude) {
+    if !crate::cli_registry::source_for(kind)
+        .api_profile()
+        .is_some_and(|f| f.supports_project_scope())
+    {
         return Ok(vec![]);
     }
     let conn = app_db::conn()?;
@@ -1806,7 +1378,10 @@ pub fn import_scope_dir_config(
     scope: String,
 ) -> AppResult<String> {
     let kind = CliKind::from_id(cli_id.as_deref())?;
-    if !matches!(kind, CliKind::Claude) {
+    if !crate::cli_registry::source_for(kind)
+        .api_profile()
+        .is_some_and(|f| f.supports_project_scope())
+    {
         return Err(AppError::coded("profile.import_claude_only"));
     }
     let settings = read_dir_effective_settings(&dir)
@@ -1861,7 +1436,10 @@ pub fn import_scope_dir_config(
 #[tauri::command]
 pub fn get_scope_dir_status(cli_id: Option<String>) -> AppResult<Vec<ScopeDirStatus>> {
     let kind = CliKind::from_id(cli_id.as_deref())?;
-    if !matches!(kind, CliKind::Claude) {
+    if !crate::cli_registry::source_for(kind)
+        .api_profile()
+        .is_some_and(|f| f.supports_project_scope())
+    {
         return Ok(vec![]);
     }
     let conn = app_db::conn()?;
@@ -1979,7 +1557,11 @@ pub fn sync_active_profile_from_cli(cli_id: Option<String>, scope: Option<String
     let kind = CliKind::from_id(cli_id.as_deref())?;
     let scope_str = scope.as_deref().unwrap_or("global");
 
-    if scope_str == "global" || !matches!(kind, CliKind::Claude) {
+    if scope_str == "global"
+        || !crate::cli_registry::source_for(kind)
+            .api_profile()
+            .is_some_and(|f| f.supports_project_scope())
+    {
         return sync_active_profile_from_cli_for(kind);
     }
 
@@ -2179,12 +1761,9 @@ pub fn list_bookmarks_with_context(cli_id: Option<String>) -> AppResult<Vec<Book
 
     let session_index = app_db::read_session_list_index(kind)?;
     let session_names = app_db::load_session_names()?;
-    // WorkBuddy 用户重命名在 workbuddy.db（sessions.custom_title），覆盖原生 AI 标题
-    let wb_titles = if kind == CliKind::WorkBuddy {
-        crate::parser::load_workbuddy_custom_titles()
-    } else {
-        std::collections::HashMap::new()
-    };
+    // 自定义标题的来源逐 CLI 不同：有的 CLI 把用户重命名存在自己的另一个库里，
+    // 与索引不同源。由源给出，命令层不再按 CLI 判断去哪儿读。
+    let wb_titles = crate::cli_registry::source_for(kind).custom_titles();
 
     let id_to_path: std::collections::HashMap<&str, &str> = session_index
         .iter()
@@ -2391,12 +1970,12 @@ pub fn import_profiles_backup(
             continue;
         }
 
-        let kind = match item.cli_id.as_str() {
-            "claude" => CliKind::Claude,
-            "codex" => CliKind::Codex,
-            "gemini" => CliKind::Gemini,
-            _ => continue,
+        let Ok(kind) = CliKind::from_id(Some(item.cli_id.as_str())) else {
+            continue;
         };
+        if settings_file_name(kind).is_none() {
+            continue;
+        }
 
         let target_name = if item.action == "rename" {
             item.new_name.clone().unwrap_or_else(|| item.name.clone())
@@ -2645,96 +2224,6 @@ mod tests {
             "auth_mode": "chatgpt",
             "access_token": "oauth-access"
         })));
-    }
-
-    #[test]
-    fn codex_build_toml_patch_injects_experimental_bearer_token_and_requires_auth() {
-        // 1. 新版标准结构：experimental_bearer_token 在 codex 节点下
-        let content = json!({
-            "codex": {
-                "model_provider": "deepseek",
-                "provider_name": "DeepSeek",
-                "base_url": "https://api.deepseek.com",
-                "model": "deepseek-chat",
-                "experimental_bearer_token": "sk-custom-secret"
-            }
-        });
-
-        let patch = build_codex_toml_patch(&content);
-        let patch_table = patch.as_table().expect("patch should be a toml table");
-        assert_eq!(
-            patch_table.get("model_provider").and_then(|v| v.as_str()),
-            Some("deepseek")
-        );
-        assert_eq!(
-            patch_table.get("model").and_then(|v| v.as_str()),
-            Some("deepseek-chat")
-        );
-
-        let provider_table = patch_table
-            .get("model_providers")
-            .and_then(|v| v.as_table())
-            .and_then(|v| v.get("deepseek"))
-            .and_then(|v| v.as_table())
-            .expect("should have [model_providers.deepseek] table");
-
-        assert_eq!(
-            provider_table.get("experimental_bearer_token").and_then(|v| v.as_str()),
-            Some("sk-custom-secret")
-        );
-        assert_eq!(
-            provider_table.get("requires_openai_auth").and_then(|v| v.as_bool()),
-            Some(true)
-        );
-
-        // 2. 兼容旧版结构：OPENAI_API_KEY 在 auth 节点下
-        let legacy_content = json!({
-            "auth": {
-                "OPENAI_API_KEY": "sk-legacy-secret"
-            },
-            "codex": {
-                "model_provider": "deepseek",
-                "provider_name": "DeepSeek",
-                "base_url": "https://api.deepseek.com",
-                "model": "deepseek-chat"
-            }
-        });
-        let legacy_patch = build_codex_toml_patch(&legacy_content);
-        let legacy_provider_table = legacy_patch
-            .get("model_providers")
-            .and_then(|v| v.get("deepseek"))
-            .expect("legacy patch should have [model_providers.deepseek]");
-        assert_eq!(
-            legacy_provider_table.get("experimental_bearer_token").and_then(|v| v.as_str()),
-            Some("sk-legacy-secret")
-        );
-    }
-
-    #[test]
-    fn codex_clear_managed_config_fields_removes_provider_table_and_bearer_token() {
-        let raw = r#"
-model_provider = "custom"
-model = "deepseek-chat"
-experimental_bearer_token = "stale-key"
-
-[model_providers.custom]
-name = "DeepSeek"
-base_url = "https://api.deepseek.com"
-experimental_bearer_token = "sk-custom-secret"
-requires_openai_auth = true
-
-[other_section]
-keep_me = true
-"#;
-        let mut config: toml::Value = raw.parse().unwrap();
-        clear_codex_managed_config_fields(&mut config);
-
-        let table = config.as_table().unwrap();
-        assert!(table.get("model").is_none());
-        assert!(table.get("model_provider").is_none());
-        assert!(table.get("experimental_bearer_token").is_none());
-        assert!(table.get("model_providers").is_none());
-        assert!(table.get("other_section").is_some());
     }
 
     #[test]

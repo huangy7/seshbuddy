@@ -1,12 +1,9 @@
 use crate::app_db;
 use crate::cli::{self, CliKind};
 use crate::error::{AppError, AppResult};
-use crate::history;
 use crate::parser;
-use crate::session as session_mod;
 use crate::session::{PaginatedProjects, ProjectInfo, ProjectSessionChunkItem, SessionInfo};
 use crate::streaming;
-use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -90,7 +87,11 @@ pub struct SearchIndexStatus {
     pub(crate) physical_index_ready: bool,
 }
 
-struct RawSession {
+/// 扫描阶段的中间产物：尚未投影为展示项的一条会话。
+///
+/// `pub(crate)` 而非私有：各 CLI 源的 `scan` 出口以它为返回类型，可见性至少要覆盖
+/// `cli_registry`；它仍是索引层的内部类型，字段不对外暴露，不随定位符一起挪走。
+pub(crate) struct RawSession {
     session: SessionInfo,
     /// 分组键；`None` = 会话解析不出项目路径（见 `ProjectInfo::encoded_dir`）。
     encoded_dir: Option<String>,
@@ -98,7 +99,7 @@ struct RawSession {
     original_path: Option<String>,
 }
 
-fn file_modified_ms(metadata: &fs::Metadata) -> i64 {
+pub(crate) fn file_modified_ms(metadata: &fs::Metadata) -> i64 {
     metadata
         .modified()
         .ok()
@@ -107,7 +108,7 @@ fn file_modified_ms(metadata: &fs::Metadata) -> i64 {
         .unwrap_or_default()
 }
 
-fn cached_session_list_metadata(
+pub(crate) fn cached_session_list_metadata(
     cached: &HashMap<String, app_db::SessionListIndexRecord>,
     file_path: &str,
     file_size: u64,
@@ -359,123 +360,64 @@ fn build_paginated_projects_from_sessions(
     }
 }
 
-fn load_claude_projects_snapshot(
-    custom_names: &HashMap<String, String>,
-    page: usize,
-    page_size: usize,
-) -> AppResult<Option<PaginatedProjects>> {
-    let Some((records, total_sessions, has_more)) =
-        load_session_list_index_page(CliKind::Claude, page, page_size)?
-    else {
-        return Ok(None);
-    };
-
-    let history_path = cli::history_path(CliKind::Claude)?;
-    let (session_map, project_map) = history::parse_history(history_path.to_str().unwrap_or(""));
-    let mut selected_sessions = Vec::with_capacity(records.len());
-
-    for record in records {
-        let file_path = record.session_path;
-        if parser::is_subagent_session(&file_path) {
-            continue;
-        }
-        let encoded_dir = Path::new(&file_path)
-            .parent()
-            .and_then(|parent| parent.file_name())
-            .and_then(|name| name.to_str())
-            .filter(|value| !value.is_empty())
-            .unwrap_or("unknown")
-            .to_string();
-        let original_path = session_mod::resolve_project_path(
-            &encoded_dir,
-            record.project_path.as_deref(),
-            Some(&project_map),
-        );
-        let session_id = record.session_id;
-        let display_name = crate::title_resolver::resolve_display_name(
-            super::session::custom_session_name(custom_names, CliKind::Claude, &file_path),
-            record.title.as_deref(),
-            record.first_user_message.as_deref(),
-            session_map
-                .get(&session_id)
-                .map(|h| h.display.as_str())
-                .filter(|d| !d.is_empty()),
-            &session_id,
-        );
-        let timestamp = record
-            .last_timestamp
-            .or(record.first_timestamp)
-            .unwrap_or_default();
-
-        selected_sessions.push(RawSession {
-            session: SessionInfo {
-                session_id,
-                file_path,
-                display_name,
-                timestamp,
-                file_size: record.file_size,
-                git_branch: record.git_branch,
-                has_archive_snapshot: record.has_archive_snapshot,
-                is_archived: record.is_archived,
-                cli_id: CliKind::Claude.id().to_string(),
-            },
-            encoded_dir: Some(encoded_dir),
-            original_path,
-        });
-    }
-
-    Ok(Some(build_paginated_projects_from_sessions(
-        selected_sessions,
-        total_sessions,
-        has_more,
-    )))
+/// 一条索引记录投影成列表项所需的 CLI 专属字段。
+///
+/// 六种 CLI 的列表装配只在「逐记录投影」上分叉：循环骨架、分页、分组与展示名解析链
+/// 完全一致。把分叉点收进这个结构，投影由各源自己给出，公共骨架因此只写一次 ——
+/// 新增一个 CLI 不必再往扫描/快照层补一份近似的循环。
+pub(crate) struct SnapshotProjection {
+    /// 分组键；`None` = 会话解析不出项目路径（见 `ProjectInfo::encoded_dir`）。
+    pub(crate) encoded_dir: Option<String>,
+    /// 项目路径；`None` 的语义与 `ProjectInfo::original_path` 相同。
+    pub(crate) original_path: Option<String>,
+    /// `resolve_display_name` 的原生标题实参。索引外还有标题来源的 CLI 在这里补上，
+    /// 其余 CLI 直接透传索引里的 `title`。
+    pub(crate) title: Option<String>,
+    /// `resolve_display_name` 的 history 兜底实参；没有 history 来源的 CLI 给 `None`。
+    pub(crate) history_display: Option<String>,
+    /// 会话所在分支；索引不记录分支的 CLI 给空串。
+    pub(crate) git_branch: String,
 }
 
-fn load_codex_projects_snapshot(
+/// 装配分页项目快照的公共骨架。
+///
+/// `setup` 在确认本页确有记录之后才执行：索引为空时直接返回 `Ok(None)`，不做任何
+/// CLI 专属准备（例如解析 history 文件）—— 与逐条 CLI 早退的次序一致，避免
+/// 「空索引 + 准备步骤报错」从 `Ok(None)` 变成 `Err`。
+/// `project` 携带该 CLI 的逐记录差异；由 `setup` 返回，好让准备步骤里读出的映射
+/// 被闭包按值捕获。
+pub(crate) fn build_projects_snapshot<S, F>(
+    kind: CliKind,
     custom_names: &HashMap<String, String>,
     page: usize,
     page_size: usize,
-) -> AppResult<Option<PaginatedProjects>> {
+    setup: S,
+) -> AppResult<Option<PaginatedProjects>>
+where
+    S: FnOnce() -> AppResult<F>,
+    F: Fn(&app_db::SessionListIndexRecord) -> SnapshotProjection,
+{
     let Some((records, total_sessions, has_more)) =
-        load_session_list_index_page(CliKind::Codex, page, page_size)?
+        load_session_list_index_page(kind, page, page_size)?
     else {
         return Ok(None);
     };
 
-    let history_path = cli::history_path(CliKind::Codex)?;
-    let session_map = history::parse_codex_history(history_path.to_str().unwrap_or(""));
-    // 单次读取 Codex 索引 thread_name Map（规范 §3.1），整页查询 O(1) 命中
-    let codex_titles = parser::load_codex_index_titles();
+    let project = setup()?;
     let mut selected_sessions = Vec::with_capacity(records.len());
 
     for record in records {
-        let file_path = record.session_path;
-        if parser::is_subagent_session(&file_path) {
+        if parser::is_subagent_session(&record.session_path) {
             continue;
         }
+        let projection = project(&record);
+        let file_path = record.session_path;
         let session_id = record.session_id;
-        // 快照与实时扫描必须给出同一个分组键：索引里没有项目路径时两边都是 `None`。
-        let original_path = record
-            .project_path
-            .filter(|path| !path.trim().is_empty());
-        let encoded_dir = original_path.clone();
-        let stem = Path::new(&file_path)
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("");
-        let title = record
-            .title
-            .as_deref()
-            .or_else(|| codex_titles.get(stem).map(String::as_str))
-            .or_else(|| codex_titles.get(&session_id).map(String::as_str));
         let display_name = crate::title_resolver::resolve_display_name(
-            super::session::custom_session_name(custom_names, CliKind::Codex, &file_path),
-            title,
+            super::session::custom_session_name(custom_names, kind, &file_path),
+            projection.title.as_deref(),
             record.first_user_message.as_deref(),
-            session_map
-                .get(&session_id)
-                .map(|h| h.display.as_str())
-                .filter(|d| !d.is_empty()),
+            projection.history_display.as_deref(),
             &session_id,
         );
         let timestamp = record
@@ -490,257 +432,13 @@ fn load_codex_projects_snapshot(
                 display_name,
                 timestamp,
                 file_size: record.file_size,
-                git_branch: record.git_branch,
+                git_branch: projection.git_branch,
                 has_archive_snapshot: record.has_archive_snapshot,
                 is_archived: record.is_archived,
-                cli_id: CliKind::Codex.id().to_string(),
+                cli_id: kind.id().to_string(),
             },
-            encoded_dir,
-            original_path,
-        });
-    }
-
-    Ok(Some(build_paginated_projects_from_sessions(
-        selected_sessions,
-        total_sessions,
-        has_more,
-    )))
-}
-
-fn load_gemini_projects_snapshot(
-    custom_names: &HashMap<String, String>,
-    page: usize,
-    page_size: usize,
-) -> AppResult<Option<PaginatedProjects>> {
-    let Some((records, total_sessions, has_more)) =
-        load_session_list_index_page(CliKind::Gemini, page, page_size)?
-    else {
-        return Ok(None);
-    };
-
-    let mut selected_sessions = Vec::with_capacity(records.len());
-
-    for record in records {
-        let file_path = record.session_path;
-        if parser::is_subagent_session(&file_path) {
-            continue;
-        }
-        let session_id = record.session_id;
-        let original_path = record
-            .project_path
-            .filter(|path| !path.trim().is_empty())
-            .unwrap_or_else(|| session_id.clone());
-        let encoded_dir = original_path.clone();
-        let display_name = crate::title_resolver::resolve_display_name(
-            super::session::custom_session_name(custom_names, CliKind::Gemini, &file_path),
-            record.title.as_deref(),
-            record.first_user_message.as_deref(),
-            None,
-            &session_id,
-        );
-        let timestamp = record
-            .last_timestamp
-            .or(record.first_timestamp)
-            .unwrap_or_default();
-
-        selected_sessions.push(RawSession {
-            session: SessionInfo {
-                session_id,
-                file_path,
-                display_name,
-                timestamp,
-                file_size: record.file_size,
-                git_branch: record.git_branch,
-                has_archive_snapshot: record.has_archive_snapshot,
-                is_archived: record.is_archived,
-                cli_id: CliKind::Gemini.id().to_string(),
-            },
-            encoded_dir: Some(encoded_dir),
-            original_path: Some(original_path),
-        });
-    }
-
-    Ok(Some(build_paginated_projects_from_sessions(
-        selected_sessions,
-        total_sessions,
-        has_more,
-    )))
-}
-
-fn load_workbuddy_projects_snapshot(
-    custom_names: &HashMap<String, String>,
-    page: usize,
-    page_size: usize,
-) -> AppResult<Option<PaginatedProjects>> {
-    let Some((records, total_sessions, has_more)) =
-        load_session_list_index_page(CliKind::WorkBuddy, page, page_size)?
-    else {
-        return Ok(None);
-    };
-
-    // 单次读取 WorkBuddy 用户重命名 Map（workbuddy.db 的 sessions.custom_title），整页 O(1) 命中
-    let wb_titles = parser::load_workbuddy_custom_titles();
-    let mut selected_sessions = Vec::with_capacity(records.len());
-
-    for record in records {
-        let file_path = record.session_path;
-        if parser::is_subagent_session(&file_path) {
-            continue;
-        }
-        let session_id = record.session_id;
-        let original_path = record
-            .project_path
-            .filter(|path| !path.trim().is_empty())
-            .unwrap_or_else(|| session_id.clone());
-        let encoded_dir = original_path.clone();
-        let display_name = crate::title_resolver::resolve_display_name(
-            super::session::custom_session_name(custom_names, CliKind::WorkBuddy, &file_path),
-            wb_titles
-                .get(&session_id)
-                .map(String::as_str)
-                .or(record.title.as_deref()),
-            record.first_user_message.as_deref(),
-            None,
-            &session_id,
-        );
-        let timestamp = record
-            .last_timestamp
-            .or(record.first_timestamp)
-            .unwrap_or_default();
-
-        selected_sessions.push(RawSession {
-            session: SessionInfo {
-                session_id,
-                file_path,
-                display_name,
-                timestamp,
-                file_size: record.file_size,
-                git_branch: record.git_branch,
-                has_archive_snapshot: record.has_archive_snapshot,
-                is_archived: record.is_archived,
-                cli_id: CliKind::WorkBuddy.id().to_string(),
-            },
-            encoded_dir: Some(encoded_dir),
-            original_path: Some(original_path),
-        });
-    }
-
-    Ok(Some(build_paginated_projects_from_sessions(
-        selected_sessions,
-        total_sessions,
-        has_more,
-    )))
-}
-
-fn load_dsh_projects_snapshot(
-    custom_names: &HashMap<String, String>,
-    page: usize,
-    page_size: usize,
-) -> AppResult<Option<PaginatedProjects>> {
-    let Some((records, total_sessions, has_more)) =
-        load_session_list_index_page(CliKind::Dsh, page, page_size)?
-    else {
-        return Ok(None);
-    };
-
-    let mut selected_sessions = Vec::with_capacity(records.len());
-
-    for record in records {
-        let file_path = record.session_path;
-        if parser::is_subagent_session(&file_path) {
-            continue;
-        }
-        let session_id = record.session_id;
-        let original_path = record
-            .project_path
-            .filter(|path| !path.trim().is_empty())
-            .unwrap_or_else(|| session_id.clone());
-        let encoded_dir = original_path.clone();
-        let display_name = crate::title_resolver::resolve_display_name(
-            super::session::custom_session_name(custom_names, CliKind::Dsh, &file_path),
-            record.title.as_deref(),
-            record.first_user_message.as_deref(),
-            None,
-            &session_id,
-        );
-        let timestamp = record
-            .last_timestamp
-            .or(record.first_timestamp)
-            .unwrap_or_default();
-
-        selected_sessions.push(RawSession {
-            session: SessionInfo {
-                session_id,
-                file_path,
-                display_name,
-                timestamp,
-                file_size: record.file_size,
-                git_branch: String::new(),
-                has_archive_snapshot: record.has_archive_snapshot,
-                is_archived: record.is_archived,
-                cli_id: CliKind::Dsh.id().to_string(),
-            },
-            encoded_dir: Some(encoded_dir),
-            original_path: Some(original_path),
-        });
-    }
-
-    Ok(Some(build_paginated_projects_from_sessions(
-        selected_sessions,
-        total_sessions,
-        has_more,
-    )))
-}
-
-fn load_antigravity_projects_snapshot(
-    custom_names: &HashMap<String, String>,
-    page: usize,
-    page_size: usize,
-) -> AppResult<Option<PaginatedProjects>> {
-    let Some((records, total_sessions, has_more)) =
-        load_session_list_index_page(CliKind::Antigravity, page, page_size)?
-    else {
-        return Ok(None);
-    };
-
-    let mut selected_sessions = Vec::with_capacity(records.len());
-
-    for record in records {
-        let file_path = record.session_path;
-        if parser::is_subagent_session(&file_path) {
-            continue;
-        }
-        let session_id = record.session_id;
-        let original_path = record
-            .project_path
-            .filter(|path| !path.trim().is_empty());
-        let encoded_dir = original_path.clone();
-        let display_name = crate::title_resolver::resolve_display_name(
-            super::session::custom_session_name(custom_names, CliKind::Antigravity, &file_path),
-            record.title.as_deref(),
-            record.first_user_message.as_deref(),
-            None,
-            &session_id,
-        );
-        let timestamp = record
-            .last_timestamp
-            .or(record.first_timestamp)
-            .unwrap_or_default();
-
-        selected_sessions.push(RawSession {
-            session: SessionInfo {
-                session_id,
-                file_path,
-                display_name,
-                timestamp,
-                file_size: record.file_size,
-                git_branch: String::new(),
-                has_archive_snapshot: record.has_archive_snapshot,
-                is_archived: record.is_archived,
-                cli_id: CliKind::Antigravity.id().to_string(),
-            },
-            encoded_dir,
-            original_path,
+            encoded_dir: projection.encoded_dir,
+            original_path: projection.original_path,
         });
     }
 
@@ -777,14 +475,11 @@ fn collect_missing_search_paths(
         .filter(|(path, record)| {
             // 双轨墓碑拦截：已删除会话不进入全文搜索待索引列表
             let session_id = if !record.session_id.is_empty() {
-                record.session_id.as_str()
-            } else if kind == CliKind::Antigravity {
-                ""
+                record.session_id.clone()
             } else {
-                Path::new(path)
-                    .file_stem()
-                    .and_then(|s| s.to_str())
-                    .unwrap_or("")
+                crate::cli_registry::source_for(kind)
+                    .path_only_session_id(path)
+                    .unwrap_or_default()
             };
             let safe_session_id = if session_id == "transcript"
                 || session_id == "session"
@@ -792,7 +487,7 @@ fn collect_missing_search_paths(
             {
                 ""
             } else {
-                session_id
+                session_id.as_str()
             };
             if tombstone_filter.is_tombstoned(safe_session_id, path) {
                 return false;
@@ -853,39 +548,6 @@ pub(crate) fn resolve_search_index_status(kind: CliKind) -> AppResult<SearchInde
     })
 }
 
-fn resolve_session_index_payload(
-    session_path: &Path,
-    file_path: &str,
-    file_metadata: &fs::Metadata,
-    cached_list: &HashMap<String, app_db::SessionListIndexRecord>,
-    list_updates: &mut Vec<app_db::SessionListIndexRecord>,
-    invalid_paths: &mut HashSet<String>,
-) -> Option<parser::SessionListMetadata> {
-    let file_size = file_metadata.len();
-    let modified_ms = file_modified_ms(file_metadata);
-    let cached_list_metadata =
-        cached_session_list_metadata(cached_list, file_path, file_size, modified_ms);
-
-    if let Some(metadata) = cached_list_metadata {
-        return Some(metadata);
-    }
-
-    match parser::scan_session_metadata_only(session_path) {
-        Some(metadata) => {
-            list_updates.push(build_session_list_index_record(
-                file_path,
-                modified_ms,
-                &metadata,
-            ));
-            Some(metadata)
-        }
-        None => {
-            invalid_paths.insert(file_path.to_string());
-            None
-        }
-    }
-}
-
 /// 已知行中落在「本轮没能读取」的子树前缀下时，不该按"没扫到"推断删除：读不到 ≠ 里面没有。
 fn is_under_unverified_prefix(path: &str, prefixes: &[PathBuf]) -> bool {
     prefixes
@@ -893,35 +555,11 @@ fn is_under_unverified_prefix(path: &str, prefixes: &[PathBuf]) -> bool {
         .any(|prefix| Path::new(path).starts_with(prefix))
 }
 
-/// 读取会话子目录；失败时把该目录记为「本轮未验证」并跳过，而不是当成"里面什么都没有"。
-///
-/// 读不到和空目录对陈旧行判定意味着完全相反的事：空目录说明会话确实没了、该清理；读不到
-/// 只是这一轮看不见，按"已删除"推断会把该子树下的记录整批清掉（权限变化、外置盘未挂载、
-/// I/O 压力都会命中）。根目录读取失败仍然中止整轮扫描（数据源整体不可用），子目录级失败
-/// 只跳过该子树，其余项目照常更新。
-fn read_dir_or_record_unverified(
-    dir: &Path,
-    unverified: &mut Vec<PathBuf>,
-) -> Option<fs::ReadDir> {
-    match fs::read_dir(dir) {
-        Ok(entries) => Some(entries),
-        Err(err) => {
-            tracing::warn!(
-                "会话子目录读取失败，本轮跳过该子树（其下已有记录保留、不按已删除处理）: dir={:?}, err={}",
-                dir,
-                err
-            );
-            unverified.push(dir.to_path_buf());
-            None
-        }
-    }
-}
-
 /// 小集合不做存活比例保护：删几条会话是日常操作，加守卫只会让正常清理失效。
 const MASS_DELETION_GUARD_MIN_KNOWN: usize = 10;
 
 /// Antigravity 会话正本的固定文件名。
-const ANTIGRAVITY_TRANSCRIPT_FILE_NAME: &str = "transcript.jsonl";
+pub(crate) const ANTIGRAVITY_TRANSCRIPT_FILE_NAME: &str = "transcript.jsonl";
 
 /// 找出「日志目录里有 jsonl、却没有会话正本名」的目录，返回 (目录, 实际文件名)。
 ///
@@ -930,7 +568,9 @@ const ANTIGRAVITY_TRANSCRIPT_FILE_NAME: &str = "transcript.jsonl";
 /// **无法从内容判断谁才是会话正本**。因此不能把匹配放宽成"目录下任意 jsonl" —— 那会把每个
 /// 会话重复索引一遍。既然猜不出正本，就把它变成显式信号：上游一旦改命名，这里当天就会告警，
 /// 而不是表现为"会话静默从列表里消失"（这正是 dsh 换代时踩过的坑）。
-fn antigravity_transcript_naming_drift(jsonl_files: &[PathBuf]) -> Vec<(PathBuf, Vec<String>)> {
+pub(crate) fn antigravity_transcript_naming_drift(
+    jsonl_files: &[PathBuf],
+) -> Vec<(PathBuf, Vec<String>)> {
     let mut by_dir: HashMap<&Path, Vec<String>> = HashMap::new();
     for path in jsonl_files {
         let (Some(parent), Some(name)) = (
@@ -1522,7 +1162,7 @@ where
             }
             parsed
         }
-        None => CliKind::all().to_vec(),
+        None => crate::cli::CliKind::ALL.to_vec(),
     };
 
     let front = front_cli_id
@@ -1646,3 +1286,6 @@ mod tests;
 
 mod scan;
 pub(crate) use scan::*;
+
+mod scan_accumulator;
+pub(crate) use scan_accumulator::*;

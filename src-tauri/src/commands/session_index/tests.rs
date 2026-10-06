@@ -1,4 +1,7 @@
     use super::*;
+    use crate::session as session_mod;
+    use crate::session::SessionListMetadata;
+    use serde_json::Value;
 
     #[test]
     fn requested_kinds_resolves_supplied_subset_and_deduplicates_ids() {
@@ -148,6 +151,16 @@
     fn clear_codex_index_rows() {
         if let Ok(conn) = app_db::conn() {
             let _ = app_db::clear_session_index_inner(&conn, "codex");
+        }
+    }
+
+    /// Claude 的项目路径展示回归与 DSH / Codex 同理：共享真实 app DB 的 Claude 索引行，
+    /// 串行化避免 flaky。
+    static CLAUDE_SCAN_TEST_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+
+    fn clear_claude_index_rows() {
+        if let Ok(conn) = app_db::conn() {
+            let _ = app_db::clear_session_index_inner(&conn, "claude");
         }
     }
 
@@ -998,8 +1011,10 @@
         .unwrap();
 
         let scan_result = scan_projects_inner_for_cli(CliKind::Dsh, None, None, true).unwrap();
-        let snapshot_result =
-            load_dsh_projects_snapshot(&HashMap::new(), 0, 100).unwrap().expect("索引应有该行");
+        let snapshot_result = crate::cli_registry::source_for(CliKind::Dsh)
+            .snapshot(&HashMap::new(), 0, 100)
+            .unwrap()
+            .expect("索引应有该行");
 
         match prev_override {
             Some(path) => cli::set_cli_data_dir_override(CliKind::Dsh, Some(path)).unwrap(),
@@ -1039,8 +1054,8 @@
         let _guard = CODEX_SCAN_TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         clear_codex_index_rows();
         let root = tempfile::tempdir().unwrap();
-        // 路径里必须带 `/.codex/`：`parser::detect_kind` 按路径分段认 CLI，认不出来会按
-        // Claude 解析（夹具因此静默变空，用例退化成恒真）。
+        // 路径里必须带 `/.codex/`：`cli_registry::kind_for_path` 按数据目录标记认 CLI，
+        // 认不出来会落到兜底的 Claude 解析（夹具因此静默变空，用例退化成恒真）。
         let data_dir = root.path().join(".codex");
         let sessions_dir = data_dir.join("sessions");
         fs::create_dir_all(&sessions_dir).unwrap();
@@ -1114,7 +1129,8 @@
             "空白 cwd 不是路径：必须落 NULL，不能落空串（空串是第三种缺席表达）"
         );
 
-        let snapshot_result = load_codex_projects_snapshot(&HashMap::new(), 0, 100)
+        let snapshot_result = crate::cli_registry::source_for(CliKind::Codex)
+            .snapshot(&HashMap::new(), 0, 100)
             .unwrap()
             .expect("索引应有该行");
 
@@ -1161,7 +1177,7 @@
 
     /// 真实 `~/.dsh/sessions` 冒烟：扫描不 panic、项目路径正确、可见会话数与磁盘一致。
     /// `--Users-...--` key 目录解码（去前后缀双斜杠）后的路径应能在结果 original_path 命中。
-    /// 计数口径（与 scan_dsh_projects 同步）：header 可解析 && origin != "subagent"（子会话
+    /// 计数口径（与 DshSource::scan 同步）：header 可解析 && origin != "subagent"（子会话
     /// 不进侧边栏）&& 含 surface 消息（空会话过滤）。计数断言防止"静默丢会话测试全绿"。
     #[test]
     fn dsh_scan_smokes_against_real_sessions_dir() {
@@ -1355,4 +1371,141 @@
         // 2. 备份中修改时间较新（200 > 100）优先
         assert_eq!(candidates[1].file_path, std::path::PathBuf::from("/backup/c.jsonl"));
         assert_eq!(candidates[2].file_path, std::path::PathBuf::from("/backup/b.jsonl"));
+    }
+
+    /// 累加器契约测试共享真实 app DB 的 Gemini 索引行，串行化避免 flaky。
+    static ACCUMULATOR_TEST_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+
+    fn clear_gemini_index_rows() {
+        if let Ok(conn) = app_db::conn() {
+            let _ = app_db::clear_session_index_inner(&conn, "gemini");
+        }
+    }
+
+    /// `upsert_session_list_index` 刻意不写归档列（`has_archive_snapshot` 由 `archived_at`
+    /// 派生，只归归档流程维护），因此测试要构造「库中已有归档行」，只能自己落 `archived_at`。
+    fn mark_gemini_row_archived(key: &str) {
+        if let Ok(conn) = app_db::conn() {
+            let _ = conn.execute(
+                "UPDATE session_list_index SET archived_at = ?1 \
+                 WHERE cli_id = ?2 AND session_path = ?3",
+                rusqlite::params!["2024-01-01T00:00:00Z", "gemini", key],
+            );
+        }
+    }
+
+    /// `force` 只清空**复用视图**，不清空**已知视图**。可观测的后果是展示状态的回落：
+    /// 非 force 时从库中已有行取归档标记，force 时该行不再被复用，标记因此不回落。
+    /// 两个视图合成一份的后果是双向的 —— 合成「恒复用」会让强制刷新拿不到新状态，
+    /// 合成「恒不复用」会让归档标记在每次刷新后丢失。
+    #[test]
+    fn accumulator_force_stops_reusing_archived_state() {
+        let _guard = ACCUMULATOR_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        clear_gemini_index_rows();
+        let key = "/tmp/seshbuddy-accumulator-contract/session.jsonl";
+        let record = list_record(key, 0);
+        app_db::upsert_session_list_index(CliKind::Gemini, &[record]).unwrap();
+        mark_gemini_row_archived(key);
+        let names = HashMap::new();
+
+        let metadata = SessionListMetadata {
+            session_id: key.to_string(),
+            project_path: None,
+            title: None,
+            first_user_message: None,
+            first_timestamp: None,
+            last_timestamp: None,
+            git_branch: String::new(),
+            file_size: 1,
+        };
+        let projection = || ScanProjection {
+            project_path: None,
+            encoded_dir: None,
+            original_path: None,
+            title: None,
+            history_display: None,
+            git_branch: String::new(),
+        };
+
+        let mut cached = ScanAccumulator::new(CliKind::Gemini, &names, false).unwrap();
+        cached.push_session(key, metadata.clone(), projection());
+        let reused = cached.finish(&[]).unwrap();
+        assert_eq!(reused.len(), 1);
+        assert!(
+            reused[0].session.has_archive_snapshot,
+            "非 force：应从库中已有行回落归档状态"
+        );
+
+        let mut forced = ScanAccumulator::new(CliKind::Gemini, &names, true).unwrap();
+        forced.push_session(key, metadata, projection());
+        let forced_sessions = forced.finish(&[]).unwrap();
+        assert_eq!(forced_sessions.len(), 1);
+        assert!(
+            !forced_sessions[0].session.has_archive_snapshot,
+            "force：不复用库中行，归档状态不回落"
+        );
+
+        clear_gemini_index_rows();
+    }
+
+    /// 展示路径必须取**纠正后**的项目路径。会话文件里的 cwd 与 history 映射指向同一个
+    /// 编码目录、但字符串不同（下划线 vs 连字符）：纠正值来自 history 映射，展示路径也应
+    /// 是它。若误用纠正前的元数据原值，实时扫描会显示 cwd 而快照（读索引）显示映射值，
+    /// 同一会话出现两个路径。这是六个源里唯一「投影 project_path 与元数据原值不同」的分叉点。
+    #[test]
+    fn claude_scan_original_path_takes_corrected_project_path() {
+        let _guard = CLAUDE_SCAN_TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        clear_claude_index_rows();
+        let root = tempfile::tempdir().unwrap();
+        let data_dir = root.path().join(".claude");
+        let session_dir = data_dir.join("projects").join("-Users-x-my-proj");
+        fs::create_dir_all(&session_dir).unwrap();
+        // cwd 用下划线、history project 用连字符：两者编码到同一个目录名。
+        fs::write(
+            session_dir.join("s1.jsonl"),
+            concat!(
+                "{\"type\":\"user\",\"cwd\":\"/Users/x/my_proj\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}]}}\n",
+            ),
+        )
+        .unwrap();
+        fs::write(
+            data_dir.join("history.jsonl"),
+            concat!("{\"sessionId\":\"s1\",\"display\":\"d\",\"project\":\"/Users/x/my-proj\"}\n"),
+        )
+        .unwrap();
+
+        let prev_override = app_db::read_cli_path_overrides()
+            .ok()
+            .and_then(|overrides| overrides.get("claude").cloned());
+        cli::set_cli_data_dir_override(
+            CliKind::Claude,
+            Some(data_dir.to_str().unwrap().to_string()),
+        )
+        .unwrap();
+
+        let scan_result = scan_projects_inner_for_cli(CliKind::Claude, None, None, true).unwrap();
+        let snapshot_result = crate::cli_registry::source_for(CliKind::Claude)
+            .snapshot(&HashMap::new(), 0, 100)
+            .unwrap()
+            .expect("索引应有该行");
+
+        match prev_override {
+            Some(path) => cli::set_cli_data_dir_override(CliKind::Claude, Some(path)).unwrap(),
+            None => cli::set_cli_data_dir_override(CliKind::Claude, None).unwrap(),
+        }
+        clear_claude_index_rows();
+
+        assert_eq!(scan_result.projects.len(), 1);
+        assert_eq!(
+            scan_result.projects[0].original_path.as_deref(),
+            Some("/Users/x/my-proj"),
+            "展示路径必须取 history 映射纠正后的值，而不是会话文件里的 cwd"
+        );
+        assert_eq!(
+            snapshot_result.projects[0].original_path.as_deref(),
+            Some("/Users/x/my-proj"),
+            "快照（读索引）必须与实时扫描显示同一路径"
+        );
     }

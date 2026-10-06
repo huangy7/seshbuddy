@@ -72,7 +72,8 @@
     "batch_delete_failed": "Batch delete failed: {detail}",
     "open_failed": "Failed to open the path: {detail}",
     "reveal_failed": "Failed to show the item in the file manager: {detail}",
-    "trash_failed": "Failed to move to the trash: {detail}"
+    "trash_failed": "Failed to move to the trash: {detail}",
+    "delete_unsupported": "{cli} sessions cannot be deleted from SeshBuddy yet."
   },
   "proxy": {
     "traffic_db_missing": "Traffic database does not exist",
@@ -169,7 +170,8 @@
     "script_path_not_utf8": "The temporary script path contains non-UTF-8 characters",
     "unsupported_platform": "Unsupported platform",
     "temp_script_create_failed": "Cannot create the temporary script: {detail}",
-    "not_found": "The {cli} CLI was not detected"
+    "not_found": "The {cli} CLI was not detected",
+    "no_sessions_dir": "The {kind} CLI has no sessions directory"
   },
   "context_menu": {
     "register_permission_denied": "Registration failed: permission denied. {detail}",

@@ -160,21 +160,8 @@ pub(crate) fn tombstone_session_id(
     session_path: &str,
     db_session_id: Option<&str>,
 ) -> String {
-    let fallback_id = {
-        let p = std::path::Path::new(session_path);
-        let file_name = p.file_name().and_then(|s| s.to_str()).unwrap_or("");
-        if kind == CliKind::Antigravity {
-            crate::parser::antigravity::extract_conversation_id(p).unwrap_or_default()
-        } else if file_name.starts_with("session.jsonl") {
-            p.parent()
-                .and_then(|parent| parent.file_name())
-                .and_then(|s| s.to_str())
-                .unwrap_or("")
-                .to_string()
-        } else {
-            p.file_stem().and_then(|s| s.to_str()).unwrap_or("").to_string()
-        }
-    };
+    let fallback_id = crate::cli_registry::source_for(kind)
+        .tombstone_fallback_id(std::path::Path::new(session_path));
     let session_id = db_session_id
         .filter(|s| !s.trim().is_empty())
         .unwrap_or(&fallback_id);
@@ -197,6 +184,10 @@ pub(crate) const TOMBSTONE_RETENTION_DAYS: i64 = 30;
 ///
 /// 判定必须落在墓碑记录的那个路径上：只有用户真的把文件放回原处才满足，
 /// 会话在别处留有副本不会误触发 —— 这正是双轨墓碑要防的复活场景。
+///
+/// 「文件是否回来」经会话存在性入口判定而非直接 `Path::exists()`：墓碑同样覆盖库型会话，
+/// 其身份是 `cli://…` 而非文件路径，对它们做文件系统判定会恒为「不存在」，
+/// 于是放回的会话永远清不掉自己的墓碑。
 pub(crate) fn purge_restored_tombstones_inner(conn: &Connection) -> AppResult<usize> {
     let rows: Vec<(String, String, String)> = {
         let mut stmt = conn.prepare(
@@ -211,7 +202,7 @@ pub(crate) fn purge_restored_tombstones_inner(conn: &Connection) -> AppResult<us
 
     let restored: Vec<(String, String)> = rows
         .iter()
-        .filter(|(_, _, file_path)| std::path::Path::new(file_path).exists())
+        .filter(|(cli_id, _, file_path)| super::session_exists(cli_id, file_path))
         .map(|(cli_id, session_id, _)| (cli_id.clone(), session_id.clone()))
         .collect();
     if restored.is_empty() {

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { rustEnumVariants, tsUnionMembers } from "./enumParity";
+import { rustCliIds, rustEnumVariants, tsConstArrayMembers, tsUnionMembers } from "./enumParity";
 
 // 不写成 `new URL("../../…", import.meta.url)`：那个字面形状是 Vite 的资源引用语法，
 // 会被改写成非 file: 的模块 URL，fileURLToPath 直接抛「The URL must be of scheme file」。
@@ -56,6 +56,30 @@ describe("Rust↔TS 镜像枚举的 parity", () => {
     expect(tsUnionMembers('export type T =\n  | { kind: "a" }\n  | { kind: "b"; n: number };', "T"))
       .toEqual(["a", "b"]);
     expect(tsUnionMembers("没有联合的文本", "T")).toEqual([]);
+
+    // `CliKind::id()` 的字面量：抽的是 `=> "…"` 的取值，不是变体名
+    expect(rustCliIds('pub fn id(self) -> &\'static str {\n    match self {\n        Self::WorkBuddy => "workbuddy",\n    }\n}'))
+      .toEqual(["workbuddy"]);
+    expect(rustCliIds("没有 id 函数的文本")).toEqual([]);
+
+    // 收窄派生的清单（`as const` 数组）—— `tsUnionMembers` 抽不到这种形态
+    expect(tsConstArrayMembers('export const IDS = ["a", "b"] as const;', "IDS")).toEqual(["a", "b"]);
+    expect(tsConstArrayMembers("没有该常量的文本", "IDS")).toEqual([]);
+  });
+
+  /**
+   * `CliKind` ↔ `CLI_IDS`：前端唯一的手写清单与 Rust 的线上 id 必须一致。
+   *
+   * 判据取自 `CliKind::id()` 而**非**枚举变体名 —— 变体名与线上 id 不是同一条映射
+   * （`WorkBuddy` 的 id 是 `workbuddy`），按变体名折算会在两边都「看起来对」时静默判错。
+   */
+  it("CliKind 的 id 串与前端 CLI_IDS 相同", () => {
+    const rust = rustCliIds(read("src-tauri", "src", "cli.rs"));
+    const ts = tsConstArrayMembers(read("src", "types", "cli.ts"), "CLI_IDS");
+
+    expect(rust, "cli.rs 里没抽到 CliKind::id() 的任何 id").not.toEqual([]);
+    expect(ts, "cli.ts 里没抽到 CLI_IDS 的任何成员").not.toEqual([]);
+    expect(ts, "Rust 加了 CLI 而前端 CLI_IDS 没跟上：该 CLI 的会话在前端整体不可见").toEqual(rust);
   });
 
   for (const mirror of MIRRORS) {

@@ -131,7 +131,10 @@ fn register_macos(skip_permissions: bool, terminal_app: Option<&str>) -> AppResu
     // Determine preferred terminal: 用户设置优先，未安装/未设置时回退自动探测
     let terminal_app = crate::terminal::macos_app_name(terminal_app);
 
-    // Build claude command based on skip_permissions setting
+    // 右键菜单动作属于「用 Claude 在此目录新建会话」这一条功能，不是逐 CLI 分派：
+    // 菜单本身按 CLI 划分，新 CLI 本就不该出现在这里。故此处硬编码 "claude" 是功能范围的一部分，
+    // 不是等待按 CLI 归位的遗漏——后续按能力收敛时不要把它一并收走。
+    // skip_permissions 决定是否附加跳过权限确认的旗标。
     let claude_cmd = if skip_permissions {
         "claude --dangerously-skip-permissions"
     } else {

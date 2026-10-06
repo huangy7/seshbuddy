@@ -1,3 +1,5 @@
+use crate::cli::CliKind;
+use crate::cli_registry::{source_for, SessionLocator};
 use crate::error::{AppError, AppResult};
 use crate::paths::app_data_dir;
 use chrono::Utc;
@@ -79,6 +81,43 @@ fn create_pool() -> AppResult<Pool<SqliteConnectionManager>> {
 /// gets its own connection — no nested locking.
 pub(crate) fn conn() -> AppResult<r2d2::PooledConnection<SqliteConnectionManager>> {
     Ok(GLOBAL_POOL.get()?)
+}
+
+/// 开启一个**写入事务**。
+///
+/// 必须用 `IMMEDIATE`，不能用 rusqlite 的默认 `DEFERRED`。
+///
+/// WAL 模式下，DEFERRED 事务若**先读后写**，会把读快照升级为写；此时若别的连接已提交，
+/// SQLite 直接返回 `SQLITE_BUSY_SNAPSHOT`（扩展码 517）而**不调用 busy 处理器** ——
+/// 等待会造成死锁，所以它选择当场失败。表现是并发写时报 `database is locked`，
+/// 而连接上设的 `busy_timeout` 完全不起作用（实测：设 5000ms 仍立刻失败）。
+///
+/// `IMMEDIATE` 在 `BEGIN` 时就取得写锁，不存在「先读后升级」这一步，
+/// 争用因此回到 busy 处理器，按 `busy_timeout` 等待而不是当场失败。
+///
+/// **只读事务不要用它**：那会让读事务白白持有写锁并相互串行化。
+pub(crate) fn write_tx(conn: &mut Connection) -> AppResult<rusqlite::Transaction<'_>> {
+    Ok(conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?)
+}
+
+/// 会话是否仍存在：持久化层主键（`cli_id` + 定位符串）→ 存在性判定。
+///
+/// 供启动期孤儿清理使用，是「索引/检索里的会话还在不在」的唯一入口，避免各清理点
+/// 各自对路径做 `Path::exists()` —— 那会把库型会话（`cli://…`）一律判成不存在而误删。
+///
+/// **`cli_id` 解析失败时返回 `true`（视为存在）。** 解析失败说明「我们不认识这个 CLI」，
+/// 而不是「这个会话没了」。孤儿清理以 `false` 为删除依据，方向判错会物理删除一个仍有
+/// 数据的会话（不可恢复）；漏删一行陈旧索引则下次启动还能再清。取舍与虚拟定位符同源：
+/// 宁可漏删，不可误删 —— 不可把它「简化」成 `unwrap_or(false)`。
+pub(crate) fn session_exists(cli_id: &str, key: &str) -> bool {
+    match CliKind::from_id(Some(cli_id)) {
+        Ok(kind) => {
+            let loc = SessionLocator::decode(kind, key);
+            // 源取自定位符自身携带的 cli_id，与解码用的 kind 同源，避免两处各存一份而漂移。
+            source_for(loc.cli_id()).exists(&loc)
+        }
+        Err(_) => true,
+    }
 }
 
 pub(crate) fn archives_dir() -> AppResult<PathBuf> {
@@ -323,4 +362,3 @@ mod tests {
         create_base_schema(&conn).unwrap();
     }
 }
-

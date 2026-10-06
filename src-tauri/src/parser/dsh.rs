@@ -1427,12 +1427,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn detect_kind_dsh_path() {
-        let kind = crate::parser::detect_kind("/Users/u/.dsh/sessions/--a--/sid/session.jsonl.zstd");
-        assert!(matches!(kind, crate::parser::SessionKind::Dsh));
-    }
-
-    #[test]
     fn zstd_decompress_roundtrip() {
         let raw = b"{\"type\":\"session\"}\n{\"type\":\"user/message\"}\n";
         let c = zstd::encode_all(std::io::Cursor::new(&raw[..]), 3).unwrap();

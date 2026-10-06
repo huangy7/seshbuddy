@@ -2,14 +2,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { setLocale } from "../i18n";
 import {
   CLI_DEFINITIONS,
+  CLI_IDS,
   cliInstallHint,
   cliPermissionHint,
   cliPermissionLabel,
   type CliDefinition,
-  type CliId,
 } from "./cli";
 
-const ALL_CLIS: CliId[] = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity"];
+/** 遍历全部 CLI 时用生产的那份清单，不另抄一份 —— 抄一份就又多一个会静默过期的来源。 */
+const ALL_CLIS = CLI_IDS;
 
 /** 解析结果必须是文案：漏配 key 时 vue-i18n 原样返回 key，据此可判定。 */
 function expectResolved(text: string) {

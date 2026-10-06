@@ -1,4 +1,5 @@
 use base64::{engine::general_purpose::STANDARD, Engine as _};
+use crate::cli_registry::features::LaunchPlan;
 use crate::error::{AppError, AppResult};
 use portable_pty::{native_pty_system, CommandBuilder, MasterPty, PtySize};
 use serde::{Deserialize, Serialize};
@@ -410,7 +411,7 @@ pub fn create_session(
         }
 
         #[cfg(any(unix, windows))]
-        if cli == crate::cli::CliKind::Claude {
+        if crate::cli_registry::source_for(cli).needs_hook_relay() {
             if let Some(settings_path) = settings_file.as_deref() {
                 let relay_command = match crate::claude_hooks::resolve_hook_relay_command() {
                     Ok(cmd) => Some(cmd),
@@ -493,7 +494,23 @@ pub fn create_session(
             }
         }
 
-        let launch_args = cli.launch_arguments(resume_session_id.as_deref(), skip_permissions, settings_file.as_deref());
+        // 参数与终端启动同源：路由判据（有会话 id 走恢复、没有走新建）只有一份，
+        // 在两个启动点各写一遍就会分叉 —— 新会话曾被误路由到恢复能力，导致
+        // 「只能新建、不能恢复」的 CLI 在此处被判成不支持恢复而拒绝启动。
+        let plan = crate::cli_registry::features::launch_plan_for(
+            cli,
+            resume_session_id.as_deref(),
+            skip_permissions,
+            settings_file.as_deref(),
+        )?;
+        let launch_args = match plan {
+            LaunchPlan::CommandLine { args, .. } => args,
+            // PTY 只能承载命令行启动；深链型 CLI 在应用内不走 PTY 恢复，
+            // 调用方应据能力位在前端就拦截，这里返回明确错误而不是静默启动一个空壳。
+            LaunchPlan::DeepLink { .. } => {
+                return Err(crate::cli_registry::features::unsupported_kind(cli))
+            }
+        };
 
         #[cfg(windows)]
         let mut builder = if cli_path.to_lowercase().ends_with(".cmd") {
