@@ -105,7 +105,7 @@ pub(super) fn file_backed_exists(loc: &SessionLocator) -> bool {
     match loc.as_file_path() {
         Some(path) => path.exists(),
         None => {
-            debug_assert!(false, "文件型源收到了虚拟定位符: {loc:?}");
+            debug_assert!(false, "file-backed source received a virtual locator: {loc:?}");
             true
         }
     }

@@ -1,8 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { rustCliIds, rustEnumVariants, tsConstArrayMembers, tsUnionMembers } from "./enumParity";
+import {
+  rustCliIds,
+  rustEnumVariants,
+  rustCapability,
+  tsConstArrayMembers,
+  tsUnionMembers,
+} from "./enumParity";
+import { CLI_DEFINITIONS, CLI_IDS, type CliId } from "../types/cli";
 
 // 不写成 `new URL("../../…", import.meta.url)`：那个字面形状是 Vite 的资源引用语法，
 // 会被改写成非 file: 的模块 URL，fileURLToPath 直接抛「The URL must be of scheme file」。
@@ -65,6 +72,13 @@ describe("Rust↔TS 镜像枚举的 parity", () => {
     // 收窄派生的清单（`as const` 数组）—— `tsUnionMembers` 抽不到这种形态
     expect(tsConstArrayMembers('export const IDS = ["a", "b"] as const;', "IDS")).toEqual(["a", "b"]);
     expect(tsConstArrayMembers("没有该常量的文本", "IDS")).toEqual([]);
+
+    // 能力位：Option 访问器看 Some/None，布尔访问器看 true/false
+    expect(rustCapability("fn new_session(&self) -> Option<X> {\n    Some(&X)\n}", "new_session")).toBe(true);
+    expect(rustCapability("fn fork(&self) -> Option<X> {\n    None\n}", "fork")).toBe(false);
+    expect(rustCapability("fn can_delete(&self) -> bool {\n    false\n}", "can_delete")).toBe(false);
+    expect(rustCapability("fn can_delete(&self) -> bool {\n    true\n}", "can_delete")).toBe(true);
+    expect(rustCapability("没有该方法的文本", "can_delete")).toBeUndefined();
   });
 
   /**
@@ -92,4 +106,63 @@ describe("Rust↔TS 镜像枚举的 parity", () => {
       expect(ts, `Rust 加了变体而 TS 联合没跟上：${mirror.why}`).toEqual(rust);
     });
   }
+
+  /**
+   * 前端能力位 → Rust 源上的判据方法。判据是方法体表达的能力有无：
+   * `Option` 访问器看 `Some(...)`/`None`，布尔访问器（`can_delete`）看 `true`/`false`。
+   */
+  const CAPABILITY_METHODS: Record<string, string> = {
+    supportsNewSession: "new_session",
+    supportsResumeSession: "resume_session",
+    supportsInPlaceFork: "fork",
+    supportsUsageStats: "usage_stats",
+    supportsApiProfiles: "api_profile",
+    supportsApiLogs: "api_proxy",
+    supportsDelete: "can_delete",
+  };
+
+  /**
+   * `supportsContextMenu` 刻意不配 Rust 判据：它是**纯前端关切**。系统右键菜单只有
+   * Claude 一条（`context_menu.rs` 里硬编码 "claude"），不由 `CliSource` 回答，
+   * Rust 侧没有可派生该位的源。此处显式列名，而不是悄悄从表里漏掉。
+   */
+  const FRONTEND_ONLY_BITS = ["supportsContextMenu"] as const;
+
+  /**
+   * `CliSource` 的能力位 ↔ 前端 `CLI_DEFINITIONS` 的 `supports*`。
+   *
+   * **为什么必须有**：上面那条 `CliKind::id()` ↔ `CLI_IDS` 只钉住 id 集合，**钉不住能力位**。
+   * 位对不上时前端照常编译、全部测试照常绿，运行时才「界面提供了后端不做的入口」
+   * 或「后端支持而界面藏起来」—— 后者正是库型源删除静默报成功那一类缺陷。
+   *
+   * 判据从 Rust 源派生：`sources/<id>.rs` 的 `impl CliSource` 里各能力访问器的方法体。
+   * 文件名即 `CliKind::id()` 的串（`sources/mod.rs` 的 `mod <id>;` 与 `id()` 同串）。
+   */
+  it("CliSource 的能力位与前端 CLI_DEFINITIONS 逐 CLI 一致", () => {
+    const sourcesDir = join(REPO_ROOT, "src-tauri", "src", "cli_registry", "sources");
+    const ids = readdirSync(sourcesDir)
+      .filter((name) => name.endsWith(".rs") && name !== "mod.rs")
+      .map((name) => name.replace(/\.rs$/, ""))
+      .sort();
+
+    // 源文件集合本身也要与前端清单一致：多一个源没接前端、少一个源没接后端，都是缺陷。
+    expect(ids, "cli_registry/sources 的源文件集合与前端 CLI_IDS 不同").toEqual([...CLI_IDS].sort());
+
+    // 显式列出的「纯前端位」必须真的存在，且不在可派生表里 —— 防止排除项本身写错而静默漏检。
+    for (const bit of FRONTEND_ONLY_BITS) {
+      expect(bit in CLI_DEFINITIONS.claude, `${bit} 不在 CliDefinition 上`).toBe(true);
+      expect(bit in CAPABILITY_METHODS, `${bit} 不应同时有 Rust 判据`).toBe(false);
+    }
+
+    for (const id of ids) {
+      const source = readFileSync(join(sourcesDir, `${id}.rs`), "utf8");
+      const def = CLI_DEFINITIONS[id as CliId];
+      expect(def, `CLI_DEFINITIONS 缺少 ${id}`).toBeDefined();
+      for (const [bit, method] of Object.entries(CAPABILITY_METHODS)) {
+        const rust = rustCapability(source, method);
+        expect(rust, `${id}.rs 的 ${method}() 抽不到 Some/None（或 true/false）`).toBeDefined();
+        expect(def[bit as keyof typeof def], `${id} 的 ${bit} 与 Rust ${method}() 不一致`).toBe(rust);
+      }
+    }
+  });
 });

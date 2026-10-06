@@ -643,10 +643,36 @@ mod tests {
         assert!(out.failed.is_empty());
     }
 
+    /// ★ 库型源的删除必须**判失败**，而不是被 `trash_or_skip` 静默跳过。
+    ///
+    /// 库型会话的身份是 `cli://opencode/<key>` 虚拟键，不是文件路径：`Path::exists()`
+    /// 对它恒假，于是改前会走 `Ok` 分支被 `run_batch_delete` 计为成功；数据库侧随即
+    /// 写墓碑、删索引行 —— UI 报成功、列表里会话消失，而库里的行仍在且被墓碑隐藏到
+    /// 保留期满。本测试钉住这条不再谎报成功。
+    #[test]
+    fn library_source_delete_fails_instead_of_reporting_success() {
+        let paths = vec!["cli://opencode/ses_deadbeef".to_string()];
+        let out = run_batch_delete(
+            &paths,
+            |path| trash_session(CliKind::Opencode, path),
+            |_, _, _| {},
+        );
+        assert_eq!(out.succeeded, 0, "库型源的删除不得计成功");
+        assert_eq!(out.failed.len(), 1);
+        assert_eq!(out.failed[0].0, "cli://opencode/ses_deadbeef");
+        match &out.failed[0].1 {
+            AppError::Coded { code, params } => {
+                assert_eq!(*code, "system_ops.delete_unsupported");
+                assert_eq!(params.get("cli").map(String::as_str), Some("OpenCode"));
+            }
+            other => panic!("退回了非结构化错误：{other:?}"),
+        }
+    }
+
     /// 上面那道门不得误伤六个文件型源：缺失文件仍按「跳过已不存在」计成功。
     #[test]
     fn file_backed_sources_still_delete() {
-        for kind in CliKind::ALL.iter().copied() {
+        for kind in CliKind::ALL.iter().copied().filter(|k| *k != CliKind::Opencode) {
             assert!(
                 trash_session(kind, "/definitely/not/here.jsonl").is_ok(),
                 "{kind:?} 的删除被误判为失败"

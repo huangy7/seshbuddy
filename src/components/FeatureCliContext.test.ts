@@ -86,6 +86,7 @@ describe("feature CLI context", () => {
       "gemini",
       "dsh",
       "antigravity",
+      "opencode",
     ]);
 
     // Click claude chip to deselect it locally

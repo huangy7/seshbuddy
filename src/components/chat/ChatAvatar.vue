@@ -39,7 +39,7 @@ const gradIds = {
   agF11: `cb-ag-f11-${avatarUid}`,
 };
 
-type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "generic";
+type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "generic";
 
 const brand = computed<ProviderBrand>(() => {
   if (props.cliId) {
@@ -50,6 +50,7 @@ const brand = computed<ProviderBrand>(() => {
     if (c === "workbuddy") return "workbuddy";
     if (c === "dsh") return "dsh";
     if (c === "antigravity" || c === "agy") return "antigravity";
+    if (c === "opencode") return "opencode";
   }
   if (!props.model) return "generic";
   const m = props.model.toLowerCase();
@@ -73,6 +74,8 @@ const avatarTitle = computed(() => {
 });
 
 // ─── 官方品牌矢量路径（viewBox 0 0 24 24，workbuddy 为 0 0 1024 1024）───
+// OpenCode 官方标记：一个方框挖空（evenodd 让内圈成为洞），故单路径即可。
+const OPENCODE_PATH = "M16 6H8v12h8V6zm4 16H4V2h16v20z";
 const ANTIGRAVITY_PATH =
   "M21.751 22.607c1.34 1.005 3.35.335 1.508-1.508C17.73 15.74 18.904 1 12.037 1 5.17 1 6.342 15.74.815 21.1c-2.01 2.009.167 2.511 1.507 1.506 5.192-3.517 4.857-9.714 9.715-9.714 4.857 0 4.522 6.197 9.714 9.715z";
 const CLAUDE_PATH =
@@ -299,6 +302,16 @@ const WB_PILL2_PATH =
           <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="3.303" />
         </filter>
       </defs>
+    </svg>
+
+    <!-- OpenCode 官方标（青）：方框挖空，单路径 evenodd -->
+    <svg
+      v-else-if="brand === 'opencode'"
+      class="avatar-svg brand-svg"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path :d="OPENCODE_PATH" fill="#22d3ee" />
     </svg>
 
     <!-- Generic AI Sparkle -->

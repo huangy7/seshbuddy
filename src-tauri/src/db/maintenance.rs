@@ -269,7 +269,7 @@ mod tests {
             .collect();
         assert_eq!(
             outside,
-            vec!["workbuddy", "dsh", "antigravity"],
+            vec!["workbuddy", "dsh", "antigravity", "opencode"],
             "已验证范围之外的 CLI 集合变了：新 CLI 必须在此显式表态"
         );
     }
@@ -278,15 +278,19 @@ mod tests {
     ///
     /// 这是本期最关键的一条回归。清理把「会话不存在」读作**删除依据**：一旦把库型会话
     /// 当成普通路径去 `Path::exists()`，它恒为 `false`，行会被物理删除、用户的会话在下次
-    /// 启动时消失。测试用本构建尚不认识的库型 CLI（`opencode`）作夹具，既走「认不出 CLI
-    /// → 视为存在」的失败方向，也避开文件型源的契约违例断言（虚拟定位符本不该交给文件型源）。
+    /// 启动时消失。
+    ///
+    /// 夹具用本构建**尚不认识的** CLI id（`legacy-cli-not-in-build`）：`db::session_exists`
+    /// 对解析不成 `CliKind` 的 cli_id 走「不认识 → 视为存在」那条臂，这正是本测试要钉住的
+    /// 取舍 —— 方向判错会物理删掉一个仍有数据的会话。已登记为 `CliKind` 的库型源另见
+    /// `purge_keeps_present_library_session_and_drops_absent`。
     ///
     /// 反向的一半同样必要：文件确实缺失的行必须被清掉。否则一个「从不删除任何东西」的
     /// 清理也会让本测试通过，守卫等于没测。
     #[test]
     fn purge_keeps_virtual_session_and_drops_absent_file() {
-        let virtual_cli = "opencode";
-        let virtual_path = "cli://opencode/ses_guard_virtual";
+        let virtual_cli = "legacy-cli-not-in-build";
+        let virtual_path = "cli://legacy-cli-not-in-build/ses_guard_virtual";
         let absent_cli = CliKind::Claude.id();
         let absent_path = "/tmp/seshbuddy-guard-absent-should-be-purged.jsonl";
 
@@ -337,5 +341,122 @@ mod tests {
             "DELETE FROM session_list_index WHERE cli_id = ?1 AND session_path = ?2",
             params![virtual_cli, virtual_path],
         );
+    }
+
+    /// 已登记库型源的存活判定：库中命中的行必须活过孤儿清理，库中确实没有的行必须被清掉。
+    ///
+    /// 与上一条同源，但方向相反：`OpencodeSource::exists` 会真的打开 SQLite 库查询，
+    /// 命中才答「存在」。这正是 OpenCode 用户依赖的行为 —— `exists` 一旦把命中的行误判成
+    /// 「不存在」，用户的库型会话会在下次启动时被清掉，且不可恢复。
+    ///
+    /// 反向的一半同样必要：一个**恒答「存在」**的 `exists` 会让存活断言照样通过，等于没测。
+    /// 因此夹具同时放入一条库里不存在的库型行并断言它被清理 —— 只有真的查了库、且把
+    /// 「查不到」译成「不存在」，两个断言才会同时成立；库打不开而走了报错臂的 `true`，
+    /// 也会被这条断言当场戳穿。
+    ///
+    /// 库建在临时目录里，经 `set_cli_data_dir_override` 指给 OpenCode；覆盖值测前快照、
+    /// 测后恢复，索引行测后清理（套件共用一个落盘应用库）。覆盖是进程级共享状态，
+    /// 与读真实库的冒烟测试共用一把锁串行化，避免两条测试互相看到对方的数据目录。
+    #[test]
+    fn purge_keeps_present_library_session_and_drops_absent() {
+        // 与 `discover_matches_real_db_when_present` 共享：二者都要求 OpenCode 数据目录
+        // 覆盖在各自临界区内取值稳定，并行会串台。
+        let _guard = crate::cli::OPENCODE_DATA_DIR_OVERRIDE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+
+        let cli = CliKind::Opencode.id();
+        let present_id = "ses_guard_opencode_present";
+        let present_path = format!("cli://{}/{}", cli, present_id);
+        let absent_id = "ses_guard_opencode_absent";
+        let absent_path = format!("cli://{}/{}", cli, absent_id);
+
+        // 临时库：只要本测试查询用到的列，schema 与真实库一致。
+        let temp = tempfile::tempdir().unwrap();
+        let db_path = temp.path().join("opencode.db");
+        {
+            let db = rusqlite::Connection::open(&db_path).unwrap();
+            db.execute_batch(
+                "CREATE TABLE session (\
+                   id TEXT PRIMARY KEY, project_id TEXT NOT NULL, parent_id TEXT,\
+                   slug TEXT NOT NULL, directory TEXT NOT NULL, title TEXT NOT NULL,\
+                   version TEXT NOT NULL, time_created INTEGER NOT NULL, time_updated INTEGER NOT NULL\
+                 );",
+            )
+            .unwrap();
+            db.execute(
+                "INSERT INTO session \
+                 (id, project_id, slug, directory, title, version, time_created, time_updated) \
+                 VALUES (?1, 'proj', 'slug', '/tmp', 'title', '1', 0, 0)",
+                params![present_id],
+            )
+            .unwrap();
+        }
+
+        // 先快照覆盖值、再改指向，保证任何一次并发清理看到的都是指向本临时库的覆盖。
+        let prev_override = crate::app_db::read_cli_path_overrides()
+            .ok()
+            .and_then(|overrides| overrides.get(cli).cloned());
+        crate::cli::set_cli_data_dir_override(
+            CliKind::Opencode,
+            Some(temp.path().to_str().unwrap().to_string()),
+        )
+        .unwrap();
+
+        let insert = |path: &str| {
+            let conn = conn().unwrap();
+            conn.execute(
+                "INSERT OR REPLACE INTO session_list_index \
+                 (cli_id, session_path, session_id, project_path, title, first_user_message, \
+                  first_timestamp, last_timestamp, git_branch, file_size, modified_ms, indexed_at, archived_at) \
+                 VALUES (?1, ?2, '', NULL, NULL, NULL, NULL, NULL, '', 0, 0, '', NULL)",
+                params![cli, path],
+            )
+            .unwrap();
+        };
+        let in_index = |path: &str| -> bool {
+            let conn = conn().unwrap();
+            conn.query_row(
+                "SELECT COUNT(*) FROM session_list_index WHERE cli_id = ?1 AND session_path = ?2",
+                params![cli, path],
+                |row| row.get::<_, i64>(0),
+            )
+            .unwrap()
+                > 0
+        };
+
+        // 前置清理，保证幂等（套件共用一个落盘应用库）。
+        {
+            let conn = conn().unwrap();
+            let _ = conn.execute(
+                "DELETE FROM session_list_index WHERE cli_id = ?1 AND session_path IN (?2, ?3)",
+                params![cli, present_path, absent_path],
+            );
+        }
+        insert(&present_path);
+        insert(&absent_path);
+
+        purge_orphan_session_index().unwrap();
+
+        let present_survived = in_index(&present_path);
+        let absent_purged = !in_index(&absent_path);
+
+        // 后置清理：先删索引行，再恢复覆盖值，避免留下「旧行 + 已复位覆盖」的窗口
+        {
+            let conn = conn().unwrap();
+            let _ = conn.execute(
+                "DELETE FROM session_list_index WHERE cli_id = ?1 AND session_path IN (?2, ?3)",
+                params![cli, present_path, absent_path],
+            );
+        }
+        match prev_override {
+            Some(path) => {
+                crate::cli::set_cli_data_dir_override(CliKind::Opencode, Some(path)).unwrap()
+            }
+            None => crate::cli::set_cli_data_dir_override(CliKind::Opencode, None).unwrap(),
+        }
+
+        assert!(present_survived, "库中确实存在的库型会话索引行被孤儿清理误删");
+        assert!(absent_purged, "库中不存在的库型会话索引行未被孤儿清理");
     }
 }

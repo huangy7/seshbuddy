@@ -185,9 +185,12 @@ fn scan_session_search_docs_for_index<F>(
 where
     F: FnMut(parser::SearchScanProgress),
 {
-    let session_path = Path::new(path);
-    if session_path.exists() {
-        return parser::scan_session_search_docs_with_progress(session_path, on_progress);
+    // 存在性判定交给源自己：库型会话的身份是虚拟键（`cli://opencode/...`），不是文件
+    // 路径，`Path::exists()` 对它恒为 false，会让检索对库型源整体失效。文件型源的
+    // `exists` 落回 `path.exists()`，判定与原先逐字节相同。
+    let loc = crate::cli_registry::SessionLocator::decode(kind, path);
+    if crate::cli_registry::source_for(kind).exists(&loc) {
+        return parser::scan_session_search_docs_with_progress(Path::new(path), on_progress);
     }
 
     match app_db::read_archived_session_content(kind.id(), path) {

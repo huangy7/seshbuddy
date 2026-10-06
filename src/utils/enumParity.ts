@@ -98,3 +98,36 @@ export function tsConstArrayMembers(source: string, constName: string): string[]
   if (body === undefined) return [];
   return [...body.matchAll(/"([a-z0-9]+)"/g)].map((match) => match[1]);
 }
+
+/**
+ * 取 `fn <method>(…) { … }` 方法体里表达的**能力有无**。
+ *
+ * 两族方法体都收：
+ * - `Option<…>` 访问器：`Some(…)` = 有、`None` = 无（`new_session` / `resume_session`
+ *   / `fork` / `usage_stats` / `api_profile` / `api_proxy`）；
+ * - 布尔访问器：`true` / `false`（`can_delete`）。
+ *
+ * 抽不到（方法不在文件里、或方法体两族判据都不匹配）返回 `undefined` —— 调用方必须把
+ * `undefined` 当失败，否则「两边都抽到空」会伪装成「两边一致」，正是本模块要防的那类缺陷。
+ */
+export function rustCapability(source: string, method: string): boolean | undefined {
+  const sig = new RegExp(`fn ${method}\\s*\\(`).exec(source);
+  if (sig === null) return undefined;
+  const open = source.indexOf("{", sig.index);
+  if (open < 0) return undefined;
+  let depth = 0;
+  let end = open;
+  for (; end < source.length; end++) {
+    if (source[end] === "{") depth++;
+    else if (source[end] === "}") {
+      depth--;
+      if (depth === 0) break;
+    }
+  }
+  const body = source.slice(open, end);
+  if (/\bSome\s*\(/.test(body)) return true;
+  if (/\bNone\b/.test(body)) return false;
+  if (/\bfalse\b/.test(body)) return false;
+  if (/\btrue\b/.test(body)) return true;
+  return undefined;
+}

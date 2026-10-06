@@ -164,6 +164,14 @@
         }
     }
 
+    /// OpenCode 端到端验收会写共享的真实 app DB；清掉本 CLI 的索引行，
+    /// 既让起始状态干净，也在结束后恢复原状。
+    fn clear_opencode_index_rows() {
+        if let Ok(conn) = app_db::conn() {
+            let _ = app_db::clear_session_index_inner(&conn, "opencode");
+        }
+    }
+
     #[test]
     fn collect_missing_search_paths_rebuilds_all_when_physical_index_is_not_ready() {
         let list_index = HashMap::from([
@@ -1508,4 +1516,211 @@
             Some("/Users/x/my-proj"),
             "快照（读索引）必须与实时扫描显示同一路径"
         );
+    }
+
+    /// 库型源（OpenCode）的会话身份是虚拟键，不是文件路径。索引构建的存在性判定必须
+    /// 问源本身，若仍用 `Path::exists()` 则虚拟键恒判不存在，检索对库型源整体失效。
+    ///
+    /// 真实库不存在就跳过 —— 不能假设 CI 上装了 OpenCode。全程只读，不碰用户数据。
+    /// 与读写 OpenCode 数据目录覆盖的测试共用同一把锁，避免读到被改过的数据目录。
+    #[test]
+    fn opencode_virtual_key_reaches_search_docs_scan() {
+        let _guard = crate::cli::OPENCODE_DATA_DIR_OVERRIDE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+
+        let Ok(dir) = cli::data_dir(CliKind::Opencode) else { return };
+        let db_path = dir.join("opencode.db");
+        if !db_path.exists() {
+            return;
+        }
+
+        // 挑一个确实带文本 part 的会话，保证检索文档非空。
+        let conn = rusqlite::Connection::open_with_flags(
+            &db_path,
+            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+        )
+        .expect("只读打开真实 OpenCode 库");
+        let session_id: String = conn
+            .query_row(
+                "SELECT session_id FROM part WHERE json_extract(data, '$.type') = 'text' \
+                 GROUP BY session_id ORDER BY count(*) DESC LIMIT 1",
+                [],
+                |row| row.get(0),
+            )
+            .expect("库里至少有一个带文本 part 的会话");
+        drop(conn);
+
+        let key = crate::cli_registry::SessionLocator::Virtual {
+            cli_id: CliKind::Opencode,
+            key: session_id,
+        }
+        .to_key();
+        assert!(key.starts_with("cli://opencode/"), "库型会话应是虚拟键: {key}");
+
+        let record = list_record(&key, 0);
+        let docs = scan_session_search_docs_for_index(CliKind::Opencode, &key, &record, |_| {});
+
+        let docs = docs.expect("虚拟键会话应经源的存在性判定后走到 search_docs");
+        assert!(!docs.is_empty(), "带文本 part 的会话应产出至少一条检索文档");
+    }
+
+    /// 库型源（OpenCode）端到端验收：真实库存在时，**真实入口**必须能看到库里的会话。
+    ///
+    /// 与上一条的分工：上一条把合成索引记录直接喂给 `scan_session_search_docs_for_index`，
+    /// 绕过了「索引怎么被填」与「CLI 怎么被判可见」这两段，所以 `scan` / `has_sessions`
+    /// 还是占位时它也照样通过。本条只走真实入口：
+    /// - 列表扫描 `scan_projects_inner_for_cli`；
+    /// - 可见性判定 `cli::has_sessions`；
+    /// - 检索候选 `resolve_search_index_status`（`get_search_index_status` 的实现）。
+    ///
+    /// 三处任一仍是占位，条数就与 `session` 表对不上。真实库不存在就跳过 ——
+    /// 不能假设 CI 上装了 OpenCode。全程只读 OpenCode 库，只写本应用索引且前后各清一次。
+    /// 与改 OpenCode 数据目录覆盖的测试共用同一把锁，避免读到被改过的数据目录。
+    #[test]
+    fn opencode_end_to_end_list_visibility_and_search_candidates() {
+        let _guard = crate::cli::OPENCODE_DATA_DIR_OVERRIDE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+
+        let Ok(dir) = cli::data_dir(CliKind::Opencode) else { return };
+        let db_path = dir.join("opencode.db");
+        if !db_path.exists() {
+            return;
+        }
+
+        let expected: i64 = {
+            let conn = rusqlite::Connection::open_with_flags(
+                &db_path,
+                rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+            )
+            .expect("只读打开真实 OpenCode 库");
+            conn.query_row("SELECT count(*) FROM session", [], |row| row.get(0))
+                .expect("统计 session 行数")
+        };
+        assert!(expected > 0, "库存在却没有任何会话，无法验证端到端路径");
+
+        // 先清索引：让可见性必须由源自己判定（索引为空时才会走到 discover 分支），
+        // 也让随后的扫描从干净状态重建。
+        clear_opencode_index_rows();
+
+        assert!(
+            cli::has_sessions(CliKind::Opencode),
+            "索引为空时，有会话的库型源必须被判为可见，否则前端会把它整块过滤掉"
+        );
+
+        let scanned = scan_projects_inner_for_cli(CliKind::Opencode, None, None, true)
+            .expect("扫描真实 OpenCode 库");
+        assert_eq!(
+            scanned.total_sessions as i64, expected,
+            "列表扫描条数应等于 session 表行数"
+        );
+        assert!(!scanned.projects.is_empty(), "扫描结果应至少有一个项目分组");
+
+        // 检索候选：列表索引刚被扫描填好、检索索引尚空，候选数应等于会话数 ——
+        // 即 `search_docs` 在生产路径上真的会被调用，而不是只有直接调用时才可达。
+        let status = resolve_search_index_status(CliKind::Opencode).expect("读取检索索引状态");
+        assert_eq!(
+            status.total_sessions as i64, expected,
+            "检索状态里的总会话数应与库一致"
+        );
+        assert_eq!(
+            status.missing_sessions as i64, expected,
+            "检索索引为空时全部会话都应是待索引候选，否则 search_docs 永远不会被触发"
+        );
+
+        clear_opencode_index_rows();
+    }
+
+    /// 子会话可见性回归：库型源的 `scan` 与快照两条装配路径必须给出同一批会话。
+    ///
+    /// 真实库当前不含任何子会话（`parent_id IS NOT NULL` 的行数为 0），在真库上两条
+    /// 路径天然一致，分辨不出「扫描漏滤子会话」这个分歧；故此处显式造一个临时库，
+    /// 放入一条顶层会话与一条 `parent_id` 指向它的子会话，断言才可能变红。
+    ///
+    /// 若 `scan` 不按 `parent_id` 过滤，子会话会经扫描写进列表索引：扫描路径能看到它，
+    /// 而快照路径会经 `is_subagent` 把它挡在列表外，两条路径的可见集合与
+    /// `total_sessions` 随之分叉 —— 正是本用例要钉住的行为。
+    #[test]
+    fn opencode_scan_and_snapshot_agree_on_sub_sessions() {
+        let _guard = crate::cli::OPENCODE_DATA_DIR_OVERRIDE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+
+        // 临时库：只建 `scan` / `is_subagent` 用到的列，schema 与真实库一致。
+        let temp = tempfile::tempdir().unwrap();
+        let db_path = temp.path().join("opencode.db");
+        {
+            let db = rusqlite::Connection::open(&db_path).unwrap();
+            db.execute_batch(
+                "CREATE TABLE session (\
+                   id TEXT PRIMARY KEY, project_id TEXT NOT NULL, parent_id TEXT,\
+                   slug TEXT NOT NULL, directory TEXT NOT NULL, title TEXT NOT NULL,\
+                   version TEXT NOT NULL, time_created INTEGER NOT NULL, time_updated INTEGER NOT NULL\
+                 );",
+            )
+            .unwrap();
+            db.execute(
+                "INSERT INTO session \
+                 (id, project_id, slug, directory, title, version, time_created, time_updated) \
+                 VALUES ('ses_regr_sub_parent', 'proj', 'slug', '/tmp/proj', 'parent', '1', 1000, 2000)",
+                [],
+            )
+            .unwrap();
+            db.execute(
+                "INSERT INTO session \
+                 (id, project_id, parent_id, slug, directory, title, version, time_created, time_updated) \
+                 VALUES ('ses_regr_sub_child', 'proj', 'ses_regr_sub_parent', 'slug', '/tmp/proj', 'child', '1', 1000, 2000)",
+                [],
+            )
+            .unwrap();
+        }
+
+        let prev_override = app_db::read_cli_path_overrides()
+            .ok()
+            .and_then(|overrides| overrides.get("opencode").cloned());
+        cli::set_cli_data_dir_override(
+            CliKind::Opencode,
+            Some(temp.path().to_str().unwrap().to_string()),
+        )
+        .unwrap();
+        clear_opencode_index_rows();
+
+        // 真实入口：扫描先把索引写满，快照再读同一份索引 —— 两条装配路径。
+        let scanned = scan_projects_inner_for_cli(CliKind::Opencode, None, None, true)
+            .expect("扫描临时 OpenCode 库");
+        let snapshot = crate::cli_registry::source_for(CliKind::Opencode)
+            .snapshot(&HashMap::new(), 0, 100)
+            .expect("读取列表索引")
+            .expect("扫描已写入索引，快照不应缺席");
+
+        // 先复位覆盖、再清索引：临时目录马上被删，覆盖不能留在指向它的值上。
+        match prev_override {
+            Some(path) => cli::set_cli_data_dir_override(CliKind::Opencode, Some(path)).unwrap(),
+            None => cli::set_cli_data_dir_override(CliKind::Opencode, None).unwrap(),
+        }
+        clear_opencode_index_rows();
+
+        let scan_ids: Vec<String> = scanned
+            .projects
+            .iter()
+            .flat_map(|project| project.sessions.iter().map(|s| s.session_id.clone()))
+            .collect();
+        let snapshot_ids: Vec<String> = snapshot
+            .projects
+            .iter()
+            .flat_map(|project| project.sessions.iter().map(|s| s.session_id.clone()))
+            .collect();
+
+        assert_eq!(
+            scan_ids,
+            vec!["ses_regr_sub_parent".to_string()],
+            "扫描只应看到顶层会话，子会话不得写进列表索引"
+        );
+        assert_eq!(
+            snapshot_ids, scan_ids,
+            "快照与扫描的可见会话集合必须一致"
+        );
+        assert_eq!(scanned.total_sessions, 1, "总数不得把子会话算进去");
+        assert_eq!(snapshot.total_sessions, 1, "快照总数同样不得含子会话");
     }

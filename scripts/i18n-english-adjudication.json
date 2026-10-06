@@ -824,6 +824,10 @@
       "verdict": "keep",
       "reason": "身份值（厂商名/模型名）"
     },
+    "OpenCode": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
     "Claude Code": {
       "verdict": "keep",
       "reason": "身份值（厂商名/模型名）"
