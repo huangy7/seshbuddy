@@ -30,6 +30,23 @@ fn trash_or_skip(path: &str) -> AppResult<()> {
     }
 }
 
+/// 删除一个会话定位符：先问源能不能删，再走文件回收站。
+///
+/// **这道门是承重的。** 库型源的会话身份是 `cli://<id>/<key>` 虚拟键，不是文件路径；
+/// `trash_or_skip` 的 `Path::exists()` 对它恒为假，于是静默返回 `Ok`、被
+/// `run_batch_delete` 计为成功。随后数据库侧写墓碑、删索引行 —— 用户看到「删除成功」、
+/// 列表里会话消失，而库里的行原封不动，且被墓碑隐藏到保留期满。这是「文件系统形状的
+/// 假设撞上虚拟键」的同一类缺陷，只是这次毁的是用户数据的**可见性**却谎报成功。
+///
+/// 删除本就不在库型源的接入范围内（本期只做浏览、检索、用量、新建、恢复），所以这里
+/// 诚实地判失败，而不是假装删掉。失败原因带 `cli` 归属，前端按 `{reasons}` 渲染。
+fn trash_session(kind: CliKind, path: &str) -> AppResult<()> {
+    if !crate::cli_registry::source_for(kind).can_delete() {
+        return Err(AppError::coded("system_ops.delete_unsupported").with("cli", kind.name()));
+    }
+    trash_or_skip(path)
+}
+
 /// 逐路径删除，单个失败不中止；on_progress 每个路径处理完回调一次（done/total/current）。
 /// 纯计数：`trash_one` 返回 Ok 计成功、Err 记失败；"跳过已不存在"由 `trash_or_skip` 决定。
 pub fn run_batch_delete<F, G>(paths: &[String], mut trash_one: F, mut on_progress: G) -> BatchDeleteOutcome
@@ -172,8 +189,9 @@ pub fn get_system_diagnostics(app: tauri::AppHandle) -> AppResult<SystemDiagnost
         (pretty, "".to_string(), kernel, "Unknown".to_string(), "Unknown".to_string())
     };
 
-    let clis = cli::CliKind::all()
-        .into_iter()
+    let clis = crate::cli::CliKind::ALL
+        .iter()
+        .copied()
         .map(|kind| CliDiagnosticInfo {
             id: kind.id().to_string(),
             name: kind.name().to_string(),
@@ -253,7 +271,7 @@ pub async fn delete_sessions_to_trash(
     let outcome = tauri::async_runtime::spawn_blocking(move || {
         let outcome = run_batch_delete(
             &session_paths,
-            trash_or_skip,
+            |path| trash_session(kind, path),
             |done, total, current| {
                 let _ = app.emit(
                     "batch-delete-progress",
@@ -308,14 +326,14 @@ pub fn get_launch_command(
         )?),
         _ => None,
     };
-    Ok(cli::build_launch_command_string(
+    cli::build_launch_command_string(
         kind,
         &project_path,
         session_id.as_deref(),
         skip_permissions,
         settings_file.as_deref(),
         terminal_app.as_deref(),
-    ))
+    )
 }
 
 #[tauri::command]
@@ -622,6 +640,25 @@ mod tests {
             .collect();
         let out = run_batch_delete(&paths, trash_or_skip, |_, _, _| {});
         assert_eq!(out.succeeded, 2);
+        assert!(out.failed.is_empty());
+    }
+
+    /// 上面那道门不得误伤六个文件型源：缺失文件仍按「跳过已不存在」计成功。
+    #[test]
+    fn file_backed_sources_still_delete() {
+        for kind in CliKind::ALL.iter().copied() {
+            assert!(
+                trash_session(kind, "/definitely/not/here.jsonl").is_ok(),
+                "{kind:?} 的删除被误判为失败"
+            );
+        }
+        let paths = vec!["/definitely/not/here.jsonl".to_string()];
+        let out = run_batch_delete(
+            &paths,
+            |path| trash_session(CliKind::Claude, path),
+            |_, _, _| {},
+        );
+        assert_eq!(out.succeeded, 1);
         assert!(out.failed.is_empty());
     }
 

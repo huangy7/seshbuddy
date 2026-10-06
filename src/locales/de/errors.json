@@ -72,7 +72,8 @@
     "batch_delete_failed": "Der Batch-Löschvorgang ist fehlgeschlagen: {detail}",
     "open_failed": "Der Pfad konnte nicht geöffnet werden: {detail}",
     "reveal_failed": "Das Element konnte im Dateimanager nicht angezeigt werden: {detail}",
-    "trash_failed": "Das Verschieben in den Papierkorb ist fehlgeschlagen: {detail}"
+    "trash_failed": "Das Verschieben in den Papierkorb ist fehlgeschlagen: {detail}",
+    "delete_unsupported": "{cli}-Sitzungen können derzeit nicht aus SeshBuddy gelöscht werden."
   },
   "proxy": {
     "traffic_db_missing": "Traffic-Datenbank existiert nicht",
@@ -169,7 +170,8 @@
     "script_path_not_utf8": "Der Pfad des temporären Skripts enthält Nicht-UTF-8-Zeichen",
     "unsupported_platform": "Nicht unterstützte Plattform",
     "temp_script_create_failed": "Das temporäre Skript kann nicht erstellt werden: {detail}",
-    "not_found": "{cli} CLI wurde nicht gefunden"
+    "not_found": "{cli} CLI wurde nicht gefunden",
+    "no_sessions_dir": "{kind} hat kein Sitzungsverzeichnis"
   },
   "context_menu": {
     "register_permission_denied": "Registrierung fehlgeschlagen: keine Berechtigung. {detail}",

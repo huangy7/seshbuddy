@@ -3,7 +3,7 @@ use super::archive_sidecar::{
     ArchiveSidecar,
 };
 use super::settings::{read_setting_json, write_setting_json};
-use super::{conn, now_rfc3339};
+use super::{conn, now_rfc3339, session_exists, write_tx};
 use crate::cli::CliKind;
 use crate::title_resolver::{extract_snapshot_metadata_enhanced, TitleResolverOptions};
 use crate::error::{AppError, AppResult};
@@ -136,7 +136,7 @@ pub(crate) fn snapshot_aging_sessions() -> AppResult<usize> {
     }
 
     let mut conn = conn()?;
-    let tx = conn.transaction()?;
+    let tx = write_tx(&mut conn)?;
 
     for (cli_id, session_path, compressed, modified_ms, retention_policy, pinned_at) in &prepared {
         // Write to file system instead of DB
@@ -215,10 +215,10 @@ pub(crate) fn purge_expired_archives() -> AppResult<usize> {
     }
 
     let mut conn = conn()?;
-    let tx = conn.transaction()?;
+    let tx = write_tx(&mut conn)?;
 
     for (cli_id, session_path) in &expired {
-        let file_exists = Path::new(session_path).exists();
+        let file_exists = session_exists(cli_id, session_path);
         tx.execute(
             "DELETE FROM archived_session_content WHERE cli_id = ?1 AND session_path = ?2",
             params![cli_id, session_path],
@@ -304,7 +304,7 @@ pub(crate) fn get_session_archive_status(
     session_path: &str,
 ) -> AppResult<SessionArchiveStatus> {
     let retention_days = get_archive_retention_days()?;
-    let source_exists = Path::new(session_path).exists();
+    let source_exists = session_exists(kind.id(), session_path);
     let conn = conn()?;
     let archive_row: Option<(String, String)> = conn
         .query_row(
@@ -410,7 +410,7 @@ pub(crate) fn set_session_archive_pinned(
         return Ok(true);
     }
 
-    let path_exists = Path::new(session_path).exists();
+    let path_exists = session_exists(kind.id(), session_path);
     if path_exists {
         // 源文件健在时「取消保留」= 撤销 pin：彻底移除归档（行 + .gz + sidecar），
         // 会话回到普通状态、从归档列表消失。>28 天的会话下轮维护周期会被自动重新快照。
@@ -456,30 +456,22 @@ fn read_archived_file_content(path: &Path, cli_id: &str) -> AppResult<Vec<u8>> {
     decompress_archived_bytes(cli_id, &data)
 }
 
-/// DSH 归档第二层 zstd 解压：输入为已 gzip 解压的字节（即 DSH 源文件内容）。
-/// DSH 源文件本身 zstd 压缩，归档为 `gzip(zstd(jsonl))`；内层无法按 zstd 解出
-/// （明文源文件快照或截断）时原样返回 gzip 层结果。非 DSH 不做任何处理。
+/// 归档内层解压：把「源文件本身是否还压了一层」交给该 CLI 的源。
+///
+/// 输入为已 gzip 解压的字节（即源文件内容）。多数 CLI 的源是明文，源实现原样返回；
+/// 另压一层的 CLI 在此多解一层。这里走 `Truncation::Complete`：调用方已完整读取归档，
+/// 内层帧不完整即数据损坏，丢弃已解出的部分、原样返回更安全。
 fn decompress_dsh_zstd_layer(cli_id: &str, bytes: Vec<u8>) -> Vec<u8> {
-    use std::io::Read;
-
-    if cli_id != "dsh" {
-        return bytes;
-    }
-    match zstd::stream::read::Decoder::new(&bytes[..]) {
-        Ok(mut decoder) => {
-            let mut out = Vec::new();
-            if decoder.read_to_end(&mut out).is_ok() {
-                out
-            } else {
-                bytes
-            }
-        }
+    match CliKind::from_id(Some(cli_id)) {
+        Ok(kind) => crate::cli_registry::source_for(kind)
+            .decode_archived_source(bytes, crate::cli_registry::Truncation::Complete),
+        // 认不出的 id 走与改动前「非 DSH 即原样返回」相同的分支。
         Err(_) => bytes,
     }
 }
 
-/// 归档快照解压：先解外层 gzip；`cli_id=="dsh"` 时 DSH 源文件本身为 zstd 压缩，
-/// 归档是 `gzip(zstd(jsonl))`，再追加内层 zstd 解压，返回完整 jsonl。
+/// 归档快照解压：先解外层 gzip，再交该 CLI 的源解内层（源文件另压一层时才多解一层），
+/// 返回完整 jsonl。
 fn decompress_archived_bytes(cli_id: &str, gz_data: &[u8]) -> AppResult<Vec<u8>> {
     use flate2::read::GzDecoder;
     use std::io::Read;
@@ -544,19 +536,23 @@ pub(crate) fn list_archived_sessions_inner(
         ))
     })?;
 
-    let codex_titles = load_codex_titles_for(cli_id);
+    let index_titles = match CliKind::from_id(Some(cli_id)) {
+        Ok(kind) => crate::cli_registry::source_for(kind).index_titles(),
+        // 认不出的 id 与改动前「非 Codex 即无索引」同分支。
+        Err(_) => None,
+    };
     let mut entries = Vec::new();
     for row in rows {
         let (session_path, session_id, project_path, display_name, title, first_user_message, archived_at, policy) =
             row?;
-        let source_exists = Path::new(&session_path).exists();
+        let source_exists = session_exists(cli_id, &session_path);
         // 链：用户重命名 > 原生标题（展示名）；首条用户消息原样使用（扫描/归档时已清洗），
         // 缺失时才回源文件或快照兜底，不再二次清洗
         let first_user_message = first_user_message.or_else(|| {
             if source_exists {
                 crate::parser::read_first_user_message(&session_path)
             } else {
-                read_archived_snapshot_metadata(cli_id, &session_path, codex_titles.as_ref()).1
+                read_archived_snapshot_metadata(cli_id, &session_path, index_titles.as_ref()).1
             }
         });
 
@@ -612,7 +608,7 @@ pub(crate) fn delete_session_archive_inner(
 }
 
 pub(crate) fn delete_session_archive(kind: CliKind, session_path: &str) -> AppResult<()> {
-    let source_exists = Path::new(session_path).exists();
+    let source_exists = session_exists(kind.id(), session_path);
     {
         let conn = conn()?;
         delete_session_archive_inner(&conn, kind.id(), session_path, source_exists)?;
@@ -629,7 +625,7 @@ pub(crate) fn delete_session_archive(kind: CliKind, session_path: &str) -> AppRe
 /// 恢复后归档快照仍保留（作为备份），仅清除 archived_at 标记。
 pub(crate) fn restore_session_to_disk(kind: CliKind, session_path: &str) -> AppResult<()> {
     // 源文件已存在则不需要恢复
-    if Path::new(session_path).exists() {
+    if session_exists(kind.id(), session_path) {
         return Err(AppError::coded("db.restore_target_exists"));
     }
 
@@ -637,13 +633,10 @@ pub(crate) fn restore_session_to_disk(kind: CliKind, session_path: &str) -> AppR
     let content = read_archived_session_content(kind.id(), session_path)?
         .ok_or_else(|| AppError::coded("db.archive_content_missing"))?;
 
-    // DSH 源文件本身 zstd 压缩：恢复写回时按源路径后缀回压 zstd，
-    // 避免明文 jsonl 写到 .zstd/.zst 路径导致 DSH 解析器（按后缀走 zstd 解码）读不了。
-    let restore_bytes = if kind.id() == "dsh" && dsh_source_path_is_zstd(session_path) {
-        zstd::encode_all(std::io::Cursor::new(&content[..]), 3).map_err(AppError::from)?
-    } else {
-        content
-    };
+    // 源文件格式各异：明文 CLI 原样写回；源文件本身另压一层的 CLI（按源路径后缀判定）
+    // 在此回压，避免明文写到 `.zstd`/`.zst` 路径导致其按后缀解码的解析器读不了。
+    let restore_bytes =
+        crate::cli_registry::source_for(kind).encode_for_restore(content, session_path)?;
 
     // 确保父目录存在
     let path = Path::new(session_path);
@@ -662,15 +655,6 @@ pub(crate) fn restore_session_to_disk(kind: CliKind, session_path: &str) -> AppR
     )?;
 
     Ok(())
-}
-
-/// DSH 源路径后缀判定：`.zstd` / `.zst` 视为 zstd 压缩源文件（与 dsh 解析器同判）。
-fn dsh_source_path_is_zstd(session_path: &str) -> bool {
-    let name = Path::new(session_path)
-        .file_name()
-        .and_then(|s| s.to_str())
-        .unwrap_or("");
-    name.ends_with(".zstd") || name.ends_with(".zst")
 }
 
 /// 归档快照的物理文件随会话路径一起搬迁。
@@ -746,38 +730,24 @@ fn move_archive_files(old_gz: &Path, new_gz: &Path, new_path: &str) {
 /// 兼容三种 CLI 的 JSONL 格式（Claude / Codex / Gemini），使用 title_resolver 增强解析。
 fn extract_snapshot_metadata(
     content: &[u8],
-    cli_id: &str,
     session_path: &str,
     options: &TitleResolverOptions,
 ) -> (Option<String>, Option<String>, Option<String>) {
-    extract_snapshot_metadata_enhanced(content, cli_id, session_path, options)
+    extract_snapshot_metadata_enhanced(content, session_path, options)
 }
 
 /// 读取归档快照并提取 (原生标题, 清洗后首条用户消息, cwd)；快照缺失或解析失败时返回 (None, None, None)。
 fn read_archived_snapshot_metadata(
     cli_id: &str,
     session_path: &str,
-    codex_titles: Option<&std::collections::HashMap<String, String>>,
+    index_titles: Option<&std::collections::HashMap<String, String>>,
 ) -> (Option<String>, Option<String>, Option<String>) {
     let options = TitleResolverOptions {
-        codex_index_titles: codex_titles,
+        codex_index_titles: index_titles,
     };
     match read_archived_session_content(cli_id, session_path) {
-        Ok(Some(content)) => extract_snapshot_metadata(&content, cli_id, session_path, &options),
+        Ok(Some(content)) => extract_snapshot_metadata(&content, session_path, &options),
         _ => (None, None, None),
-    }
-}
-
-/// Codex 场景加载一次 session_index.jsonl 内存 Map（单次读取，供整批归档解析复用）
-fn load_codex_titles_for(cli_id: &str) -> Option<std::collections::HashMap<String, String>> {
-    if cli_id != "codex" {
-        return None;
-    }
-    let map = crate::parser::load_codex_index_titles();
-    if map.is_empty() {
-        None
-    } else {
-        Some(map)
     }
 }
 
@@ -872,7 +842,7 @@ pub(crate) fn restore_missing_archived_index_rows_inner(
         } else {
             Some(archived_at.clone())
         };
-        let file_size = if Path::new(session_path).exists() {
+        let file_size = if session_exists(cli_id, session_path) {
             fs::metadata(session_path).map(|m| m.len()).unwrap_or(0)
         } else {
             archive_file_path(cli_id, session_path)
@@ -967,7 +937,7 @@ pub(crate) fn restore_missing_archived_index_rows_inner(
 
         let file_size = if current_size > 0 {
             current_size
-        } else if Path::new(&session_path).exists() {
+        } else if session_exists(cli_id, &session_path) {
             fs::metadata(&session_path).map(|m| m.len()).unwrap_or(0)
         } else {
             archive_file_path(cli_id, &session_path)
@@ -1027,7 +997,7 @@ pub(crate) fn restore_missing_archived_index_rows(kind: CliKind) -> AppResult<us
     let conn = conn()?;
     let project_map = load_history_project_map(kind);
     let cli_id = kind.id().to_string();
-    let codex_titles = load_codex_titles_for(&cli_id);
+    let index_titles = crate::cli_registry::source_for(kind).index_titles();
     // 只救回落在当前数据源范围内的归档会话：数据源切换后旧源范围内的归档同样不该回到
     // 列表里，否则"改数据源"这件事会被这一步当场撤销（归档行是列表加载时无条件补建的）
     let scope_root = crate::cli::sessions_dir(kind).ok();
@@ -1038,7 +1008,7 @@ pub(crate) fn restore_missing_archived_index_rows(kind: CliKind) -> AppResult<us
         scope_root.as_deref(),
         &tombstones,
         project_map.as_ref(),
-        &|path| read_archived_snapshot_metadata(&cli_id, path, codex_titles.as_ref()),
+        &|path| read_archived_snapshot_metadata(&cli_id, path, index_titles.as_ref()),
     )
 }
 
@@ -1163,8 +1133,8 @@ fn sli_archived_at_for(source_exists: bool, retention_policy: &str, archived_at:
 
 /// 流式 gunzip 头部内容（用于身份识别，避免对注定跳过的文件全量解压）。
 /// 截断/损坏容忍：能解出多少算多少，完全解不出返回 None。
-/// DSH 归档为 `gzip(zstd(jsonl))`，会话头在 zstd 内层：对 dsh 再尽力 zstd 解出
-/// （`take(limit)` 截断帧时保留已解出的头部），zstd 帧不存在时回退 gzip 层结果。
+/// 归档内层是否另压一层由该 CLI 的源决定；这里走 `Truncation::Truncated`：
+/// 流已按上限截断，内层帧必然不完整，尽力解出多少头部算多少，解不出回退 gzip 层结果。
 fn gunzip_head(path: &Path, cli_id: &str, limit: u64) -> Option<Vec<u8>> {
     use flate2::read::GzDecoder;
     use std::io::Read;
@@ -1175,16 +1145,14 @@ fn gunzip_head(path: &Path, cli_id: &str, limit: u64) -> Option<Vec<u8>> {
     if buf.is_empty() {
         return None;
     }
-    if cli_id == "dsh" {
-        if let Ok(mut decoder) = zstd::stream::read::Decoder::new(&buf[..]) {
-            let mut out = Vec::new();
-            let _ = decoder.read_to_end(&mut out);
-            if !out.is_empty() {
-                return Some(out);
-            }
-        }
+    match CliKind::from_id(Some(cli_id)) {
+        Ok(kind) => Some(
+            crate::cli_registry::source_for(kind)
+                .decode_archived_source(buf, crate::cli_registry::Truncation::Truncated),
+        ),
+        // 认不出的 id 走与改动前「非 DSH 即原样返回」相同的分支。
+        Err(_) => Some(buf),
     }
-    Some(buf)
 }
 
 pub(crate) fn rebuild_archive_index_from_disk(
@@ -1264,11 +1232,10 @@ pub(crate) fn rebuild_archive_index_from_disk(
     let rebuild_tombstones: std::collections::HashMap<
         String,
         super::TombstoneFilter,
-    > = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity"]
-        .into_iter()
-        .filter_map(|cli_id| {
-            let kind = CliKind::from_id(Some(cli_id)).ok()?;
-            Some((cli_id.to_string(), super::load_tombstone_filter(kind).unwrap_or_default()))
+    > = crate::cli::CliKind::ALL
+        .iter()
+        .map(|&kind| {
+            (kind.id().to_string(), super::load_tombstone_filter(kind).unwrap_or_default())
         })
         .collect();
 
@@ -1415,12 +1382,16 @@ pub(crate) fn rebuild_archive_index_from_disk(
             decompress_dsh_zstd_layer(&current_cli_id, buf)
         };
 
-        let codex_titles = load_codex_titles_for(current_cli_id);
+        let index_titles = match CliKind::from_id(Some(current_cli_id)) {
+            Ok(kind) => crate::cli_registry::source_for(kind).index_titles(),
+            // 认不出的 id 与改动前「非 Codex 即无索引」同分支。
+            Err(_) => None,
+        };
         let options = TitleResolverOptions {
-            codex_index_titles: codex_titles.as_ref(),
+            codex_index_titles: index_titles.as_ref(),
         };
         let (title, first_msg, meta_cwd) =
-            extract_snapshot_metadata(&decompressed, current_cli_id, "", &options);
+            extract_snapshot_metadata(&decompressed, "", &options);
         let cwd = meta_cwd.or(parsed_cwd);
 
         let session_id = match &parsed_id {
@@ -1485,7 +1456,7 @@ pub(crate) fn rebuild_archive_index_from_disk(
             }
         }
 
-        let source_exists = Path::new(&session_path).exists();
+        let source_exists = session_exists(&current_cli_id, &session_path);
         let db_archived_at = sli_archived_at_for(source_exists, &meta.retention_policy, &meta.archived_at);
 
         tx.execute(
@@ -2092,7 +2063,6 @@ mod tests {
         };
         let (title, user, cwd) = extract_snapshot_metadata(
             content.as_bytes(),
-            "claude",
             "/Users/h/codes/SeshBuddy/s.jsonl",
             &options,
         );
@@ -2112,7 +2082,6 @@ mod tests {
         };
         let (title, user, cwd) = extract_snapshot_metadata(
             content.as_bytes(),
-            "codex",
             "/private/tmp/projY/s.jsonl",
             &options,
         );
@@ -2133,7 +2102,6 @@ mod tests {
         };
         let (title, user, cwd) = extract_snapshot_metadata(
             content.as_bytes(),
-            "claude",
             "/p/s.jsonl",
             &options,
         );

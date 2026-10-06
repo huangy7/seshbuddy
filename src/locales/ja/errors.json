@@ -72,7 +72,8 @@
     "batch_delete_failed": "一括削除の実行に失敗しました: {detail}",
     "open_failed": "パスを開けませんでした: {detail}",
     "reveal_failed": "ファイルマネージャーでの表示に失敗しました: {detail}",
-    "trash_failed": "ゴミ箱への移動に失敗しました: {detail}"
+    "trash_failed": "ゴミ箱への移動に失敗しました: {detail}",
+    "delete_unsupported": "{cli} のセッションは現在 SeshBuddy から削除できません。"
   },
   "proxy": {
     "traffic_db_missing": "トラフィックデータベースが存在しません",
@@ -169,7 +170,8 @@
     "script_path_not_utf8": "一時スクリプトのパスに非 UTF-8 文字が含まれています",
     "unsupported_platform": "未対応のプラットフォームです",
     "temp_script_create_failed": "一時スクリプトを作成できません: {detail}",
-    "not_found": "{cli} CLI が見つかりません"
+    "not_found": "{cli} CLI が見つかりません",
+    "no_sessions_dir": "{kind} にはセッションディレクトリがありません"
   },
   "context_menu": {
     "register_permission_denied": "登録に失敗しました。権限がありません。{detail}",

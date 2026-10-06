@@ -10,17 +10,6 @@ use tauri::{
     AppHandle, Emitter, Manager, Runtime,
 };
 
-fn tray_cli_label(kind: CliKind) -> &'static str {
-    match kind {
-        CliKind::Claude => "Claude",
-        CliKind::Codex => "Codex",
-        CliKind::Gemini => "Gemini",
-        CliKind::WorkBuddy => "WorkBuddy",
-        CliKind::Dsh => "DSH",
-        CliKind::Antigravity => "Antigravity",
-    }
-}
-
 fn build_cli_profiles_submenu<R: Runtime, M: Manager<R>>(
     manager: &M,
     kind: CliKind,
@@ -32,7 +21,7 @@ fn build_cli_profiles_submenu<R: Runtime, M: Manager<R>>(
     let mut submenu_builder = SubmenuBuilder::with_id(
         manager,
         format!("profiles:{}", cli_id),
-        tray_cli_label(kind),
+        crate::cli_registry::descriptor_for(kind).tray_label,
     );
 
     if profiles.is_empty() {
@@ -359,6 +348,27 @@ mod tests {
                 routed.find_iter(&compact).count(),
                 1,
                 "{name} 的托盘重建调用点没有走 tray::attribute_rebuild_error"
+            );
+        }
+    }
+
+    /// 托盘短名必须与改动前逐字相同。
+    #[test]
+    fn tray_labels_match_previous_values() {
+        use crate::cli::CliKind;
+        let expected = [
+            (CliKind::Claude, "Claude"),
+            (CliKind::Codex, "Codex"),
+            (CliKind::Gemini, "Gemini"),
+            (CliKind::WorkBuddy, "WorkBuddy"),
+            (CliKind::Dsh, "DSH"),
+            (CliKind::Antigravity, "Antigravity"),
+        ];
+        for (kind, label) in expected {
+            assert_eq!(
+                crate::cli_registry::descriptor_for(kind).tray_label,
+                label,
+                "{kind:?} 的托盘短名与改动前不同"
             );
         }
     }

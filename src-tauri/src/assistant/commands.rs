@@ -1,4 +1,3 @@
-use crate::cli::CliKind;
 use crate::app_db::SessionListIndexRecord;
 use crate::error::{AppError, AppResult};
 use crate::native_text::native_text;
@@ -124,9 +123,12 @@ fn is_valid_ref_prefix(prefix: &str) -> bool {
             .all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
 }
 
-/// 文件存在校验：渲染与点击之间会话文件可能已被删除
-fn session_file_exists(path: &str) -> bool {
-    std::path::Path::new(path).exists()
+/// 会话存在校验：渲染与点击之间会话可能已被删除。
+///
+/// 经会话存在性入口而非直接做文件系统判定：引用目标可能是库型会话（身份是 `cli://…`），
+/// 对它们做 `Path::exists()` 会恒为 false，一条正常的引用会被误判成「目标已消失」而抹掉。
+fn session_file_exists(cli_id: &str, path: &str) -> bool {
+    crate::app_db::session_exists(cli_id, path)
 }
 
 /// 批量解析引用前缀 → 会话目标；未找到/已删 → None（前端据此抹掉无效引用）。
@@ -134,7 +136,7 @@ fn session_file_exists(path: &str) -> bool {
 pub fn resolve_session_refs(prefixes: Vec<String>) -> AppResult<Vec<Option<SessionRef>>> {
     // 引用可来自任一 CLI：预载所有 kind 的索引
     let mut by_kind: Vec<(String, Vec<SessionListIndexRecord>)> = Vec::new();
-    for kind in CliKind::all() {
+    for kind in crate::cli::CliKind::ALL.iter().copied() {
         let index = crate::app_db::read_session_list_index(kind)?;
         by_kind.push((kind.id().to_string(), index.into_values().collect()));
     }
@@ -147,7 +149,7 @@ pub fn resolve_session_refs(prefixes: Vec<String>) -> AppResult<Vec<Option<Sessi
             by_kind
                 .iter()
                 .find_map(|(cli, records)| resolve_one_prefix(records, cli, p))
-                .filter(|r| session_file_exists(&r.file_path)) // 已删 → None
+                .filter(|r| session_file_exists(&r.cli_id, &r.file_path)) // 已删 → None
         })
         .collect())
 }
@@ -163,7 +165,7 @@ pub fn assistant_open_session(app: tauri::AppHandle, prefix: String) -> AppResul
 
     // 跨全部 CLI 找目标（复用 Task 1 的纯函数）
     let mut target: Option<SessionRef> = None;
-    for kind in CliKind::all() {
+    for kind in crate::cli::CliKind::ALL.iter().copied() {
         let index = crate::app_db::read_session_list_index(kind)?;
         let records: Vec<SessionListIndexRecord> = index.into_values().collect();
         if let Some(r) = resolve_one_prefix(&records, kind.id(), &prefix) {
@@ -172,7 +174,7 @@ pub fn assistant_open_session(app: tauri::AppHandle, prefix: String) -> AppResul
         }
     }
     let target = target
-        .filter(|r| session_file_exists(&r.file_path)) // 渲染与点击间被删 → 业务错误
+        .filter(|r| session_file_exists(&r.cli_id, &r.file_path)) // 渲染与点击间被删 → 业务错误
         .ok_or_else(|| AppError::coded("assistant.ref_target_missing"))?;
 
     let Some(main) = app.get_webview_window("main") else {
@@ -607,7 +609,12 @@ pub struct CacheStatus {
 pub fn assistant_cache_status() -> AppResult<CacheStatus> {
     let mut total = 0usize;
     let mut session_ids = std::collections::HashSet::new();
-    for kind in [crate::cli::CliKind::Claude, crate::cli::CliKind::Codex, crate::cli::CliKind::Gemini] {
+    // 与回填同源：统计范围由源声明的提取格式推导，保证「能回填」与「计入待补」的集合一致。
+    for kind in crate::cli::CliKind::ALL
+        .iter()
+        .copied()
+        .filter(|k| crate::cli_registry::source_for(*k).transcript_format().is_some())
+    {
         let index = crate::app_db::read_session_list_index(kind)?;
         total += index.len();
         session_ids.extend(index.values().map(|r| r.session_id.clone()));
@@ -930,10 +937,10 @@ mod tests {
         // 存在的文件：temp_dir 写唯一文件，测完清理
         let path = std::env::temp_dir().join(format!("seshbuddy-ref-test-{}.jsonl", std::process::id()));
         std::fs::write(&path, "{}").unwrap();
-        assert!(super::session_file_exists(&path.to_string_lossy()));
+        assert!(super::session_file_exists("claude", &path.to_string_lossy()));
         std::fs::remove_file(&path).unwrap();
         // 已删/不存在 → false
-        assert!(!super::session_file_exists(&path.to_string_lossy()));
+        assert!(!super::session_file_exists("claude", &path.to_string_lossy()));
     }
 
     #[test]
@@ -942,7 +949,7 @@ mod tests {
         let existing = std::env::current_exe().unwrap().to_string_lossy().into_owned();
         let records = vec![rec("aaaaaaaa-0000-0000-0000-000000000000", Some("kept"), None, &existing, 100)];
         let r = super::resolve_one_prefix(&records, "claude", "aaaaaaaa")
-            .filter(|r| super::session_file_exists(&r.file_path));
+            .filter(|r| super::session_file_exists(&r.cli_id, &r.file_path));
         assert!(r.is_some());
 
         // 不存在的文件路径 → filter 丢弃（对应「文件已删」状态）
@@ -954,7 +961,7 @@ mod tests {
             100,
         )];
         let r = super::resolve_one_prefix(&records_missing, "claude", "bbbbbbbb")
-            .filter(|r| super::session_file_exists(&r.file_path));
+            .filter(|r| super::session_file_exists(&r.cli_id, &r.file_path));
         assert!(r.is_none());
     }
 

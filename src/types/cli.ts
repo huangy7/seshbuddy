@@ -1,6 +1,17 @@
 import { t } from "../i18n";
 
-export type CliId = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity";
+/**
+ * 全部 CLI 的 id —— **前端唯一的手写清单**。
+ *
+ * 类型由它收窄派生，`isCliId` 由它判定。此前联合与判定链各写一份，加一个 CLI 要改两处，
+ * 而漏改 `isCliId` **不会有任何编译错误**：它会在运行时静默返回 false，那个 CLI 的会话
+ * 就整体不可见。收窄派生把这两处合成一处，判定链的漏写由此不可能发生。
+ *
+ * 与 Rust 侧的一致性由 `enumParity` 的 parity 测试钉住（判据取自 `CliKind::id()`）。
+ */
+export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity"] as const;
+
+export type CliId = (typeof CLI_IDS)[number];
 
 export interface CliDefinition {
   id: CliId;
@@ -212,7 +223,7 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
 export const SUPPORTED_CLIS = Object.values(CLI_DEFINITIONS);
 
 export function isCliId(value: string): value is CliId {
-  return value === "claude" || value === "codex" || value === "gemini" || value === "workbuddy" || value === "dsh" || value === "antigravity";
+  return (CLI_IDS as readonly string[]).includes(value);
 }
 
 export function getCliDefinition(id: CliId): CliDefinition {

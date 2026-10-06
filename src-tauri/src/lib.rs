@@ -8,6 +8,7 @@ mod app_db {
 mod error;
 mod streaming;
 mod cli;
+mod cli_registry;
 mod cli_config;
 mod paths;
 mod pty_manager;

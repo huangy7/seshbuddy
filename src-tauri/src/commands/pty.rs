@@ -25,7 +25,10 @@ pub fn create_pty_session(
                 None,
             )
         },
-        crate::commands::profile::build_claude_temp_settings_file,
+        |cli_kind| match crate::cli::CliKind::from_id(Some(cli_kind)) {
+            Ok(kind) => crate::cli_registry::source_for(kind).build_temp_settings(),
+            Err(_) => Ok(None),
+        },
     )?;
 
     let result = pty_manager::create_session(
@@ -49,20 +52,25 @@ pub fn create_pty_session(
     result
 }
 
-fn resolve_settings_file_for_pty<BuildProfile, BuildClaudeTemp>(
+/// 决定这次 PTY 启动用哪个 settings 文件。
+///
+/// 两个 builder 是注入进来的，**能力查询在 `build_temp` 里**（由生产调用方提供），
+/// 本函数不做 —— 这个接缝是测试唯一能强制制造「写临时配置失败」的地方，
+/// 把查询挪进来会删掉它。
+fn resolve_settings_file_for_pty<BuildProfile, BuildTemp>(
     cli_kind: &str,
     profile_name: Option<String>,
     build_profile: BuildProfile,
-    build_claude_temp: BuildClaudeTemp,
+    build_temp: BuildTemp,
 ) -> AppResult<Option<String>>
 where
     BuildProfile: FnOnce(&str, String) -> AppResult<String>,
-    BuildClaudeTemp: FnOnce() -> AppResult<String>,
+    BuildTemp: FnOnce(&str) -> AppResult<Option<String>>,
 {
     match profile_name {
         Some(name) if !name.is_empty() => build_profile(cli_kind, name).map(Some),
-        _ if cli_kind == "claude" => match build_claude_temp() {
-            Ok(path) => Ok(Some(path)),
+        _ => match build_temp(cli_kind) {
+            Ok(settings) => Ok(settings),
             Err(e) => {
                 tracing::warn!(
                     "[pty_command] failed to create Claude temp settings file; falling back to frontend status detection: {}",
@@ -71,7 +79,6 @@ where
                 Ok(None)
             }
         },
-        _ => Ok(None),
     }
 }
 
@@ -115,7 +122,7 @@ mod tests {
             "claude",
             None,
             |_cli_kind, _profile_name| unreachable!("no profile should not build profile settings"),
-            || Err(AppError::business("temp settings failed")),
+            |_cli_kind| Err(AppError::business("temp settings failed")),
         )
         .unwrap();
 
@@ -128,7 +135,7 @@ mod tests {
             "claude",
             Some("review".to_string()),
             |_cli_kind, _profile_name| Err(AppError::business("profile settings failed")),
-            || unreachable!("profile should not build no-profile temp settings"),
+            |_cli_kind| unreachable!("profile should not build no-profile temp settings"),
         )
         .unwrap_err();
 

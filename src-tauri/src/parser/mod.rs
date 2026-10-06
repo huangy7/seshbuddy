@@ -12,8 +12,8 @@ mod parse_bench;
 pub(crate) mod shared;
 pub(crate) mod workbuddy;
 
+use crate::cli_registry::{kind_for_path, source_for};
 use crate::error::AppResult;
-use crate::parser::shared::{scan_search_docs_from_text, scan_search_docs_with_extractor};
 use crate::session::{self, ChatMessage, SessionLoadResult, UsageRecord};
 use std::path::Path;
 
@@ -22,50 +22,8 @@ pub(crate) use codex::load_codex_index_titles;
 pub(crate) use workbuddy::load_workbuddy_custom_titles;
 pub use crate::session::SessionListMetadata;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum SessionKind {
-    Claude,
-    Codex,
-    Dsh,
-    Gemini,
-    WorkBuddy,
-    Antigravity,
-}
-
-/// 按文件路径判定会话种类（与解析源文件/归档时使用同一判定）。
-pub fn detect_kind(file_path: &str) -> SessionKind {
-    if file_path.contains("/.gemini/antigravity-cli/")
-        || file_path.contains("\\.gemini\\antigravity-cli\\")
-    {
-        SessionKind::Antigravity
-    } else if file_path.contains("/.dsh/") || file_path.contains("\\.dsh\\") {
-        SessionKind::Dsh
-    } else if file_path.contains("/.gemini/") || file_path.contains("\\.gemini\\") {
-        SessionKind::Gemini
-    } else if file_path.contains("/.codex/") || file_path.contains("\\.codex\\") {
-        SessionKind::Codex
-    } else if file_path.contains("/.workbuddy/") || file_path.contains("\\.workbuddy\\") {
-        SessionKind::WorkBuddy
-    } else {
-        SessionKind::Claude
-    }
-}
-
 pub(crate) fn parse_session_file(file_path: &str) -> AppResult<Vec<ChatMessage>> {
-    match detect_kind(file_path) {
-        SessionKind::Claude => claude::parse_session_file(file_path),
-        SessionKind::Codex => {
-            codex::parse_codex_session_file(file_path).map(|result| result.messages)
-        }
-        SessionKind::Dsh => dsh::parse_dsh_session_file(file_path),
-        SessionKind::Gemini => {
-            gemini::parse_gemini_session_file(file_path).map(|result| result.messages)
-        }
-        SessionKind::WorkBuddy => {
-            workbuddy::parse_workbuddy_session_file(file_path).map(|result| result.messages)
-        }
-        SessionKind::Antigravity => antigravity::parse_session_file(file_path),
-    }
+    source_for(kind_for_path(file_path)).parse(file_path)
 }
 
 pub(crate) fn parse_session_file_streaming<F>(
@@ -79,22 +37,8 @@ pub(crate) fn parse_session_file_streaming<F>(
 where
     F: FnMut(Vec<session::ChatMessage>) -> bool,
 {
-    match detect_kind(file_path) {
-        SessionKind::Claude => {
-            claude::parse_session_file_streaming(file_path, skip_sidechain, on_batch)
-        }
-        SessionKind::Codex => codex::parse_codex_session_file_streaming(file_path, on_batch),
-        SessionKind::Dsh => dsh::parse_dsh_session_file_streaming(file_path, on_batch),
-        SessionKind::Gemini => {
-            gemini::parse_gemini_session_file_streaming(file_path, on_batch)
-        }
-        SessionKind::WorkBuddy => {
-            workbuddy::parse_workbuddy_session_file_streaming(file_path, on_batch)
-        }
-        SessionKind::Antigravity => {
-            antigravity::parse_session_file_streaming(file_path, skip_sidechain, on_batch)
-        }
-    }
+    let mut cb = on_batch;
+    source_for(kind_for_path(file_path)).parse_streaming(file_path, skip_sidechain, &mut cb)
 }
 
 pub(crate) fn parse_session_incremental(
@@ -102,75 +46,25 @@ pub(crate) fn parse_session_incremental(
     offset: u64,
     skip_sidechain: bool,
 ) -> AppResult<SessionLoadResult> {
-    match detect_kind(file_path) {
-        SessionKind::Claude => claude::parse_session_incremental(file_path, offset, skip_sidechain),
-        SessionKind::Codex => codex::parse_codex_session_incremental(file_path, offset),
-        SessionKind::Dsh => dsh::parse_dsh_session_incremental(file_path, offset),
-        SessionKind::Gemini => gemini::parse_gemini_session_incremental(file_path, offset),
-        SessionKind::WorkBuddy => workbuddy::parse_workbuddy_session_incremental(file_path, offset),
-        SessionKind::Antigravity => antigravity::parse_session_incremental(file_path, offset),
-    }
+    source_for(kind_for_path(file_path)).parse_incremental(file_path, offset, skip_sidechain)
 }
 
 /// 从内存内容按会话类型解析消息（归档兜底用）。
-/// 与源文件路径解析保持一致：按 detect_kind 分派对应 CLI 的解析器，
+/// 与源文件路径解析保持一致：按 kind_for_path 分派对应 CLI 的解析器，
 /// 避免归档兜底误用通用 Claude 解析器导致 Codex/Gemini/WorkBuddy/Antigravity 归档解析出 0 条。
 pub(crate) fn parse_session_content_by_kind(
     file_path: &str,
     content: &str,
 ) -> Vec<session::ChatMessage> {
-    match detect_kind(file_path) {
-        SessionKind::Claude => claude::parse_session_from_string(content).unwrap_or_default(),
-        SessionKind::Codex => codex::parse_codex_session_from_string(content),
-        SessionKind::Dsh => dsh::parse_dsh_session_from_string(content),
-        SessionKind::Gemini => gemini::parse_gemini_session_from_string(content),
-        SessionKind::WorkBuddy => workbuddy::parse_workbuddy_session_from_string(content),
-        SessionKind::Antigravity => antigravity::parse_antigravity_session_from_string(content),
-    }
+    source_for(kind_for_path(file_path)).parse_from_content(content)
 }
 
 pub(crate) fn read_first_user_message(file_path: &str) -> Option<String> {
-    match detect_kind(file_path) {
-        SessionKind::Claude => claude::read_first_user_message(file_path),
-        SessionKind::Codex => codex::read_codex_first_user_message(file_path),
-        SessionKind::Dsh => dsh::read_first_user_message(file_path),
-        SessionKind::Gemini => gemini::read_gemini_first_user_message(file_path),
-        SessionKind::WorkBuddy => workbuddy::read_workbuddy_first_user_message(file_path),
-        SessionKind::Antigravity => antigravity::read_first_user_message(file_path),
-    }
+    source_for(kind_for_path(file_path)).first_user_message(file_path)
 }
 
 pub(crate) fn read_session_id(file_path: &str) -> Option<String> {
-    match detect_kind(file_path) {
-        SessionKind::Claude => Path::new(file_path)
-            .file_stem()
-            .and_then(|stem| stem.to_str())
-            .map(|stem| stem.to_string()),
-        SessionKind::Codex => codex::read_codex_session_meta_field(file_path, |payload| {
-            payload
-                .get("id")
-                .and_then(|v| v.as_str())
-                .map(|v| v.to_string())
-        })
-        .or_else(|| {
-            Path::new(file_path)
-                .file_stem()
-                .and_then(|stem| stem.to_str())
-                .and_then(|stem| stem.rsplit('-').next())
-                .map(|stem| stem.to_string())
-        }),
-        SessionKind::Dsh => dsh::read_session_id(file_path),
-        SessionKind::Gemini => gemini::read_gemini_header_field(file_path, "sessionId"),
-        SessionKind::WorkBuddy => {
-            workbuddy::read_workbuddy_header_field(file_path, "sessionId").or_else(|| {
-                Path::new(file_path)
-                    .file_stem()
-                    .and_then(|stem| stem.to_str())
-                    .map(|stem| stem.to_string())
-            })
-        }
-        SessionKind::Antigravity => antigravity::read_session_id(file_path),
-    }
+    source_for(kind_for_path(file_path)).session_id(file_path)
 }
 
 /// 解析会话所属的项目路径。
@@ -178,47 +72,17 @@ pub(crate) fn read_session_id(file_path: &str) -> Option<String> {
 /// 出口处收口到同一条不变量：**空白不是路径**（缺席是 `None`，不是空串）。
 /// 逐分支各写一次过滤会让某一个分支漏掉 —— `codex` 的 `session_meta` 分支就这么漏过一次。
 pub(crate) fn read_project_path(file_path: &str) -> Option<String> {
-    read_project_path_raw(file_path).filter(|value| !value.trim().is_empty())
-}
-
-fn read_project_path_raw(file_path: &str) -> Option<String> {
-    match detect_kind(file_path) {
-        SessionKind::Claude => None,
-        SessionKind::Codex => codex::read_codex_session_meta_field(file_path, |payload| {
-            payload
-                .get("cwd")
-                .and_then(|v| v.as_str())
-                .map(|v| v.to_string())
-        })
-        .or_else(|| codex::read_codex_turn_context_cwd(file_path)),
-        SessionKind::Dsh => dsh::read_project_path(file_path),
-        SessionKind::Gemini => None,
-        SessionKind::WorkBuddy => workbuddy::read_workbuddy_header_field(file_path, "cwd"),
-        SessionKind::Antigravity => antigravity::read_project_path(file_path),
-    }
+    source_for(kind_for_path(file_path))
+        .project_path_raw(file_path)
+        .filter(|value| !value.trim().is_empty())
 }
 
 pub(crate) fn extract_usage_records(file_path: &str, project: &str) -> Vec<UsageRecord> {
-    match detect_kind(file_path) {
-        SessionKind::Claude => claude::extract_usage_records(file_path, project),
-        SessionKind::Codex => codex::extract_usage_records(file_path, project),
-        SessionKind::Dsh => dsh::extract_usage_records(file_path, project),
-        SessionKind::Gemini => gemini::extract_gemini_usage_records(file_path, project),
-        SessionKind::Antigravity => antigravity::extract_usage_records(file_path, project),
-        // WorkBuddy 用量统计暂不接入
-        SessionKind::WorkBuddy => Vec::new(),
-    }
-}
-
-pub(crate) fn scan_session_metadata_only(file_path: &Path) -> Option<SessionListMetadata> {
-    let path_str = file_path.to_string_lossy().to_string();
-    match detect_kind(&path_str) {
-        SessionKind::Claude => claude::scan_claude_metadata_only(file_path),
-        SessionKind::Codex => codex::scan_codex_metadata_only(file_path),
-        SessionKind::Dsh => dsh::scan_session_metadata_only(file_path),
-        SessionKind::Gemini => gemini::scan_gemini_metadata_only(file_path),
-        SessionKind::WorkBuddy => workbuddy::scan_workbuddy_metadata_only(file_path),
-        SessionKind::Antigravity => antigravity::scan_session_metadata_only(file_path),
+    let kind = kind_for_path(file_path);
+    match source_for(kind).usage_stats() {
+        Some(feature) => feature.usage_records(file_path, project),
+        // 没有该能力 = 没有用量数据。改动前这里拿到的是空表，行为相同。
+        None => Vec::new(),
     }
 }
 
@@ -232,13 +96,7 @@ pub(crate) fn is_subagent_session(file_path: &str) -> bool {
     {
         return true;
     }
-    match detect_kind(file_path) {
-        SessionKind::Claude => false,
-        SessionKind::Codex => codex::is_codex_subagent_file(file_path),
-        SessionKind::Dsh => dsh::is_subagent_file(file_path),
-        SessionKind::Antigravity => antigravity::is_subagent_session(file_path),
-        _ => false,
-    }
+    source_for(kind_for_path(file_path)).is_subagent(file_path)
 }
 
 pub(crate) fn scan_session_search_docs_with_progress<F>(
@@ -248,47 +106,16 @@ pub(crate) fn scan_session_search_docs_with_progress<F>(
 where
     F: FnMut(SearchScanProgress),
 {
-    let path_str = file_path.to_string_lossy().to_string();
-    match detect_kind(&path_str) {
-        SessionKind::Claude => {
-            scan_search_docs_with_extractor(file_path, claude::extract_claude_role_text, on_progress)
-        }
-        SessionKind::Codex => {
-            scan_search_docs_with_extractor(file_path, codex::extract_codex_role_text, on_progress)
-        }
-        SessionKind::Dsh => dsh::scan_search_docs_with_progress(file_path, on_progress),
-        SessionKind::Gemini => {
-            scan_search_docs_with_extractor(file_path, gemini::extract_gemini_role_text, on_progress)
-        }
-        SessionKind::WorkBuddy => scan_search_docs_with_extractor(
-            file_path,
-            workbuddy::extract_workbuddy_role_text,
-            on_progress,
-        ),
-        SessionKind::Antigravity => scan_search_docs_with_extractor(
-            file_path,
-            antigravity::extract_antigravity_role_text,
-            on_progress,
-        ),
-    }
+    let key = file_path.to_string_lossy();
+    let mut cb = on_progress;
+    source_for(kind_for_path(&key)).search_docs(&key, &mut cb)
 }
 
 pub(crate) fn scan_session_search_docs_from_bytes(
     file_path: &str,
     content: &[u8],
 ) -> Option<Vec<SearchDocument>> {
-    match detect_kind(file_path) {
-        SessionKind::Claude => scan_search_docs_from_text(content, claude::extract_claude_role_text),
-        SessionKind::Codex => scan_search_docs_from_text(content, codex::extract_codex_role_text),
-        SessionKind::Dsh => dsh::scan_search_docs_from_bytes(content),
-        SessionKind::Gemini => scan_search_docs_from_text(content, gemini::extract_gemini_role_text),
-        SessionKind::WorkBuddy => {
-            scan_search_docs_from_text(content, workbuddy::extract_workbuddy_role_text)
-        }
-        SessionKind::Antigravity => {
-            scan_search_docs_from_text(content, antigravity::extract_antigravity_role_text)
-        }
-    }
+    source_for(kind_for_path(file_path)).search_docs_from_bytes(content)
 }
 
 #[cfg(test)]
@@ -296,7 +123,7 @@ mod result_string_class_error_shape {
     use super::*;
     use crate::error::AppError;
 
-    /// 六个 CLI 各一个路径，**按 `detect_kind` 的路由规则**落进对应分支。
+    /// 六个 CLI 各一个路径，**按 `kind_for_path` 的路由规则**落进对应分支。
     fn per_kind_paths(base: &str) -> Vec<(&'static str, String)> {
         vec![
             ("claude", format!("{base}/.claude/projects/p/gone.jsonl")),
@@ -408,18 +235,6 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     #[test]
-    fn detect_kind_routes_workbuddy_paths() {
-        assert!(matches!(
-            detect_kind("/Users/x/.workbuddy/projects/foo/sess.jsonl"),
-            SessionKind::WorkBuddy
-        ));
-        assert!(matches!(
-            detect_kind("/Users/x/.claude/projects/foo/sess.jsonl"),
-            SessionKind::Claude
-        ));
-    }
-
-    #[test]
     fn search_doc_scan_reports_file_byte_progress() {
         let unique = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -521,15 +336,6 @@ mod dispatch_tests {
     }
 
     #[test]
-    fn detect_kind_routes_by_path() {
-        assert_eq!(detect_kind("/Users/x/.claude/projects/a/b.jsonl"), SessionKind::Claude);
-        assert_eq!(detect_kind("/Users/x/.codex/sessions/a.jsonl"), SessionKind::Codex);
-        assert_eq!(detect_kind("/Users/x/.gemini/tmp/a.jsonl"), SessionKind::Gemini);
-        assert_eq!(detect_kind("/Users/x/.workbuddy/projects/p/a.jsonl"), SessionKind::WorkBuddy);
-        assert_eq!(detect_kind("/Users/x/.gemini/antigravity-cli/brain/s1/.system_generated/logs/transcript.jsonl"), SessionKind::Antigravity);
-    }
-
-    #[test]
     fn parse_content_by_kind_parses_each_format() {
         assert_eq!(parse_session_content_by_kind("/Users/x/.claude/projects/p/a.jsonl", claude_line()).len(), 1);
         assert_eq!(parse_session_content_by_kind("/Users/x/.codex/sessions/a.jsonl", codex_line()).len(), 1);
@@ -565,7 +371,8 @@ mod dispatch_tests {
         assert_eq!(docs.len(), 2);
         assert!(docs[0].search_text.contains("hello dsh"));
 
-        let metadata = scan_session_metadata_only(&path).expect("metadata");
+        let metadata =
+            source_for(kind_for_path(file_path)).metadata_only(file_path).expect("metadata");
         assert_eq!(metadata.session_id, "sess-1");
         assert_eq!(metadata.project_path.as_deref(), Some("/Users/x/proj"));
     }
@@ -597,7 +404,8 @@ mod dispatch_tests {
         assert_eq!(docs.len(), 2);
         assert!(docs[0].search_text.contains("hello antigravity"));
 
-        let metadata = scan_session_metadata_only(&path).expect("metadata");
+        let metadata =
+            source_for(kind_for_path(file_path)).metadata_only(file_path).expect("metadata");
         assert_eq!(metadata.session_id, "agy-sess-1");
     }
 

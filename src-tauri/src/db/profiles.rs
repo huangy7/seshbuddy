@@ -1,4 +1,4 @@
-use super::{conn, now_rfc3339};
+use super::{conn, now_rfc3339, write_tx};
 use crate::cli::CliKind;
 use crate::error::{AppError, AppResult};
 use nanoid::nanoid;
@@ -83,7 +83,7 @@ pub(crate) fn save_profile_with(
     serde_json::from_str::<Value>(content)?;
 
     let normalized = normalize_profile_name(&name);
-    let tx = conn.transaction()?;
+    let tx = write_tx(conn)?;
 
     let created_at: Option<String> = tx
         .query_row(
@@ -144,7 +144,7 @@ pub(crate) fn delete_profile(kind: CliKind, name: &str) -> AppResult<()> {
 
 pub(crate) fn delete_profile_with(conn: &mut Connection, kind: CliKind, name: &str) -> AppResult<()> {
     let normalized = normalize_profile_name(name);
-    let tx = conn.transaction()?;
+    let tx = write_tx(conn)?;
 
     let deleted: bool = tx
         .query_row(
@@ -201,7 +201,7 @@ pub(crate) fn rename_profile_with(
     let old_normalized = normalize_profile_name(&old_name);
     let new_normalized = normalize_profile_name(&new_name);
 
-    let tx = conn.transaction()?;
+    let tx = write_tx(conn)?;
 
     let existing_old: Option<String> = tx
         .query_row(
@@ -384,7 +384,7 @@ pub(crate) fn create_profile_tab_with(
     }
 
     let id = nanoid!(10);
-    let tx = conn.transaction()?;
+    let tx = write_tx(conn)?;
 
     let sort_order: i32 = tx.query_row(
         "SELECT COALESCE(MAX(sort_order), -1) + 1 FROM profile_tabs WHERE cli_id = ?1",
@@ -431,7 +431,7 @@ pub(crate) fn update_profile_tab_with(
     name: Option<String>,
     dirs: Option<Vec<String>>,
 ) -> AppResult<TabInfo> {
-    let tx = conn.transaction()?;
+    let tx = write_tx(conn)?;
 
     let existing = tx
         .query_row(
@@ -518,7 +518,7 @@ pub(crate) fn delete_profile_tab_with(conn: &mut Connection, tab_id: &str) -> Ap
         return Err(AppError::coded("profile.global_tab_undeletable"));
     }
 
-    let tx = conn.transaction()?;
+    let tx = write_tx(conn)?;
 
     tx.execute(
         "DELETE FROM active_profiles WHERE scope = ?1",
@@ -731,7 +731,7 @@ pub(crate) fn import_profile_tab(tab: &TabInfo) -> AppResult<()> {
 }
 
 pub(crate) fn import_profile_tab_with(conn: &mut Connection, tab: &TabInfo) -> AppResult<()> {
-    let tx = conn.transaction()?;
+    let tx = write_tx(conn)?;
     let now = now_rfc3339();
 
     tx.execute(

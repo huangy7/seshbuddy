@@ -1,11 +1,9 @@
-use crate::cli::{self, CliKind};
-use crate::cli_config::{
-    read_json_file, read_toml_file, settings_path_for, write_atomically, write_json_file,
-    write_toml_file,
-};
+use crate::cli::CliKind;
+use crate::cli_config::write_atomically;
+use crate::cli_registry::source_for;
 use crate::error::{AppError, AppResult};
 use crate::paths::app_data_dir;
-use crate::{history, parser, session};
+use crate::{parser, session};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -141,20 +139,13 @@ pub struct SessionTrafficList {
 
 // ─── Path helpers ────────────────────────────────────────────────────
 
-/// DSH 代理本期及整个实施计划均不支持:所有 Dsh 代理分支均返回 Err。
-/// 此端口仅是满足 match 穷尽性的占位值,实际不会被读取(永不生效)。
-const DSH_PROXY_UNUSED_PORT: u16 = 18088;
-
+/// 该 CLI 上报的代理端口。
+///
+/// 取自描述符而非代理能力：`default_proxy_status` 对**所有** CLI 都会读它并放进返回给前端的
+/// `ProxyStatus`，而 Gemini / WorkBuddy 没有代理能力却各有自己的端口号。
+/// 端口因此是逐 CLI 数据，不是「有没有这个能力」的问题。
 pub fn default_port_for(kind: CliKind) -> u16 {
-    match kind {
-        CliKind::Claude => 18080,
-        CliKind::Codex => 18082,
-        CliKind::Gemini => 18084,
-        CliKind::WorkBuddy => 18086,
-        // DSH 代理暂不支持,占位端口,实际永不生效
-        CliKind::Dsh => DSH_PROXY_UNUSED_PORT,
-        CliKind::Antigravity => DSH_PROXY_UNUSED_PORT,
-    }
+    crate::cli_registry::descriptor_for(kind).proxy_port
 }
 
 fn default_ws_port_for(kind: CliKind) -> u16 {
@@ -310,6 +301,39 @@ fn terminate_process_best_effort(pid: u32) {
 #[cfg(test)]
 mod proxy_pid_tests {
     use super::*;
+
+    /// 代理端口必须与改动前逐字相同。
+    ///
+    /// 这个值经 IPC 返回给前端，且**每个 CLI 都有**（含没有代理能力的那些）——
+    /// 改错不会编译失败，只会静默改变上报值。Gemini 与 WorkBuddy 尤其容易出错：
+    /// 它们用不了代理，却各自有 18084 / 18086。
+    ///
+    /// 六个值一律写字面量，不用 `NO_PROXY_PORT` 常量代替：拿常量去断言常量是自指的，
+    /// 常量本身漂移时测试照样绿。常量另有一条断言钉住。
+    #[test]
+    fn proxy_ports_match_previous_values() {
+        use crate::cli::CliKind;
+        assert_eq!(
+            crate::cli_registry::NO_PROXY_PORT,
+            18088,
+            "无代理能力的上报端口常量变了"
+        );
+        let expected = [
+            (CliKind::Claude, 18080),
+            (CliKind::Codex, 18082),
+            (CliKind::Gemini, 18084),
+            (CliKind::WorkBuddy, 18086),
+            (CliKind::Dsh, 18088),
+            (CliKind::Antigravity, 18088),
+        ];
+        for (kind, port) in expected {
+            assert_eq!(
+                default_port_for(kind),
+                port,
+                "{kind:?} 的代理端口与改动前不同"
+            );
+        }
+    }
 
     #[test]
     fn parse_pid_file_content_accepts_positive_pid() {
@@ -512,124 +536,27 @@ fn validate_url(url: &str) -> AppResult<()> {
     Ok(())
 }
 
-fn codex_default_base_url() -> String {
-    "https://api.openai.com/v1".to_string()
-}
-
 fn default_base_url_for(kind: CliKind) -> String {
-    match kind {
-        CliKind::Claude => "https://api.anthropic.com".to_string(),
-        CliKind::Codex => codex_default_base_url(),
-        CliKind::Gemini => String::new(),
-        CliKind::WorkBuddy => String::new(),
-        CliKind::Dsh => String::new(),
-        CliKind::Antigravity => String::new(),
-    }
+    source_for(kind).api_proxy().map(|feature| feature.default_base_url()).unwrap_or_default()
 }
 
 fn get_base_url_for_cli(kind: CliKind) -> AppResult<String> {
-    match kind {
-        CliKind::Claude => {
-            let settings = read_json_file(&settings_path_for(kind)?, "{}")?;
-            Ok(settings
-                .get("env")
-                .and_then(|env| env.get("ANTHROPIC_BASE_URL"))
-                .and_then(|v| v.as_str())
-                .unwrap_or("https://api.anthropic.com")
-                .to_string())
-        }
-        CliKind::Codex => {
-            let config = read_toml_file(&settings_path_for(kind)?)?;
-            let provider_id = config
-                .get("model_provider")
-                .and_then(|v| v.as_str())
-                .map(str::trim)
-                .filter(|v| !v.is_empty())
-                .unwrap_or("openai-chat-completions");
-            Ok(config
-                .get("model_providers")
-                .and_then(|v| v.as_table())
-                .and_then(|providers| providers.get(provider_id))
-                .and_then(|v| v.as_table())
-                .and_then(|provider| provider.get("base_url"))
-                .and_then(|v| v.as_str())
-                .unwrap_or("https://api.openai.com/v1")
-                .to_string())
-        }
+    match source_for(kind).api_proxy() {
+        Some(feature) => feature.base_url(),
         // 四种 CLI 是**同一句文案**，共用 `proxy.unsupported_kind`，CLI 展示名进 `params.kind`
         // （`CliKind::name()` 是品牌名，四语同值，不是需要本地化的文本）；
         // 拆成四个码会让同一句话在语言包里出现四遍。
-        CliKind::Gemini | CliKind::WorkBuddy | CliKind::Dsh | CliKind::Antigravity => {
-            Err(AppError::coded("proxy.unsupported_kind").with("kind", kind.name()))
-        }
+        None => Err(AppError::coded("proxy.unsupported_kind").with("kind", kind.name())),
     }
 }
 
 fn set_base_url_for_cli(kind: CliKind, url: &str) -> AppResult<()> {
-    match kind {
-        CliKind::Claude => {
-            let path = settings_path_for(kind)?;
-            let mut settings = read_json_file(&path, "{}")?;
-            let env = settings
-                .as_object_mut()
-                .ok_or(AppError::coded("proxy.settings_not_object"))?
-                .entry("env")
-                .or_insert_with(|| serde_json::json!({}));
-            env.as_object_mut().ok_or(AppError::coded("proxy.env_not_object"))?.insert(
-                "ANTHROPIC_BASE_URL".to_string(),
-                serde_json::Value::String(url.to_string()),
-            );
-            write_json_file(&path, &settings)
-        }
-        CliKind::Codex => {
-            let path = settings_path_for(kind)?;
-            let mut config = read_toml_file(&path)?;
-            if !config.is_table() {
-                config = toml::Value::Table(toml::map::Map::new());
-            }
-            let root = config.as_table_mut().ok_or(AppError::coded("proxy.codex_config_not_table"))?;
-            let provider_id = root
-                .get("model_provider")
-                .and_then(|v| v.as_str())
-                .map(str::trim)
-                .filter(|v| !v.is_empty())
-                .unwrap_or("openai-chat-completions")
-                .to_string();
-            root.insert(
-                "model_provider".to_string(),
-                toml::Value::String(provider_id.clone()),
-            );
-
-            let providers = root
-                .entry("model_providers".to_string())
-                .or_insert_with(|| toml::Value::Table(toml::map::Map::new()));
-            if !providers.is_table() {
-                *providers = toml::Value::Table(toml::map::Map::new());
-            }
-            let providers_table = providers
-                .as_table_mut()
-                .ok_or(AppError::coded("proxy.model_providers_not_table"))?;
-            let provider_entry = providers_table
-                .entry(provider_id)
-                .or_insert_with(|| toml::Value::Table(toml::map::Map::new()));
-            if !provider_entry.is_table() {
-                *provider_entry = toml::Value::Table(toml::map::Map::new());
-            }
-            let provider_table = provider_entry
-                .as_table_mut()
-                .ok_or(AppError::coded("proxy.provider_config_not_table"))?;
-            provider_table.insert("base_url".to_string(), toml::Value::String(url.to_string()));
-            provider_table
-                .entry("wire_api".to_string())
-                .or_insert_with(|| toml::Value::String("responses".to_string()));
-            write_toml_file(&path, &config)
-        }
+    match source_for(kind).api_proxy() {
+        Some(feature) => feature.set_base_url(url),
         // 四种 CLI 是**同一句文案**，共用 `proxy.unsupported_kind`，CLI 展示名进 `params.kind`
         // （`CliKind::name()` 是品牌名，四语同值，不是需要本地化的文本）；
         // 拆成四个码会让同一句话在语言包里出现四遍。
-        CliKind::Gemini | CliKind::WorkBuddy | CliKind::Dsh | CliKind::Antigravity => {
-            Err(AppError::coded("proxy.unsupported_kind").with("kind", kind.name()))
-        }
+        None => Err(AppError::coded("proxy.unsupported_kind").with("kind", kind.name())),
     }
 }
 
@@ -869,7 +796,7 @@ pub fn disable(kind: Option<CliKind>) -> AppResult<()> {
         }
         None => {
             let mut disabled_any = false;
-            for cli_kind in CliKind::all() {
+            for cli_kind in crate::cli::CliKind::ALL.iter().copied() {
                 disabled_any |= disable_kind(cli_kind)?;
             }
             if disabled_any {
@@ -896,7 +823,7 @@ pub fn status(kind: Option<CliKind>) -> AppResult<ProxyStatus> {
         return status_for_kind(kind);
     }
 
-    for cli_kind in CliKind::all() {
+    for cli_kind in crate::cli::CliKind::ALL.iter().copied() {
         let status = status_for_kind(cli_kind)?;
         if status.enabled || status.running {
             return Ok(status);
@@ -942,13 +869,13 @@ fn check_consistency_for_kind(kind: CliKind) {
 
 pub fn check_consistency() {
     tracing::info!("Checking proxy state consistency");
-    for kind in CliKind::all() {
+    for kind in crate::cli::CliKind::ALL.iter().copied() {
         check_consistency_for_kind(kind);
     }
 }
 
 pub fn cleanup_stale_proxy_processes() {
-    for kind in CliKind::all() {
+    for kind in crate::cli::CliKind::ALL.iter().copied() {
         let Some(pid) = read_proxy_pid_file(kind) else {
             continue;
         };
@@ -983,7 +910,7 @@ fn cleanup_dead_proxy(kind: CliKind, state: &ProxyState) {
 
 /// Called from lib.rs on app exit to clean up proxy subprocesses
 pub fn cleanup_on_exit() {
-    for kind in CliKind::all() {
+    for kind in crate::cli::CliKind::ALL.iter().copied() {
         if let Ok(Some(state)) = read_proxy_state(kind) {
             if state.enabled {
                 tracing::info!("App exiting, cleaning up proxy for {}", kind.id());
@@ -1119,11 +1046,12 @@ pub fn session_traffic_timestamps(session_id: &str, kind: CliKind) -> Vec<String
         Ok(c) => c,
         Err(_) => return vec![],
     };
-    let path_filter = match kind {
-        CliKind::Claude => "(path LIKE '/v1/messages%' AND path NOT LIKE '/v1/messages/count_tokens%')",
-        CliKind::Codex => "(path LIKE '/v1/responses%' OR path LIKE '/v1/chat/completions%' OR path LIKE '/chat/completions%' OR path LIKE '/responses%')",
-        CliKind::Gemini | CliKind::WorkBuddy | CliKind::Dsh | CliKind::Antigravity => return vec![],
+    // 抓包过滤谓词取自能力：它与 `find_traffic_by_timestamp` 用的是同一份谓词，
+    // 两处各写一遍 match 迟早分叉。没有代理能力的 CLI 没有流量可查，直接返回空。
+    let Some(feature) = crate::cli_registry::source_for(kind).api_proxy() else {
+        return vec![];
     };
+    let path_filter = feature.traffic_path_filter();
     let sql = format!(
         "SELECT timestamp FROM traffic WHERE session_id = ?1 AND cli_id = ?2 AND {path_filter} ORDER BY timestamp"
     );
@@ -1322,75 +1250,9 @@ pub fn get_traffic_sessions(
 fn load_session_metadata(
     kind: CliKind,
 ) -> AppResult<(HashMap<String, String>, HashMap<String, Option<String>>)> {
-    match kind {
-        CliKind::Claude | CliKind::Codex => {
-            let history_path = cli::history_path(kind)?;
-            // history.jsonl 只解析一次，同时拿到 display 兜底 map 与项目路径 map
-            // （此前 Claude 分支解析了两遍，sessions 全量拉取时 CPU 翻倍）
-            let (history_map, history_project_map) = match kind {
-                CliKind::Claude => history::parse_history(history_path.to_str().unwrap_or("")),
-                _ => (
-                    history::parse_codex_history(history_path.to_str().unwrap_or("")),
-                    HashMap::new(),
-                ),
-            };
-            let mut project_map = match kind {
-                CliKind::Claude => build_claude_session_project_map(
-                    &cli::sessions_dir(kind)?,
-                    &history_project_map,
-                ),
-                _ => build_codex_session_project_map(&cli::sessions_dir(kind)?),
-            };
-
-            // 会话列表索引库：自定义重命名 / 原生标题 / 清洗后首条用户消息 / 项目路径
-            let records = crate::app_db::read_session_list_index(kind).unwrap_or_default();
-            let custom_names = crate::app_db::load_session_names().unwrap_or_default();
-            let mut display_map = HashMap::new();
-            for record in records.values() {
-                let sid = record.session_id.trim();
-                if sid.is_empty() {
-                    continue;
-                }
-                let display = crate::title_resolver::resolve_display_name(
-                    crate::commands::session::custom_session_name(
-                        &custom_names,
-                        kind,
-                        &record.session_path,
-                    ),
-                    record.title.as_deref(),
-                    record.first_user_message.as_deref(),
-                    history_map
-                        .get(sid)
-                        .map(|h| h.display.as_str())
-                        .filter(|v| !v.is_empty()),
-                    sid,
-                );
-                display_map.insert(sid.to_string(), display);
-                if let Some(p) = record.project_path.as_ref().filter(|p| !p.trim().is_empty()) {
-                    project_map.insert(sid.to_string(), Some(p.clone()));
-                }
-            }
-
-            // 兜底：对仅在 history_map 中出现（索引库尚未收录）的 session，使用 history display 解析
-            for (sid, hist) in &history_map {
-                if !display_map.contains_key(sid) {
-                    let display = crate::title_resolver::resolve_display_name(
-                        None,
-                        None,
-                        None,
-                        Some(hist.display.as_str()).filter(|v| !v.is_empty()),
-                        sid,
-                    );
-                    display_map.insert(sid.clone(), display);
-                }
-            }
-
-            Ok((display_map, project_map))
-        }
-        CliKind::Gemini => Ok((HashMap::new(), HashMap::new())),
-        CliKind::WorkBuddy => Ok((HashMap::new(), HashMap::new())),
-        CliKind::Dsh => Ok((HashMap::new(), HashMap::new())),
-        CliKind::Antigravity => Ok((HashMap::new(), HashMap::new())),
+    match source_for(kind).api_proxy() {
+        Some(feature) => feature.session_display_maps(),
+        None => Ok((HashMap::new(), HashMap::new())),
     }
 }
 
@@ -1413,7 +1275,13 @@ fn collect_jsonl_files(dir: &Path, files: &mut Vec<PathBuf>) -> AppResult<()> {
     Ok(())
 }
 
-fn build_claude_session_project_map(
+/// 构造 Claude 会话的项目路径映射。
+///
+/// `pub(crate)` 是因为 Claude 的代理能力实现（在 `cli_registry/sources/claude.rs`）要用它，
+/// 于是形成 `cli_registry` → `proxy` 的回调，而 `proxy` 又依赖 `cli_registry`。
+/// 这是**刻意接受的临时状态**：这两个辅助函数是 Claude / Codex 各自的会话布局知识，
+/// 终态是搬进各自的源文件（那会连带改动它们的其他调用方，属更大的搬迁）。
+pub(crate) fn build_claude_session_project_map(
     projects_dir: &Path,
     project_map: &HashMap<String, String>,
 ) -> HashMap<String, Option<String>> {
@@ -1451,7 +1319,9 @@ fn build_claude_session_project_map(
     map
 }
 
-fn build_codex_session_project_map(sessions_dir: &Path) -> HashMap<String, Option<String>> {
+/// 构造 Codex 会话的项目路径映射。`pub(crate)` 与回调方向的理由同
+/// [`build_claude_session_project_map`]。
+pub(crate) fn build_codex_session_project_map(sessions_dir: &Path) -> HashMap<String, Option<String>> {
     let mut map = HashMap::new();
     let mut files = Vec::new();
     if collect_jsonl_files(sessions_dir, &mut files).is_err() {
@@ -1728,14 +1598,10 @@ pub fn find_traffic_by_timestamp(
     };
 
     let query_kind = kind.ok_or_else(|| AppError::coded("proxy.find_by_timestamp_cli_missing"))?;
-    let path_filter = match query_kind {
-        CliKind::Claude => "(path LIKE '/v1/messages%' AND path NOT LIKE '/v1/messages/count_tokens%')",
-        CliKind::Codex => "(path LIKE '/v1/responses%' OR path LIKE '/v1/chat/completions%' OR path LIKE '/chat/completions%' OR path LIKE '/responses%')",
-        CliKind::Gemini => "1=0",
-        CliKind::WorkBuddy => "1=0",
-        CliKind::Dsh => "1=0",
-        CliKind::Antigravity => "1=0",
-    };
+    let path_filter = source_for(query_kind)
+        .api_proxy()
+        .map(|feature| feature.traffic_path_filter())
+        .unwrap_or("1=0");
     let sql = format!(
         "SELECT {TRAFFIC_DETAIL_COLUMNS}
          FROM traffic

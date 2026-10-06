@@ -134,6 +134,15 @@ fn file_signature(path: &str) -> anyhow::Result<Option<(i64, i64)>> {
     }
 }
 
+/// 解析会话所属 CLI 的提取格式；无对应格式时显式报错。
+///
+/// 绝不退回某种默认格式：结构对不上的内容照样能写进缓存，读取侧无从分辨，
+/// 用户拿到的是错误的会话正文。报错让调用方（show / grep）以退出码 1 暴露。
+fn format_for_cli(cli_id: &str) -> anyhow::Result<transcript_store::extract::CliFormat> {
+    transcript_store::extract::CliFormat::from_cli_id(cli_id)
+        .ok_or_else(|| anyhow::anyhow!("unsupported cli for transcript extraction: {}", cli_id))
+}
+
 /// 同步按需提取：确保 session 缓存新鲜。返回 false = 会话不在索引（exit 3）。
 /// 源文件已删 → gone 终态（不追溯归档）。IO 错误向上抛（不写状态，下次重试）。
 pub fn ensure_fresh(session_id: &str, cli: Option<&str>) -> anyhow::Result<bool> {
@@ -163,7 +172,10 @@ pub fn ensure_fresh(session_id: &str, cli: Option<&str>) -> anyhow::Result<bool>
                 ExtractPlan::Append { skip_raw_lines, base_seq } => (skip_raw_lines, base_seq),
                 _ => (0, 0),
             };
-            let out = extract(reader, transcript_store::extract::CliFormat::from_cli_id(&cli_id), skip, base);
+            // 无提取格式的 CLI 必须显式报错：若退回某种格式解析，产出的是结构对不上
+            // 却仍被写入缓存的内容，读取侧无从分辨，用户拿到的是错误的会话正文。
+            let format = format_for_cli(&cli_id)?;
+            let out = extract(reader, format, skip, base);
             write_extraction(cache_conn, session_id, &cli_id, mtime_ms, size, plan, out)?;
             Ok(true)
         }
@@ -633,6 +645,17 @@ mod tests {
             "transcript_cache.db 应位于 com.seshbuddy.app/assistant/ 下，实际: {:?}",
             p
         );
+    }
+
+    #[test]
+    fn format_for_cli_rejects_unsupported_cli() {
+        // 认识的 CLI 正常返回格式
+        assert!(super::format_for_cli("claude").is_ok());
+        assert!(super::format_for_cli("workbuddy").is_ok());
+        // Dsh / Antigravity 无提取格式：必须报明确错误，不得退回默认格式解析
+        let err = super::format_for_cli("dsh").unwrap_err();
+        assert_eq!(err.to_string(), "unsupported cli for transcript extraction: dsh");
+        assert!(super::format_for_cli("antigravity").is_err());
     }
 
     #[test]

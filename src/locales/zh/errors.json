@@ -72,7 +72,8 @@
     "batch_delete_failed": "批量删除执行失败: {detail}",
     "open_failed": "打开路径失败: {detail}",
     "reveal_failed": "在文件管理器中显示失败: {detail}",
-    "trash_failed": "移入回收站失败: {detail}"
+    "trash_failed": "移入回收站失败: {detail}",
+    "delete_unsupported": "{cli} 的会话暂不支持在 SeshBuddy 内删除。"
   },
   "proxy": {
     "traffic_db_missing": "流量数据库不存在",
@@ -169,7 +170,8 @@
     "script_path_not_utf8": "临时脚本路径含非 UTF-8 字符",
     "unsupported_platform": "不支持的平台",
     "temp_script_create_failed": "无法创建临时脚本: {detail}",
-    "not_found": "未检测到 {cli} CLI"
+    "not_found": "未检测到 {cli} CLI",
+    "no_sessions_dir": "{kind} 没有会话目录"
   },
   "context_menu": {
     "register_permission_denied": "注册失败，权限不足。{detail}",

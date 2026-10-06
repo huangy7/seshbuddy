@@ -65,7 +65,7 @@ fn build_runtime(app: AppHandle) -> AppResult<SessionIndexWatcherRuntime> {
     spawn_refresh_worker(app, refresh_rx);
 
     let mut watchers = Vec::new();
-    for kind in CliKind::all() {
+    for kind in crate::cli::CliKind::ALL.iter().copied() {
         let data_dir = cli::data_dir(kind)?;
         if !data_dir.exists() {
             tracing::info!(
@@ -168,51 +168,7 @@ fn is_relevant_session_path(path: &Path, kind: CliKind, sessions_dir: &Path) -> 
         return false;
     }
 
-    match kind {
-        CliKind::Antigravity => {
-            if path.file_name().and_then(|n| n.to_str()) == Some("transcript.jsonl") {
-                return true;
-            }
-            if let Some(parent) = path.parent() {
-                if parent == sessions_dir {
-                    return true;
-                }
-            }
-            false
-        }
-        CliKind::Claude => {
-            if path_str.contains("/subagents/") || path_str.contains("\\subagents\\") {
-                return false;
-            }
-            if path.extension().and_then(|e| e.to_str()) == Some("jsonl") {
-                return true;
-            }
-            if let Some(parent) = path.parent() {
-                if parent.parent() == Some(sessions_dir) || parent == sessions_dir {
-                    return true;
-                }
-            }
-            false
-        }
-        CliKind::Codex => {
-            // Codex 会话文件为 sessions/YYYY/MM/DD/rollout-*.jsonl（扫描端 collect_jsonl_files 仅收 .jsonl）
-            path.extension().and_then(|e| e.to_str()) == Some("jsonl")
-        }
-        CliKind::Gemini => {
-            // Gemini 会话文件为 tmp/<hash>/chats/session-*.jsonl
-            path.extension().and_then(|e| e.to_str()) == Some("jsonl")
-        }
-        CliKind::WorkBuddy => {
-            path.extension().and_then(|e| e.to_str()) == Some("jsonl")
-        }
-        CliKind::Dsh => {
-            // 会话日志按格式代命名（session.jsonl / session.v3.jsonl[.zstd] 等），
-            // 新建会话或迁移到新一代都会以新文件名落盘。按规范代名判定，代际升级后
-            // 的新会话才能触发重扫，否则新会话要等到下一次启动才出现在列表里。
-            let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-            crate::parser::dsh::parse_generation_log_filename(file_name).is_some()
-        }
-    }
+    crate::cli_registry::source_for(kind).is_session_event_path(path, sessions_dir)
 }
 
 fn spawn_refresh_worker(app: AppHandle, refresh_rx: Receiver<CliKind>) {

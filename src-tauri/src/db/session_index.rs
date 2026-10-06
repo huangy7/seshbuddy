@@ -1,4 +1,4 @@
-use super::{conn, now_rfc3339};
+use super::{conn, now_rfc3339, session_exists, write_tx};
 use crate::cli::CliKind;
 use crate::error::AppResult;
 use rusqlite::{params, params_from_iter, types::Value as SqlValue, Connection};
@@ -59,7 +59,7 @@ pub(crate) fn load_session_names() -> AppResult<HashMap<String, String>> {
 
 pub(crate) fn write_session_names(names: &HashMap<String, String>) -> AppResult<()> {
     let mut conn = conn()?;
-    let tx = conn.transaction()?;
+    let tx = write_tx(&mut conn)?;
     tx.execute("DELETE FROM session_names", [])?;
 
     let now = now_rfc3339();
@@ -76,7 +76,16 @@ pub(crate) fn write_session_names(names: &HashMap<String, String>) -> AppResult<
     Ok(())
 }
 
-fn map_session_list_index_record(row: &rusqlite::Row<'_>) -> rusqlite::Result<SessionListIndexRecord> {
+/// 行 → 记录。`cli_id` 由调用方传入而非从 `row` 读：本 `SELECT` 不含该列，
+/// 且每个调用点本就持有它（`CliKind` 或裸 id 串），再取一列只会多一处可能漂移的副本。
+///
+/// `is_archived` 里的「文件是否还在」经会话存在性入口判定而非直接 `Path::exists()`：
+/// 库型会话的身份是 `cli://…` 而非文件路径，对它们做文件系统判定会恒为「不存在」，
+/// 于是一个仍在的会话被误标成已归档。
+fn map_session_list_index_record(
+    row: &rusqlite::Row<'_>,
+    cli_id: &str,
+) -> rusqlite::Result<SessionListIndexRecord> {
     let session_path: String = row.get(0)?;
     let has_archive_snapshot: bool = row.get(10)?;
     Ok(SessionListIndexRecord {
@@ -91,7 +100,7 @@ fn map_session_list_index_record(row: &rusqlite::Row<'_>) -> rusqlite::Result<Se
         file_size: row.get::<_, i64>(8)? as u64,
         modified_ms: row.get(9)?,
         has_archive_snapshot,
-        is_archived: has_archive_snapshot && !Path::new(&session_path).exists(),
+        is_archived: has_archive_snapshot && !session_exists(cli_id, &session_path),
     })
 }
 
@@ -167,7 +176,7 @@ pub(crate) fn read_session_list_index_page(
     )?;
     let rows = stmt.query_map(
         params![kind.id(), limit as i64, offset as i64],
-        map_session_list_index_record,
+        |row| map_session_list_index_record(row, kind.id()),
     )?;
 
     let mut result = Vec::new();
@@ -200,7 +209,9 @@ pub(crate) fn read_session_list_index(
             ORDER BY session_path ASC
             "#,
     )?;
-    let rows = stmt.query_map(params![kind.id()], map_session_list_index_record)?;
+    let rows = stmt.query_map(params![kind.id()], |row| {
+        map_session_list_index_record(row, kind.id())
+    })?;
 
     let mut result = HashMap::new();
     for row in rows {
@@ -247,7 +258,7 @@ pub(crate) fn search_session_ids(
     )?;
     let rows = stmt.query_map(
         params![kind.id(), trimmed, limit as i64],
-        map_session_list_index_record,
+        |row| map_session_list_index_record(row, kind.id()),
     )?;
 
     let mut result = Vec::new();
@@ -307,7 +318,7 @@ fn search_session_titles_inner(
     )?;
     let rows = stmt.query_map(
         params![cli_id, pattern, limit as i64],
-        map_session_list_index_record,
+        |row| map_session_list_index_record(row, cli_id),
     )?;
     let mut out = Vec::new();
     for row in rows {
@@ -325,7 +336,7 @@ pub(crate) fn upsert_session_list_index(
     }
 
     let mut conn = conn()?;
-    let tx = conn.transaction()?;
+    let tx = write_tx(&mut conn)?;
     let now = now_rfc3339();
 
     for record in records {
@@ -388,7 +399,7 @@ pub(crate) fn delete_session_list_index_paths(
     }
 
     let mut conn = conn()?;
-    let tx = conn.transaction()?;
+    let tx = write_tx(&mut conn)?;
 
     for session_path in session_paths {
         tx.execute(
@@ -520,7 +531,9 @@ pub(crate) fn read_session_list_index_for_paths(
     params_vec.push(SqlValue::Text(kind.id().to_string()));
     params_vec.extend(session_paths.iter().cloned().map(SqlValue::Text));
 
-    let rows = stmt.query_map(params_from_iter(params_vec), map_session_list_index_record)?;
+    let rows = stmt.query_map(params_from_iter(params_vec), |row| {
+        map_session_list_index_record(row, kind.id())
+    })?;
 
     let mut result = HashMap::new();
     for row in rows {

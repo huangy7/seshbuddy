@@ -126,8 +126,51 @@ mod tests {
     /// 这里刻意走**真实的代理链路**（`proxy::run_proxy` → 上游连接失败那条分支），
     /// 而不是手搓一条 `TrafficRecord` 塞进 `Storage`：手搓只能证明存储层存得下，
     /// 证明不了「我们自己的包装句没有进库」——而后者才是这条测试存在的理由。
+    /// 进程级环境锁：本测试要临时改 `NO_PROXY`。
+    /// 环境变量是进程全局的，与其它会构造 reqwest 客户端的测试必须互斥。
+    static PROXY_ENV_LOCK: std::sync::LazyLock<Mutex<()>> =
+        std::sync::LazyLock::new(|| Mutex::new(()));
+
+    /// 临时把回环地址排除出上游代理，退出时（含 panic）还原。
+    ///
+    /// 为什么必须有：`reqwest::Client::builder()` 默认读取环境里的
+    /// `HTTP_PROXY` / `NO_PROXY`。开发机若设了 `HTTP_PROXY` 而没设 `NO_PROXY`，
+    /// 本测试「上游指向死端口 → 连接失败」的前提就不成立——请求会被交给环境代理，
+    /// 环境代理够不到那个端口，回一个 502 空响应。于是 `send()` 返回 `Ok(502)`，
+    /// 走的是**上游返回了 502** 那条正常分支（写 `status=502`、空正文、
+    /// `error_kind` 为 `None`），而不是本测试要覆盖的**上游连接失败**分支。
+    /// 表现是断言 `error_kind == Some("upstream")` 失败，且只在设了代理的机器上复现。
+    struct NoProxyGuard {
+        saved: Vec<(&'static str, Option<std::ffi::OsString>)>,
+    }
+
+    impl NoProxyGuard {
+        fn bypass_loopback() -> Self {
+            const KEYS: [&str; 2] = ["NO_PROXY", "no_proxy"];
+            let saved = KEYS.iter().map(|k| (*k, std::env::var_os(k))).collect();
+            for key in KEYS {
+                std::env::set_var(key, "127.0.0.1,localhost,::1");
+            }
+            Self { saved }
+        }
+    }
+
+    impl Drop for NoProxyGuard {
+        fn drop(&mut self) {
+            for (key, value) in &self.saved {
+                match value {
+                    Some(v) => std::env::set_var(key, v),
+                    None => std::env::remove_var(key),
+                }
+            }
+        }
+    }
+
     #[tokio::test]
     async fn error_kind_round_trips_and_body_holds_third_party_text() {
+        let _env_lock = PROXY_ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let _no_proxy = NoProxyGuard::bypass_loopback();
+
         let dir = tempfile::tempdir().unwrap();
         let db = dir.path().join("traffic.db");
         let db_path = db.to_str().unwrap().to_string();

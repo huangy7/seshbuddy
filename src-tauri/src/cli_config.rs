@@ -38,15 +38,23 @@ pub(crate) fn map_io_error(e: std::io::Error, path: &Path) -> AppError {
     }
 }
 
+/// 该 CLI 是否有可托管的配置文件，有则给出文件名。
+///
+/// **事实来源是 `ConfigFileFeature`**（各 CLI 的源文件里的实现），本函数只是它的一个便捷入口。
+/// 要判断某 CLI 能否托管配置，请查这里而不是另立清单 —— 否则清单会与实现脱节，
+/// 出现「集合里列了某 CLI、但它没有配置文件实现」的矛盾。
+///
+/// **不要在本模块里加按 CLI 分岔的逻辑**：那正是本次收敛从本模块移走的东西。
+/// 新的 CLI 差异应当写进它自己的源文件。
+pub(crate) fn settings_file_name(kind: CliKind) -> Option<&'static str> {
+    crate::cli_registry::source_for(kind)
+        .config_file()
+        .map(|feature| feature.settings_file_name())
+}
+
 pub(crate) fn settings_path_for(kind: CliKind) -> AppResult<PathBuf> {
-    match kind {
-        CliKind::Claude => Ok(cli::data_dir(kind)?.join("settings.json")),
-        CliKind::Codex => Ok(cli::data_dir(kind)?.join("config.toml")),
-        CliKind::Gemini => Err(unsupported_kind_error(kind)),
-        CliKind::WorkBuddy => Err(unsupported_kind_error(kind)),
-        CliKind::Dsh => Err(unsupported_kind_error(kind)),
-        CliKind::Antigravity => Err(unsupported_kind_error(kind)),
-    }
+    let name = settings_file_name(kind).ok_or_else(|| unsupported_kind_error(kind))?;
+    Ok(cli::data_dir(kind)?.join(name))
 }
 
 pub(crate) fn ensure_parent_dir(path: &Path) -> AppResult<()> {
@@ -107,4 +115,49 @@ pub(crate) fn write_toml_file(path: &Path, value: &toml::Value) -> AppResult<()>
     ensure_parent_dir(path)?;
     let content = toml::to_string_pretty(value).map_err(|e| AppError::coded("cli_config.toml_serialize_failed").with("detail", e.to_string()))?;
     write_atomically(path, content.as_bytes())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli_registry::source_for;
+
+    /// 六个 CLI 的配置文件名逐个钉住。
+    ///
+    /// 用**字面量**而非拿 `settings_file_name` 自己跟自己比：后者是自指的，
+    /// 只能发现「委托被拆掉」，发现不了能力实现写错文件名 —— 而文件名改错不会编译失败，
+    /// 只会让读写落到另一个文件上。这是本能力唯一的取值来源，值得钉死。
+    #[test]
+    fn config_file_names_match_previous_values() {
+        let expected = [
+            (CliKind::Claude, Some("settings.json")),
+            (CliKind::Codex, Some("config.toml")),
+            (CliKind::Gemini, None),
+            (CliKind::WorkBuddy, None),
+            (CliKind::Dsh, None),
+            (CliKind::Antigravity, None),
+        ];
+        for (kind, name) in expected {
+            assert_eq!(
+                settings_file_name(kind),
+                name,
+                "{kind:?} 的配置文件名与改动前不同"
+            );
+        }
+    }
+
+    /// 能力位与实现必须同源：有文件名就必须有对应的能力对象。
+    ///
+    /// 这条是**委托绊线**（上一条才是取值守卫）：它只能发现「有人绕开能力直接返回常量」，
+    /// 发现不了能力实现本身写错 —— 不要把它当取值断言用。
+    #[test]
+    fn config_file_capability_is_the_only_source() {
+        for kind in CliKind::ALL {
+            assert_eq!(
+                source_for(*kind).config_file().is_some(),
+                settings_file_name(*kind).is_some(),
+                "{kind:?} 的能力对象有无与 settings_file_name 的有无不一致"
+            );
+        }
+    }
 }

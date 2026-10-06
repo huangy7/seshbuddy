@@ -216,22 +216,23 @@ pub(crate) fn resolve_display_name(
 }
 
 /// 多 Provider 增强型会话元数据提取：返回 (原生标题, 清洗后首条用户消息, cwd)
+///
+/// 是否查索引标题表由**调用方**决定：只有实现了索引的 CLI 的调用方才会传入
+/// `options.codex_index_titles`。解析层不按 CLI id 分支 —— 「哪个 CLI 有索引」
+/// 是源的知识，调用方已在取表时定妥，这里再按 id 判一次只会让新增 CLI 时多一处漏改。
 pub(crate) fn extract_snapshot_metadata_enhanced(
     content: &[u8],
-    cli_id: &str,
     session_path: &str,
     options: &TitleResolverOptions,
 ) -> (Option<String>, Option<String>, Option<String>) {
-    if cli_id == "codex" {
-        if let Some(map) = options.codex_index_titles {
-            let stem = std::path::Path::new(session_path)
-                .file_stem()
-                .and_then(|s| s.to_str())
-                .unwrap_or_default();
-            if let Some(t) = map.get(stem).or_else(|| map.get(session_path)) {
-                let (native, user, cwd) = scan_content_lines(content);
-                return (Some(t.clone()).or(native), user, cwd);
-            }
+    if let Some(map) = options.codex_index_titles {
+        let stem = std::path::Path::new(session_path)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or_default();
+        if let Some(t) = map.get(stem).or_else(|| map.get(session_path)) {
+            let (native, user, cwd) = scan_content_lines(content);
+            return (Some(t.clone()).or(native), user, cwd);
         }
     }
 
@@ -464,7 +465,6 @@ mod tests {
         };
         let (title, user, _) = extract_snapshot_metadata_enhanced(
             content.as_bytes(),
-            "claude",
             "/path/s1.jsonl",
             &options,
         );
@@ -474,7 +474,6 @@ mod tests {
         let content_ai_only = format!("{line1}\n{line2}\n");
         let (title_ai, _, _) = extract_snapshot_metadata_enhanced(
             content_ai_only.as_bytes(),
-            "claude",
             "/path/s1.jsonl",
             &options,
         );
@@ -494,7 +493,6 @@ mod tests {
         };
         let (title, _, _) = extract_snapshot_metadata_enhanced(
             content.as_bytes(),
-            "claude",
             "/path/s1.jsonl",
             &options,
         );
@@ -516,7 +514,6 @@ mod tests {
         };
         let (title, _, _) = extract_snapshot_metadata_enhanced(
             content.as_bytes(),
-            "claude",
             "/path/s1.jsonl",
             &options,
         );
@@ -533,7 +530,6 @@ mod tests {
         };
         let (title, user, _) = extract_snapshot_metadata_enhanced(
             content.as_bytes(),
-            "codex",
             "/path/s2.jsonl",
             &options,
         );

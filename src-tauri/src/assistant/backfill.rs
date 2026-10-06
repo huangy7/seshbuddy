@@ -81,7 +81,12 @@ pub fn collect_gaps() -> AppResult<Vec<GapItem>> {
     let mut conn = store::open(&cache_db_path()?)?;
     let records = store::all_records(&conn)?;
     let mut gaps = Vec::new();
-    for kind in [crate::cli::CliKind::Claude, crate::cli::CliKind::Codex, crate::cli::CliKind::Gemini] {
+    // 参与回填的 CLI 由各源声明的提取格式推导，而非另抄一份清单：能否提取的事实
+    // 只存在于源上，手写清单会与它漂移（漏掉已声明格式的 CLI）。
+    for &kind in crate::cli::CliKind::ALL
+        .iter()
+        .filter(|k| crate::cli_registry::source_for(**k).transcript_format().is_some())
+    {
         let index = crate::app_db::read_session_list_index(kind)?;
         for (path, item) in &index {
             let rec = records.get(&item.session_id);
@@ -196,7 +201,14 @@ fn extract_one(item: &GapItem) -> AppResult<bool> {
         _ => (0, 0),
     };
     let file = std::fs::File::open(&item.session_path)?;
-    let format = transcript_store::extract::CliFormat::from_cli_id(&item.cli);
+    // 回填集合由同一判据（源声明有提取格式）推导，正常路径上这里必为 `Some`；
+    // `None` 只会来自被手工构造的 GapItem，按「不可提取」跳过，不落任何缓存状态。
+    let Some(format) = crate::cli::CliKind::from_id(Some(&item.cli))
+        .ok()
+        .and_then(|k| crate::cli_registry::source_for(k).transcript_format())
+    else {
+        return Ok(false);
+    };
     let out = extract(std::io::BufReader::new(file), format, skip, base);
     let base_count = match plan {
         ExtractPlan::Append { .. } => record.map(|r| r.message_count).unwrap_or(0),
