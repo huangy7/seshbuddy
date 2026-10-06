@@ -1,9 +1,9 @@
 [package]
 name = "seshbuddy"
-version = "0.1.0"
+version.workspace = true
 description = "AI Coding Agents Session Explorer & Desktop Companion"
-authors = ["huangy"]
-edition = "2021"
+authors.workspace = true
+edition.workspace = true
 
 [lib]
 name = "seshbuddy_lib"

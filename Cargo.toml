@@ -2,6 +2,11 @@
 members = ["src-tauri", "src-tauri-proxy", "transcript-store"]
 resolver = "2"
 
+[workspace.package]
+version = "0.1.1"
+edition = "2021"
+authors = ["huangy"]
+
 [profile.release]
 opt-level = "z"
 lto = true

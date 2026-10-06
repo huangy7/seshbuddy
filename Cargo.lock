@@ -4967,7 +4967,7 @@ dependencies = [
 
 [[package]]
 name = "seshbuddy"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -5022,7 +5022,7 @@ dependencies = [
 
 [[package]]
 name = "seshbuddy-proxy"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "bytes",
@@ -6438,7 +6438,7 @@ dependencies = [
 
 [[package]]
 name = "transcript-store"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rusqlite",
  "serde_json",
