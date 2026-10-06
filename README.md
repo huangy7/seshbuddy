@@ -27,16 +27,16 @@
 </p>
 
 <p align="center">
-  <img src="assets/screenshot-main.png" alt="SeshBuddy browsing sessions from six CLIs in one tree" width="880">
+  <img src="assets/screenshot-main.png" alt="SeshBuddy browsing sessions from seven CLIs in one tree" width="880">
 </p>
 
-SeshBuddy is a native desktop workbench for the sessions you build with AI coding agents. It reads the session logs that Claude Code, Codex, Gemini, Antigravity, WorkBuddy and DSH already write to disk, indexes them locally, and gives you one place to browse, search, archive and inspect everything — plus a local reverse proxy that shows you exactly what your agent sends over the wire.
+SeshBuddy is a native desktop workbench for the sessions you build with AI coding agents. It reads the session data and logs that Claude Code, Codex, Gemini, Antigravity, WorkBuddy, DSH and OpenCode already write to disk, indexes them locally, and gives you one place to browse, search, archive and inspect everything — plus a local reverse proxy that shows you exactly what your agent sends over the wire.
 
 ## Features
 
 | Feature | Description |
 | :--- | :--- |
-| **Multi-CLI Session Explorer** | Browse, organize, bookmark and archive sessions from **Claude Code / Codex / Gemini / Antigravity / WorkBuddy / DSH** in a single tree. |
+| **Multi-CLI Session Explorer** | Browse, organize, bookmark and archive sessions from **Claude Code / Codex / Gemini / Antigravity / WorkBuddy / DSH / OpenCode** in a single tree. |
 | **Unified Full-Text Search** | A local **Tantivy** index over every prompt, reply, tool call and code block, with session-title matching folded into the same result set. |
 | **API Reverse Proxy & Traffic Inspector** | `seshbuddy-proxy` sits between your CLI and the vendor endpoint (**Claude Code** and **Codex**) so you can read request/response payloads, latency and token usage. One click to enable, one click to restore the original endpoint. |
 | **Monaco Editor & Git Diff** | Review what an agent changed with side-by-side diffs and syntax highlighting, without leaving the app. |

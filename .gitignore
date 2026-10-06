@@ -44,12 +44,14 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# 各 agent 工具的工作目录
+# 各 agent 工具的工作目录与配置
 .superpowers/
 .agents/
 .agent/
 .claude/
 .worktrees/
+CLAUDE.md
+AGENTS.md
 
 # 静态分析工具的输出目录
 # vite dev 的 watcher 同样忽略它 —— 不忽略会在分析期间跑爆文件句柄与内存
