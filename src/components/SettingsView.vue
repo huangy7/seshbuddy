@@ -310,7 +310,8 @@ function getIcon(tabId: SettingsTab) {
 }
 .sidebar-header {
   padding: 20px 16px 12px;
-  min-width: 220px;
+  min-width: 200px;
+  box-sizing: border-box;
 }
 .settings-title {
   font-size: 20px;
@@ -324,7 +325,8 @@ function getIcon(tabId: SettingsTab) {
   flex-direction: column;
   padding: 0 10px;
   gap: 4px;
-  min-width: 220px;
+  min-width: 200px;
+  box-sizing: border-box;
 }
 .sidebar-tab {
   position: relative;
@@ -356,14 +358,18 @@ function getIcon(tabId: SettingsTab) {
   opacity: 0.8;
 }
 .tab-label {
-  flex: 1;
+  line-height: 1.2;
 }
 .red-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background-color: var(--color-danger);
-  margin-left: 8px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+.sidebar-tab.active .red-dot {
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.6);
 }
 
 /* Main Content */
