@@ -394,14 +394,8 @@ mod tests {
         }
 
         // 先快照覆盖值、再改指向，保证任何一次并发清理看到的都是指向本临时库的覆盖。
-        let prev_override = crate::app_db::read_cli_path_overrides()
-            .ok()
-            .and_then(|overrides| overrides.get(cli).cloned());
-        crate::cli::set_cli_data_dir_override(
-            CliKind::Opencode,
-            Some(temp.path().to_str().unwrap().to_string()),
-        )
-        .unwrap();
+        let _override_guard =
+            crate::cli::CliDataDirOverrideGuard::set(CliKind::Opencode, temp.path());
 
         let insert = |path: &str| {
             let conn = conn().unwrap();
@@ -441,19 +435,13 @@ mod tests {
         let present_survived = in_index(&present_path);
         let absent_purged = !in_index(&absent_path);
 
-        // 后置清理：先删索引行，再恢复覆盖值，避免留下「旧行 + 已复位覆盖」的窗口
+        // 后置清理：先删索引行
         {
             let conn = conn().unwrap();
             let _ = conn.execute(
                 "DELETE FROM session_list_index WHERE cli_id = ?1 AND session_path IN (?2, ?3)",
                 params![cli, present_path, absent_path],
             );
-        }
-        match prev_override {
-            Some(path) => {
-                crate::cli::set_cli_data_dir_override(CliKind::Opencode, Some(path)).unwrap()
-            }
-            None => crate::cli::set_cli_data_dir_override(CliKind::Opencode, None).unwrap(),
         }
 
         assert!(present_survived, "库中确实存在的库型会话索引行被孤儿清理误删");

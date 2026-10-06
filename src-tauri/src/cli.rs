@@ -230,6 +230,36 @@ pub fn set_cli_data_dir_override(kind: CliKind, data_dir: Option<String>) -> App
     write_cli_path_overrides(&overrides)
 }
 
+/// 测试使用的 CLI 数据目录覆盖守卫。
+///
+/// 测试用例若在执行断言期间发生 panic 或异常展开，写在断言之后的复位逻辑将无法被执行，
+/// 导致测试指向的临时目录永久残留在数据库全局设置中。本守卫利用 RAII（Resource Acquisition Is Initialization）
+/// 在 drop 时自动恢复前置覆盖状态，确保即便测试断言失败也不会污染持久化存储。
+#[cfg(test)]
+#[derive(Debug)]
+pub(crate) struct CliDataDirOverrideGuard {
+    kind: CliKind,
+    prev_override: Option<String>,
+}
+
+#[cfg(test)]
+impl CliDataDirOverrideGuard {
+    pub(crate) fn set(kind: CliKind, new_dir: impl AsRef<std::path::Path>) -> Self {
+        let prev_override = read_cli_path_overrides().get(kind.id()).cloned();
+        set_cli_data_dir_override(kind, Some(new_dir.as_ref().to_string_lossy().to_string()))
+            .expect("设置测试 CLI 数据目录覆盖失败");
+        Self { kind, prev_override }
+    }
+}
+
+#[cfg(test)]
+impl Drop for CliDataDirOverrideGuard {
+    fn drop(&mut self) {
+        let _ = set_cli_data_dir_override(self.kind, self.prev_override.take());
+    }
+}
+
+
 pub fn detect_cli(kind: CliKind) -> bool {
     find_cli_path(kind).is_some()
 }
@@ -837,6 +867,7 @@ fn find_cli_path_windows(command_name: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::LazyLock;
 
     /// 每个 CLI 都必须对「怎么找到自己」给出答案，且**找错了路径形态**要能失败。
     ///
@@ -1168,4 +1199,42 @@ mod tests {
             }
         }
     }
+
+    static OVERRIDE_GUARD_TEST_LOCK: LazyLock<std::sync::Mutex<()>> =
+        LazyLock::new(|| std::sync::Mutex::new(()));
+
+    #[test]
+    fn override_guard_restores_on_normal_exit_and_panic() {
+        let _lock = OVERRIDE_GUARD_TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let initial = read_cli_path_overrides().get("codex").cloned();
+        let temp = tempfile::tempdir().unwrap();
+
+        // 1. 验证正常作用域离开时自动恢复
+        {
+            let _guard = CliDataDirOverrideGuard::set(CliKind::Codex, temp.path());
+            assert_eq!(
+                read_cli_path_overrides().get("codex").cloned(),
+                Some(temp.path().to_string_lossy().to_string())
+            );
+        }
+        assert_eq!(read_cli_path_overrides().get("codex").cloned(), initial);
+
+        // 2. 验证即便发生 panic 导致栈展开，Drop 仍能恢复前置状态
+        let temp_panic = tempfile::tempdir().unwrap();
+        let panic_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let _guard = CliDataDirOverrideGuard::set(CliKind::Codex, temp_panic.path());
+            assert_eq!(
+                read_cli_path_overrides().get("codex").cloned(),
+                Some(temp_panic.path().to_string_lossy().to_string())
+            );
+            panic!("模拟测试断言失败触发栈展开");
+        }));
+        assert!(panic_result.is_err());
+        assert_eq!(
+            read_cli_path_overrides().get("codex").cloned(),
+            initial,
+            "Guard 必须在 panic 栈展开时完全恢复覆盖状态，杜绝临时目录泄漏"
+        );
+    }
 }
+
