@@ -145,8 +145,9 @@
         }
     }
 
-    /// Codex 的项目路径落库测试与 DSH 同理：共享真实 app DB 的 Codex 索引行，串行化避免 flaky。
-    static CODEX_SCAN_TEST_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+    /// Codex 的项目路径落库测试与 DSH 同理：共享真实 app DB 的 Codex 索引行与数据目录覆盖，
+    /// 与 cli 模块中的守卫单元测试共用此锁串行化避免争用。
+    use crate::cli::CODEX_DATA_DIR_OVERRIDE_TEST_LOCK as CODEX_SCAN_TEST_LOCK;
 
     fn clear_codex_index_rows() {
         if let Ok(conn) = app_db::conn() {

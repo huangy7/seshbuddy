@@ -6,8 +6,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
-#[cfg(target_os = "macos")]
-use std::sync::LazyLock;
+use std::sync::{LazyLock, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[cfg(target_os = "macos")]
@@ -211,7 +210,15 @@ pub fn list_cli_path_configs() -> AppResult<Vec<CliPathConfig>> {
         .collect()
 }
 
+/// CLI 路径覆盖表以单条 JSON 字典聚合存储在应用设置表中。
+/// 进程内并发读写（如多测试线程同时对不同 CLI 配置或复位数据目录）若不串行化，
+/// 会在「读取整表 -> 本地修改键 -> 写回整表」过程中相互覆盖，导致并发 CLI 的覆盖键被静默抹除。
+/// 引入互斥锁确保该读取-改写-写回序列具有原子性。
+static SET_CLI_DATA_DIR_OVERRIDE_LOCK: LazyLock<Mutex<()>> =
+    LazyLock::new(|| Mutex::new(()));
+
 pub fn set_cli_data_dir_override(kind: CliKind, data_dir: Option<String>) -> AppResult<()> {
+    let _lock = SET_CLI_DATA_DIR_OVERRIDE_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut overrides = read_cli_path_overrides();
 
     match data_dir
@@ -281,6 +288,13 @@ fn write_cli_path_overrides(overrides: &HashMap<String, String>) -> AppResult<()
 /// 故锁放在覆盖状态的定义处供两边引用。
 #[cfg(test)]
 pub(crate) static OPENCODE_DATA_DIR_OVERRIDE_TEST_LOCK: std::sync::LazyLock<
+    std::sync::Mutex<()>,
+> = std::sync::LazyLock::new(|| std::sync::Mutex::new(()));
+
+/// Codex 数据目录覆盖同样是进程级共享状态：本模块的守卫单元测试与 session_index 的
+/// 扫描快照回归测试分处两个模块，均会写入 Codex 目录覆盖，共用此锁串行化避免争用。
+#[cfg(test)]
+pub(crate) static CODEX_DATA_DIR_OVERRIDE_TEST_LOCK: std::sync::LazyLock<
     std::sync::Mutex<()>,
 > = std::sync::LazyLock::new(|| std::sync::Mutex::new(()));
 
@@ -1200,12 +1214,9 @@ mod tests {
         }
     }
 
-    static OVERRIDE_GUARD_TEST_LOCK: LazyLock<std::sync::Mutex<()>> =
-        LazyLock::new(|| std::sync::Mutex::new(()));
-
     #[test]
     fn override_guard_restores_on_normal_exit_and_panic() {
-        let _lock = OVERRIDE_GUARD_TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let _lock = CODEX_DATA_DIR_OVERRIDE_TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let initial = read_cli_path_overrides().get("codex").cloned();
         let temp = tempfile::tempdir().unwrap();
 
