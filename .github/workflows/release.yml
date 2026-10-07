@@ -105,6 +105,8 @@ jobs:
             args: '--target x86_64-apple-darwin'
           - platform: 'windows-latest'
             args: ''
+          - platform: 'ubuntu-22.04'
+            args: ''
 
     runs-on: ${{ matrix.platform }}
     # tauri-action 会经 beforeBuildCommand 触发 npm run build，也就是本仓库的
@@ -131,6 +133,13 @@ jobs:
       # 那会让发布产物与 CI 已验证过的不是同一份依赖。
       - name: install frontend dependencies
         run: npm ci
+
+      # tauri crate 在 Linux 上链接 webkit2gtk / gtk，缺少这些开发包无法编译
+      - name: install linux system dependencies
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       # 发布前先确认 secret 里的私钥与 tauri.conf.json pin 的公钥配对。
       # 配错不会有任何报错，只会产出一个签名无效的更新包 —— 到用户更新失败才发现。

@@ -20,6 +20,41 @@ pub const WINDOWS_POWERSHELL: &str = "powershell";
 #[cfg(any(target_os = "windows", test))]
 pub const WINDOWS_CMD: &str = "cmd";
 
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_XDG_TERMINAL_EXEC: &str = "xdg-terminal-exec";
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_GNOME_TERMINAL: &str = "gnome-terminal";
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_KONSOLE: &str = "konsole";
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_XFCE4_TERMINAL: &str = "xfce4-terminal";
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_KITTY: &str = "kitty";
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_ALACRITTY: &str = "alacritty";
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_WEZTERM: &str = "wezterm";
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_FOOT: &str = "foot";
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_X_TERMINAL_EMULATOR: &str = "x-terminal-emulator";
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_XTERM: &str = "xterm";
+
+#[cfg(any(target_os = "linux", test))]
+pub const LINUX_CANDIDATES: &[&str] = &[
+    LINUX_XDG_TERMINAL_EXEC,
+    LINUX_GNOME_TERMINAL,
+    LINUX_KONSOLE,
+    LINUX_XFCE4_TERMINAL,
+    LINUX_KITTY,
+    LINUX_ALACRITTY,
+    LINUX_WEZTERM,
+    LINUX_FOOT,
+    LINUX_X_TERMINAL_EMULATOR,
+    LINUX_XTERM,
+];
+
 /// 当前平台已安装的终端应用 id 列表（按推荐顺序）。
 pub fn detect_installed() -> Vec<&'static str> {
     #[cfg(target_os = "macos")]
@@ -41,7 +76,11 @@ pub fn detect_installed() -> Vec<&'static str> {
         apps.push(WINDOWS_CMD);
         return apps;
     }
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    #[cfg(target_os = "linux")]
+    {
+        return detect_installed_linux();
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
     {
         Vec::new()
     }
@@ -118,6 +157,69 @@ fn resolve_windows_choice_with(choice: Option<&str>, wt_available: bool) -> &'st
             }
         }
     }
+}
+
+/// Linux：当前平台已安装的终端模拟器列表探测。
+#[cfg(target_os = "linux")]
+pub fn detect_installed_linux() -> Vec<&'static str> {
+    let mut apps = Vec::new();
+    for &candidate in LINUX_CANDIDATES {
+        if is_executable_available(candidate) {
+            apps.push(candidate);
+        }
+    }
+    apps
+}
+
+#[cfg(target_os = "linux")]
+fn is_executable_available(binary_name: &str) -> bool {
+    if let Ok(path_var) = std::env::var("PATH") {
+        for dir in std::env::split_paths(&path_var) {
+            let candidate = dir.join(binary_name);
+            if candidate.is_file() {
+                return true;
+            }
+        }
+    }
+    let standard_dirs = ["/usr/bin", "/bin", "/usr/local/bin", "/snap/bin"];
+    for dir in standard_dirs {
+        if Path::new(dir).join(binary_name).is_file() {
+            return true;
+        }
+    }
+    false
+}
+
+/// Linux 终端命令行参数组装。
+/// 不同终端模拟器在执行外部脚本时具有不同的参数标准（如 `--`、`-e`、`--command` 等）。
+#[cfg(any(target_os = "linux", test))]
+pub fn format_linux_terminal_command<'a>(app: &'a str, script_path: &str) -> (&'a str, Vec<String>) {
+    match app {
+        LINUX_GNOME_TERMINAL => (app, vec!["--".to_string(), script_path.to_string()]),
+        LINUX_KONSOLE => (app, vec!["-e".to_string(), script_path.to_string()]),
+        LINUX_XFCE4_TERMINAL => (app, vec!["--command".to_string(), script_path.to_string()]),
+        LINUX_KITTY => (app, vec![script_path.to_string()]),
+        LINUX_ALACRITTY => (app, vec!["-e".to_string(), script_path.to_string()]),
+        LINUX_WEZTERM => (app, vec!["start".to_string(), "--".to_string(), script_path.to_string()]),
+        LINUX_FOOT => (app, vec![script_path.to_string()]),
+        LINUX_X_TERMINAL_EMULATOR | LINUX_XTERM => (app, vec!["-e".to_string(), script_path.to_string()]),
+        LINUX_XDG_TERMINAL_EXEC => (app, vec![script_path.to_string()]),
+        _ => (app, vec!["-e".to_string(), script_path.to_string()]),
+    }
+}
+
+/// Linux：解析用户选择为可用的终端 id。未选择或选择已失效时按候选列表回退。
+#[cfg(any(target_os = "linux", test))]
+pub fn resolve_linux_choice_with<'a>(
+    choice: Option<&'a str>,
+    installed: &[&'a str],
+) -> Option<&'a str> {
+    if let Some(chosen) = choice {
+        if installed.contains(&chosen) {
+            return Some(chosen);
+        }
+    }
+    installed.first().copied()
 }
 
 #[cfg(test)]
@@ -210,6 +312,94 @@ mod tests {
             assert_ne!(resolve_windows_choice_with(Some(WINDOWS_POWERSHELL), true), WINDOWS_CMD);
             assert_ne!(resolve_windows_choice_with(Some(WINDOWS_TERMINAL), true), WINDOWS_CMD);
             assert_ne!(resolve_windows_choice_with(None, true), WINDOWS_CMD);
+        }
+    }
+
+    #[cfg(any(target_os = "linux", test))]
+    mod linux {
+        use super::*;
+
+        #[test]
+        fn test_resolve_linux_choice_with_valid_selection() {
+            let installed = vec![LINUX_GNOME_TERMINAL, LINUX_KITTY];
+            assert_eq!(
+                resolve_linux_choice_with(Some(LINUX_KITTY), &installed),
+                Some(LINUX_KITTY)
+            );
+        }
+
+        #[test]
+        fn test_resolve_linux_choice_with_fallback_to_first() {
+            let installed = vec![LINUX_GNOME_TERMINAL, LINUX_KITTY];
+            assert_eq!(
+                resolve_linux_choice_with(Some("non-existent"), &installed),
+                Some(LINUX_GNOME_TERMINAL)
+            );
+            assert_eq!(
+                resolve_linux_choice_with(None, &installed),
+                Some(LINUX_GNOME_TERMINAL)
+            );
+        }
+
+        #[test]
+        fn test_resolve_linux_choice_with_empty_installed() {
+            let installed: Vec<&str> = vec![];
+            assert_eq!(resolve_linux_choice_with(None, &installed), None);
+            assert_eq!(
+                resolve_linux_choice_with(Some(LINUX_KITTY), &installed),
+                None
+            );
+        }
+
+        #[test]
+        fn test_format_linux_terminal_command_arguments() {
+            let script = "/tmp/seshbuddy-test.sh";
+            assert_eq!(
+                format_linux_terminal_command(LINUX_GNOME_TERMINAL, script),
+                (LINUX_GNOME_TERMINAL, vec!["--".to_string(), script.to_string()])
+            );
+            assert_eq!(
+                format_linux_terminal_command(LINUX_KONSOLE, script),
+                (LINUX_KONSOLE, vec!["-e".to_string(), script.to_string()])
+            );
+            assert_eq!(
+                format_linux_terminal_command(LINUX_XFCE4_TERMINAL, script),
+                (LINUX_XFCE4_TERMINAL, vec!["--command".to_string(), script.to_string()])
+            );
+            assert_eq!(
+                format_linux_terminal_command(LINUX_KITTY, script),
+                (LINUX_KITTY, vec![script.to_string()])
+            );
+            assert_eq!(
+                format_linux_terminal_command(LINUX_ALACRITTY, script),
+                (LINUX_ALACRITTY, vec!["-e".to_string(), script.to_string()])
+            );
+            assert_eq!(
+                format_linux_terminal_command(LINUX_WEZTERM, script),
+                (LINUX_WEZTERM, vec!["start".to_string(), "--".to_string(), script.to_string()])
+            );
+            assert_eq!(
+                format_linux_terminal_command(LINUX_FOOT, script),
+                (LINUX_FOOT, vec![script.to_string()])
+            );
+            assert_eq!(
+                format_linux_terminal_command(LINUX_X_TERMINAL_EMULATOR, script),
+                (LINUX_X_TERMINAL_EMULATOR, vec!["-e".to_string(), script.to_string()])
+            );
+            assert_eq!(
+                format_linux_terminal_command(LINUX_XTERM, script),
+                (LINUX_XTERM, vec!["-e".to_string(), script.to_string()])
+            );
+            assert_eq!(
+                format_linux_terminal_command(LINUX_XDG_TERMINAL_EXEC, script),
+                (LINUX_XDG_TERMINAL_EXEC, vec![script.to_string()])
+            );
+        }
+
+        #[test]
+        fn test_linux_candidates_integrity() {
+            assert!(!LINUX_CANDIDATES.is_empty());
+            assert_eq!(LINUX_CANDIDATES[0], LINUX_XDG_TERMINAL_EXEC);
         }
     }
 }

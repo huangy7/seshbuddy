@@ -16,6 +16,10 @@ describe('normalize-updater-manifest 脚本测试', () => {
           signature: 'sig-win',
           url: 'https://api.github.com/repos/huangy7/seshbuddy/releases/assets/615847524',
         },
+        'linux-x86_64': {
+          signature: 'sig-linux',
+          url: 'https://api.github.com/repos/huangy7/seshbuddy/releases/assets/615899999',
+        },
       },
     };
 
@@ -32,6 +36,12 @@ describe('normalize-updater-manifest 脚本测试', () => {
         url: 'https://github.com/huangy7/seshbuddy/releases/download/v0.1.1/SeshBuddy_x64.msi',
         name: 'SeshBuddy_x64.msi',
       },
+      {
+        id: 615899999,
+        apiUrl: 'https://api.github.com/repos/huangy7/seshbuddy/releases/assets/615899999',
+        url: 'https://github.com/huangy7/seshbuddy/releases/download/v0.1.1/SeshBuddy_amd64.AppImage.tar.gz',
+        name: 'SeshBuddy_amd64.AppImage.tar.gz',
+      },
     ];
 
     const result = normalizeManifest(sampleManifest, assets, 'v0.1.1');
@@ -41,6 +51,9 @@ describe('normalize-updater-manifest 脚本测试', () => {
     );
     expect(result.manifest.platforms['windows-x86_64'].url).toBe(
       'https://github.com/huangy7/seshbuddy/releases/download/v0.1.1/SeshBuddy_x64.msi',
+    );
+    expect(result.manifest.platforms['linux-x86_64'].url).toBe(
+      'https://github.com/huangy7/seshbuddy/releases/download/v0.1.1/SeshBuddy_amd64.AppImage.tar.gz',
     );
   });
 

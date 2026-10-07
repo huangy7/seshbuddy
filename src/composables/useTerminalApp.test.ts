@@ -116,4 +116,17 @@ describe("useTerminalApp", () => {
       { value: "cmd", label: "CMD" },
     ]);
   });
+
+  it("Linux 探测结果映射为可读标签选项", async () => {
+    mocks.invoke.mockResolvedValue(["gnome-terminal", "kitty", "custom-term"]);
+    const { useTerminalApp } = await importModule();
+    const { terminalAppOptions, detectTerminalApps } = useTerminalApp();
+
+    await detectTerminalApps();
+    expect(terminalAppOptions.value).toEqual([
+      { value: "gnome-terminal", label: "GNOME Terminal" },
+      { value: "kitty", label: "Kitty" },
+      { value: "custom-term", label: "custom-term" },
+    ]);
+  });
 });
