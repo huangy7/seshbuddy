@@ -6,6 +6,7 @@
     "sourcesHint": "表示したい CLI セッションを選択します。後から設定で変更できます。",
     "hasSessions": "セッションあり",
     "noSessions": "セッションはまだありません",
+    "withSessionsOnly": "セッションありのみ",
     "back": "戻る",
     "next": "続ける",
     "finish": "SeshBuddy を始める",

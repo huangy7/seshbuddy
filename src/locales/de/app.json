@@ -6,6 +6,7 @@
     "sourcesHint": "Wähle die CLI-Sitzungen aus, die du sehen möchtest. Du kannst dies später ändern.",
     "hasSessions": "Sitzungen gefunden",
     "noSessions": "Noch keine Sitzungen",
+    "withSessionsOnly": "Nur mit Sitzungen",
     "back": "Zurück",
     "next": "Weiter",
     "finish": "SeshBuddy starten",

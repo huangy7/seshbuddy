@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { currentLocale, setLocale, t } from "../i18n";
 import { SUPPORTED_LOCALES, type Locale } from "../i18n/types";
 import type { CliId, CliOption } from "../types/cli";
@@ -31,12 +31,62 @@ const title = computed(() => props.statusError
     : t("app.onboarding.sourcesTitle"));
 const primaryButton = ref<HTMLButtonElement | null>(null);
 const dialogElement = ref<HTMLDivElement | null>(null);
+const sourceListRef = ref<HTMLDivElement | null>(null);
+const canScrollUp = ref(false);
+const canScrollDown = ref(false);
+
+function updateScrollState() {
+  const el = sourceListRef.value;
+  if (!el) return;
+  canScrollUp.value = el.scrollTop > 4;
+  canScrollDown.value = el.scrollTop + el.clientHeight < el.scrollHeight - 4;
+}
+
+watch(step, (newStep) => {
+  if (newStep === "sources") {
+    void nextTick(updateScrollState);
+  }
+});
+
+const hasAnySessions = computed(() => props.cliOptions.some((cli) => cli.hasSessions));
+
+const isAllSelected = computed(() =>
+  props.cliOptions.length > 0 && selectedCliIds.value.length === props.cliOptions.length
+);
+
+const isOnlySessionsSelected = computed(() => {
+  const sessionCliIds = props.cliOptions.filter((cli) => cli.hasSessions).map((cli) => cli.id);
+  if (sessionCliIds.length === 0 || selectedCliIds.value.length !== sessionCliIds.length) return false;
+  return sessionCliIds.every((id) => selectedCliIds.value.includes(id));
+});
+
+function selectOnlySessions() {
+  const sessionCliIds = props.cliOptions.filter((cli) => cli.hasSessions).map((cli) => cli.id);
+  if (sessionCliIds.length > 0) {
+    selectedCliIds.value = [...sessionCliIds];
+  }
+}
+
+function toggleSelectAll() {
+  if (isAllSelected.value) {
+    selectedCliIds.value = [];
+  } else {
+    selectedCliIds.value = props.cliOptions.map((cli) => cli.id);
+  }
+}
 
 function focusPrimary() {
   void nextTick(() => primaryButton.value?.focus());
 }
 
-onMounted(focusPrimary);
+onMounted(() => {
+  focusPrimary();
+  window.addEventListener("resize", updateScrollState);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", updateScrollState);
+});
 
 function trapFocus(event: KeyboardEvent) {
   if (event.key !== "Tab" || !dialogElement.value) return;
@@ -116,6 +166,30 @@ const languageLabelKeys: Record<Locale, string> = {
         <h1>{{ title }}</h1>
         <p>{{ step === "language" ? t("app.onboarding.languageHint") : t("app.onboarding.sourcesHint") }}</p>
 
+        <div v-if="step === 'sources'" class="source-toolbar">
+          <span class="source-count">{{ selectedCliIds.length }} / {{ cliOptions.length }}</span>
+          <div class="source-toolbar-actions">
+            <button
+              v-if="hasAnySessions"
+              type="button"
+              class="source-action-btn"
+              :class="{ active: isOnlySessionsSelected }"
+              data-action="select-sessions-only"
+              @click="selectOnlySessions"
+            >
+              {{ t("app.onboarding.withSessionsOnly") }}
+            </button>
+            <button
+              type="button"
+              class="source-action-btn"
+              data-action="toggle-select-all"
+              @click="toggleSelectAll"
+            >
+              {{ isAllSelected ? t("app.batch.deselectAll") : t("app.batch.selectAll") }}
+            </button>
+          </div>
+        </div>
+
         <div v-if="step === 'language'" class="language-grid">
           <button
             v-for="locale in SUPPORTED_LOCALES"
@@ -129,7 +203,13 @@ const languageLabelKeys: Record<Locale, string> = {
           ><span>{{ t(languageLabelKeys[locale]) }}</span><span class="option-check" aria-hidden="true">✓</span></button>
         </div>
 
-        <div v-else class="source-list">
+        <div
+          v-else
+          ref="sourceListRef"
+          class="source-list"
+          :class="{ 'has-scroll-up': canScrollUp, 'has-scroll-down': canScrollDown }"
+          @scroll.passive="updateScrollState"
+        >
           <label v-for="cli in cliOptions" :key="cli.id" class="source-row" :class="{ selected: selectedCliIds.includes(cli.id) }" :data-cli-id="cli.id">
             <span class="source-copy"><strong>{{ cli.name }}</strong><small :class="{ available: cli.hasSessions }">{{ cli.hasSessions ? t("app.onboarding.hasSessions") : t("app.onboarding.noSessions") }}</small></span>
             <input type="checkbox" :checked="selectedCliIds.includes(cli.id)" :aria-label="cli.name" @change="toggleCli(cli.id, ($event.target as HTMLInputElement).checked)" />
@@ -166,7 +246,7 @@ const languageLabelKeys: Record<Locale, string> = {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
   width: min(100%, 740px);
-  height: min(470px, calc(100dvh - 48px));
+  height: min(520px, calc(100dvh - 48px));
   min-height: 0;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
@@ -208,28 +288,62 @@ const languageLabelKeys: Record<Locale, string> = {
 .onboarding-journey span { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--color-bg) 72%, transparent); font-size: 10px; }
 .onboarding-journey .current { color: var(--color-text); }
 .onboarding-journey .current span, .onboarding-journey .complete span { color: white; background: var(--color-primary); border-color: var(--color-primary); }
-.onboarding-content { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 27px 30px 23px; }
+.onboarding-content { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 24px 28px 20px; }
 .onboarding-progress { display: flex; align-items: center; gap: 13px; width: 100%; color: var(--color-primary); font-size: 11px; font-weight: 800; letter-spacing: .12em; }
 .onboarding-progress i { flex: 1; height: 3px; overflow: hidden; border-radius: 3px; background: var(--color-bg-secondary); }
 .onboarding-progress b { display: block; width: 50%; height: 100%; border-radius: inherit; background: var(--color-primary); transition: width .25s ease; }
 .onboarding-progress b.second { width: 100%; }
-.onboarding-content h1 { margin: 20px 0 6px; color: var(--color-text); font-size: clamp(24px, 3vw, 28px); font-weight: 760; letter-spacing: -.035em; line-height: 1.2; }
-.onboarding-content p { margin: 0 0 12px; color: var(--color-text-secondary); font-size: 13px; line-height: 1.55; }
-.language-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0 18px; }
+.onboarding-content h1 { margin: 14px 0 6px; color: var(--color-text); font-size: clamp(23px, 3vw, 26px); font-weight: 760; letter-spacing: -.035em; line-height: 1.2; }
+.onboarding-content p { margin: 0 0 10px; color: var(--color-text-secondary); font-size: 13px; line-height: 1.5; }
+.source-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: -2px 0 6px; flex: none; }
+.source-count { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--color-text-muted) 10%, transparent); color: var(--color-text-muted); font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+.source-toolbar-actions { display: flex; align-items: center; gap: 6px; }
+.source-action-btn { padding: 3px 9px; border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent); border-radius: 7px; background: var(--color-bg-secondary); color: var(--color-text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+.source-action-btn:hover { border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); color: var(--color-primary); }
+.source-action-btn.active { background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg)); border-color: var(--color-primary); color: var(--color-primary); }
+.language-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; flex: 1; min-height: 0; align-content: start; margin: 10px 0 16px; }
 .option-tile { display: flex; align-items: center; justify-content: space-between; min-height: 62px; padding: 0 16px; border: 1px solid var(--color-border); border-radius: 13px; background: var(--color-bg-secondary); color: var(--color-text); font-size: 16px; font-weight: 600; text-align: left; transition: border-color .2s, background .2s, transform .2s, box-shadow .2s; }
 .option-tile:hover, .source-row:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); }
 .option-tile.selected, .source-row.selected { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 7%, var(--color-bg)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent); }
 .option-check { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: transparent; font-size: 13px; }
 .option-tile.selected .option-check { color: white; background: var(--color-primary); }
-.source-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-height: 0; margin: 12px 0 18px; }
-.source-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 64px; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 11px; background: var(--color-bg-secondary); cursor: pointer; transition: border-color .2s, background .2s, transform .2s, box-shadow .2s; }
-.source-copy { display: grid; flex: 1; min-width: 0; gap: 3px; color: var(--color-text); }
-.source-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
-.source-copy small { width: fit-content; padding: 3px 7px; border-radius: 999px; background: color-mix(in srgb, var(--color-text-muted) 9%, transparent); color: var(--color-text-muted); font-size: 11px; white-space: nowrap; }
+.source-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 6px -4px 14px -2px;
+  padding: 2px 6px 4px 2px;
+  align-content: start;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-border) 75%, transparent) transparent;
+}
+.source-list.has-scroll-down {
+  mask-image: linear-gradient(to bottom, black calc(100% - 18px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 18px), transparent 100%);
+}
+.source-list.has-scroll-up {
+  mask-image: linear-gradient(to bottom, transparent 0, black 18px, black 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 18px, black 100%);
+}
+.source-list.has-scroll-up.has-scroll-down {
+  mask-image: linear-gradient(to bottom, transparent 0, black 18px, black calc(100% - 18px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 18px, black calc(100% - 18px), transparent 100%);
+}
+.source-list::-webkit-scrollbar { width: 5px; }
+.source-list::-webkit-scrollbar-track { background: transparent; }
+.source-list::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-border) 75%, transparent); border-radius: 999px; }
+.source-list::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+.source-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 54px; padding: 7px 12px; border: 1px solid var(--color-border); border-radius: 11px; background: var(--color-bg-secondary); cursor: pointer; transition: border-color .2s, background .2s, transform .2s, box-shadow .2s; }
+.source-copy { display: grid; flex: 1; min-width: 0; gap: 2px; color: var(--color-text); }
+.source-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; }
+.source-copy small { width: fit-content; padding: 2px 7px; border-radius: 999px; background: color-mix(in srgb, var(--color-text-muted) 9%, transparent); color: var(--color-text-muted); font-size: 11px; white-space: nowrap; }
 .source-copy small.available { background: color-mix(in srgb, var(--color-primary) 12%, transparent); color: var(--color-primary); }
 .source-row input { flex: none; width: 18px; height: 18px; accent-color: var(--color-primary); }
 .onboarding-error { color: var(--color-danger, #c0392b) !important; }
-.onboarding-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex: none; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--color-border); }
+.onboarding-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex: none; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--color-border); }
 .onboarding-actions button { min-height: 40px; padding: 8px 15px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-bg-secondary); color: var(--color-text); font-weight: 650; transition: transform .2s, background .2s, box-shadow .2s; }
 .onboarding-actions button:hover:not(:disabled) { transform: translateY(-1px); }
 .onboarding-actions button.primary { border-color: var(--color-primary); background: var(--color-primary); color: white; box-shadow: 0 7px 18px color-mix(in srgb, var(--color-primary) 24%, transparent); }
