@@ -6,6 +6,7 @@
     "sourcesHint": "选择你想查看的 CLI 会话，之后也可以在设置中修改。",
     "hasSessions": "已有会话",
     "noSessions": "暂无会话",
+    "withSessionsOnly": "仅已有会话",
     "back": "返回",
     "next": "继续",
     "finish": "开始使用 SeshBuddy",

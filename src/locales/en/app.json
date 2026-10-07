@@ -6,6 +6,7 @@
     "sourcesHint": "Select the CLI conversations you want to see. You can change this later in Settings.",
     "hasSessions": "Sessions found",
     "noSessions": "No sessions yet",
+    "withSessionsOnly": "With sessions only",
     "back": "Back",
     "next": "Continue",
     "finish": "Start using SeshBuddy",
