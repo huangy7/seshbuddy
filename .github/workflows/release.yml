@@ -177,3 +177,28 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+  # 矩阵构建发布完成后，统一规范化更新清单（latest.json）。
+  # 打包流水线默认产出的 latest.json 中，分发下载地址会退化为内部 API 端点
+  # （api.github.com/repos/.../releases/assets/<id>）。客户端更新下载时无身份凭证，
+  # 会受限于 GitHub API 匿名 IP 频次额度（60 次/小时），从而导致 403 Forbidden 错误。
+  # 集中在矩阵结束后由本步骤将所有平台的链接全量规范化为公开 CDN 直链。
+  finalize:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: normalize updater manifest
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/normalize-updater-manifest.mjs "$GITHUB_REF_NAME"
