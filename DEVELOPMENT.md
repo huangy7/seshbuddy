@@ -31,6 +31,14 @@ xcode-select --install
 - [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)（勾选“C++ 桌面开发”）
 - [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/)
 
+### Linux 依赖 (Ubuntu / Debian)
+
+Tauri 2 构建依赖 WebKitGTK 4.1 与应用指示器等系统库：
+
+```bash
+sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+```
+
 ## 快速开始
 
 ```bash

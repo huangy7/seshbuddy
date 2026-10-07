@@ -14,14 +14,14 @@
 </p>
 
 <p align="center">
-  <a href="https://seshbuddy.huangy.top/"><b>下载 macOS / Windows 版</b></a>
+  <a href="https://seshbuddy.huangy.top/"><b>下载 macOS / Windows / Linux 版</b></a>
 </p>
 
 <p align="center">
   <a href="https://seshbuddy.huangy.top/"><img src="https://img.shields.io/badge/website-seshbuddy.huangy.top-blue?style=flat-square" alt="官网"></a>
   <a href="https://github.com/huangy7/seshbuddy/releases/latest"><img src="https://img.shields.io/github/v/release/huangy7/seshbuddy?style=flat-square&label=latest" alt="最新版本"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/huangy7/seshbuddy?style=flat-square" alt="License"></a>
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue?style=flat-square" alt="Platform">
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=flat-square" alt="Platform">
   <a href="https://github.com/huangy7/seshbuddy/releases"><img src="https://img.shields.io/github/downloads/huangy7/seshbuddy/total?style=flat-square&color=success" alt="Downloads"></a>
   <img src="https://komarev.com/ghpvc/?username=huangy7-seshbuddy&label=Views&color=0071e3&style=flat-square" alt="Views">
 </p>

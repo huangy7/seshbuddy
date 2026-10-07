@@ -9,6 +9,16 @@ export const TERMINAL_APP_LABELS: Record<string, string> = {
   "windows-terminal": "Windows Terminal",
   powershell: "PowerShell",
   cmd: "CMD",
+  "xdg-terminal-exec": "Default Terminal (XDG)",
+  "gnome-terminal": "GNOME Terminal",
+  konsole: "Konsole",
+  "xfce4-terminal": "XFCE Terminal",
+  kitty: "Kitty",
+  alacritty: "Alacritty",
+  wezterm: "WezTerm",
+  foot: "Foot",
+  "x-terminal-emulator": "X Terminal Emulator",
+  xterm: "XTerm",
 };
 
 // 单例：全应用共享同一份探测结果与选择

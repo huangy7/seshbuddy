@@ -789,6 +789,46 @@
     "Windows Terminal": {
       "verdict": "keep",
       "reason": "平台/终端名"
+    },
+    "Default Terminal (XDG)": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "GNOME Terminal": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "Konsole": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "XFCE Terminal": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "Kitty": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "Alacritty": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "WezTerm": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "Foot": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "X Terminal Emulator": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
+    },
+    "XTerm": {
+      "verdict": "keep",
+      "reason": "平台/终端名"
     }
   },
   "src/composables/useTheme.ts": {

@@ -548,7 +548,28 @@ fn launch_in_terminal(
         return Ok(());
     }
 
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    #[cfg(target_os = "linux")]
+    {
+        let script_content = build_linux_launch_script(
+            program,
+            args,
+            project_path,
+            settings_file,
+            terminal_app,
+        );
+        let tmp_script = create_temp_launch_script("sh", &script_content)?;
+
+        Command::new("chmod")
+            .args(["+x", tmp_script.to_str().unwrap_or("")])
+            .output()
+            .map_err(|e| AppError::coded("cli.chmod_failed").with("detail", e.to_string()))?;
+
+        let script_path = tmp_script.to_str().unwrap_or("").to_string();
+        launch_linux_terminal(terminal_app, &script_path)?;
+        return Ok(());
+    }
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
     {
         let _ = (program, args, project_path, settings_file, terminal_app);
         Err(AppError::coded("cli.unsupported_platform"))
@@ -573,6 +594,54 @@ fn create_temp_launch_script(extension: &str, content: &str) -> AppResult<PathBu
     fs::write(&path, content)
         .map_err(|e| AppError::coded("cli.temp_script_create_failed").with("detail", e.to_string()))?;
     Ok(path)
+}
+
+/// 构建 Linux 外部终端启动脚本。
+/// 包含登录环境参数加载、进入项目目录、启动 CLI 命令并在退出后清理环境。
+#[cfg(any(target_os = "linux", test))]
+fn build_linux_launch_script(
+    program: &str,
+    args: &[String],
+    project_path: &str,
+    settings_file: Option<&str>,
+    terminal_app: Option<&str>,
+) -> String {
+    let mut script = format!(
+        "#!/bin/bash -l\n{}\n",
+        build_command_line_string(program, args, project_path, settings_file, terminal_app)
+    );
+    if let Some(sf) = settings_file {
+        script.push_str(&format!("rm -f {}\n", crate::shell_launch::posix_quote(sf)));
+    }
+    script.push_str("rm -f \"$0\"\n");
+    script
+}
+
+#[cfg(target_os = "linux")]
+fn launch_linux_terminal(terminal_choice: Option<&str>, script_path: &str) -> AppResult<()> {
+    let installed = crate::terminal::detect_installed();
+    let resolved = crate::terminal::resolve_linux_choice_with(terminal_choice, &installed);
+
+    // 优先尝试已解析出的安装终端
+    if let Some(app) = resolved {
+        let (prog, args) = crate::terminal::format_linux_terminal_command(app, script_path);
+        if Command::new(prog).args(&args).spawn().is_ok() {
+            return Ok(());
+        }
+    }
+
+    // 若解析出的终端启动失败，按推荐候选顺序全面兜底回退
+    for &candidate in crate::terminal::LINUX_CANDIDATES {
+        if Some(candidate) == resolved {
+            continue;
+        }
+        let (prog, args) = crate::terminal::format_linux_terminal_command(candidate, script_path);
+        if Command::new(prog).args(&args).spawn().is_ok() {
+            return Ok(());
+        }
+    }
+
+    Err(AppError::coded("cli.terminal_not_found"))
 }
 
 #[cfg(target_os = "windows")]
@@ -742,7 +811,12 @@ pub(crate) fn find_on_path(command: &str) -> Option<String> {
         return find_cli_path_windows(command);
     }
 
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    #[cfg(target_os = "linux")]
+    {
+        return find_cli_path_linux(command);
+    }
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
     {
         let _ = command;
         None
@@ -782,6 +856,47 @@ fn find_cli_path_macos(command_name: &str) -> Option<String> {
         format!("/opt/homebrew/bin/{}", command_name),
         format!("/usr/local/bin/{}", command_name),
         format!("/usr/bin/{}", command_name),
+    ];
+
+    candidates
+        .into_iter()
+        .find(|path| std::path::Path::new(path).exists())
+}
+
+#[cfg(target_os = "linux")]
+fn find_cli_path_linux(command_name: &str) -> Option<String> {
+    // 优先通过用户交互式登录 Shell 探测 PATH（确保捕获 bashrc/zshrc 等配置文件注入的自定义路径）
+    let shell = std::env::var("SHELL").unwrap_or_else(|_| "/bin/bash".to_string());
+    for sh in [&shell, "/bin/bash", "/bin/sh"] {
+        if let Ok(output) = Command::new(sh)
+            .args(["-l", "-c", &format!("which {}", command_name)])
+            .output()
+        {
+            if output.status.success() {
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                for line in stdout.lines() {
+                    let cleaned = strip_ansi_codes(line).trim().to_string();
+                    if !cleaned.is_empty()
+                        && cleaned.starts_with('/')
+                        && std::path::Path::new(&cleaned).exists()
+                    {
+                        return Some(cleaned);
+                    }
+                }
+            }
+        }
+    }
+
+    // 回退常见 Linux 安装与包管理器路径
+    let home = std::env::var("HOME").unwrap_or_default();
+    let candidates = [
+        format!("{}/.local/bin/{}", home, command_name),
+        format!("{}/.cargo/bin/{}", home, command_name),
+        format!("{}/.npm-global/bin/{}", home, command_name),
+        format!("/usr/local/bin/{}", command_name),
+        format!("/usr/bin/{}", command_name),
+        format!("/bin/{}", command_name),
+        format!("/snap/bin/{}", command_name),
     ];
 
     candidates
@@ -881,7 +996,23 @@ fn find_cli_path_windows(command_name: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::LazyLock;
+
+    #[test]
+    fn test_build_linux_launch_script_structure() {
+        let args = vec!["--dangerously-skip-permissions".to_string(), "resume".to_string()];
+        let script = build_linux_launch_script(
+            "claude",
+            &args,
+            "/home/user/project",
+            Some("/tmp/seshbuddy-settings-123.json"),
+            None,
+        );
+        assert!(script.starts_with("#!/bin/bash -l\n"));
+        assert!(script.contains("cd '/home/user/project'"));
+        assert!(script.contains("claude"));
+        assert!(script.contains("rm -f '/tmp/seshbuddy-settings-123.json'"));
+        assert!(script.ends_with("rm -f \"$0\"\n"));
+    }
 
     /// 每个 CLI 都必须对「怎么找到自己」给出答案，且**找错了路径形态**要能失败。
     ///
