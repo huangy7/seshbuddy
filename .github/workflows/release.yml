@@ -211,3 +211,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           node scripts/normalize-updater-manifest.mjs "$GITHUB_REF_NAME"
+
+      - name: publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "$GITHUB_REF_NAME" --draft=false --latest -R "$GITHUB_REPOSITORY"
