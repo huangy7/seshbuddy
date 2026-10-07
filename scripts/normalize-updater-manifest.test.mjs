@@ -111,6 +111,58 @@ describe('normalize-updater-manifest 脚本测试', () => {
     );
   });
 
+  it('同步更新 Release 正文到更新清单的 notes 字段', () => {
+    const sampleManifest = {
+      version: '0.1.1',
+      notes: 'See the assets to download this version and install.',
+      platforms: {
+        'darwin-aarch64': {
+          signature: 'sig-arm',
+          url: 'https://github.com/huangy7/seshbuddy/releases/download/v0.1.1/SeshBuddy_aarch64.app.tar.gz',
+        },
+      },
+    };
+
+    const assets = [
+      {
+        id: 615851706,
+        apiUrl: 'https://api.github.com/repos/huangy7/seshbuddy/releases/assets/615851706',
+        url: 'https://github.com/huangy7/seshbuddy/releases/download/v0.1.1/SeshBuddy_aarch64.app.tar.gz',
+        name: 'SeshBuddy_aarch64.app.tar.gz',
+      },
+    ];
+
+    const result = normalizeManifest(sampleManifest, assets, 'v0.1.1', '- 支持 Linux 平台\n- 修复更新链接');
+    expect(result.mutated).toBe(true);
+    expect(result.manifest.notes).toBe('- 支持 Linux 平台\n- 修复更新链接');
+  });
+
+  it('如果 Release 正文未变或为空则不修改 notes', () => {
+    const sampleManifest = {
+      version: '0.1.1',
+      notes: '现有发布说明',
+      platforms: {
+        'darwin-aarch64': {
+          signature: 'sig-arm',
+          url: 'https://github.com/huangy7/seshbuddy/releases/download/v0.1.1/SeshBuddy_aarch64.app.tar.gz',
+        },
+      },
+    };
+
+    const assets = [
+      {
+        id: 615851706,
+        apiUrl: 'https://api.github.com/repos/huangy7/seshbuddy/releases/assets/615851706',
+        url: 'https://github.com/huangy7/seshbuddy/releases/download/v0.1.1/SeshBuddy_aarch64.app.tar.gz',
+        name: 'SeshBuddy_aarch64.app.tar.gz',
+      },
+    ];
+
+    const result = normalizeManifest(sampleManifest, assets, 'v0.1.1', '现有发布说明');
+    expect(result.mutated).toBe(false);
+    expect(result.manifest.notes).toBe('现有发布说明');
+  });
+
   it('输入非法格式时抛出明确异常', () => {
     expect(() => normalizeManifest(null, [])).toThrow('缺少 platforms 根字段');
     expect(() => normalizeManifest({ platforms: {} }, null)).toThrow('必须为数组');
