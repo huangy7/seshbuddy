@@ -69,4 +69,29 @@ describe("FirstRunOnboarding", () => {
     wrapper.unmount();
     host.remove();
   });
+
+  it("supports batch selecting all and selecting only sources with sessions", async () => {
+    const wrapper = mount(FirstRunOnboarding, { props: { cliOptions: options } });
+    await wrapper.find('[data-action="next"]').trigger("click");
+
+    expect(wrapper.find(".source-count").text()).toBe(`2 / ${cliIds.length}`);
+
+    // 点击全选 -> 全部勾选
+    await wrapper.find('[data-action="toggle-select-all"]').trigger("click");
+    expect(wrapper.findAll('[data-cli-id] input:checked')).toHaveLength(cliIds.length);
+    expect(wrapper.find(".source-count").text()).toBe(`${cliIds.length} / ${cliIds.length}`);
+
+    // 点击仅已有会话 -> 只保留存在会话的选项
+    await wrapper.find('[data-action="select-sessions-only"]').trigger("click");
+    expect(wrapper.findAll('[data-cli-id] input:checked')).toHaveLength(2);
+    expect(wrapper.find(".source-count").text()).toBe(`2 / ${cliIds.length}`);
+
+    // 全选状态下再次点击 -> 清空选择并禁用提交
+    await wrapper.find('[data-action="toggle-select-all"]').trigger("click");
+    expect(wrapper.findAll('[data-cli-id] input:checked')).toHaveLength(cliIds.length);
+    await wrapper.find('[data-action="toggle-select-all"]').trigger("click");
+    expect(wrapper.findAll('[data-cli-id] input:checked')).toHaveLength(0);
+    expect(wrapper.find(".source-count").text()).toBe(`0 / ${cliIds.length}`);
+    expect(wrapper.find('[data-action="finish"]').attributes("disabled")).toBeDefined();
+  });
 });
