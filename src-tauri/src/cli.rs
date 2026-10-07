@@ -9,13 +9,13 @@ use std::process::Command;
 use std::sync::{LazyLock, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-#[cfg(target_os = "macos")]
+#[cfg(not(target_os = "windows"))]
 static ANSI_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r"[\u001b\u009b][\[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]")
         .expect("Failed to compile ANSI regex")
 });
 
-#[cfg(target_os = "macos")]
+#[cfg(not(target_os = "windows"))]
 fn strip_ansi_codes(input: &str) -> String {
     ANSI_REGEX.replace_all(input, "").to_string()
 }
