@@ -49,7 +49,7 @@ function getWidget(inputHtml: string) {
       ></span>
       <div class="header-spacer"></div>
       <button
-        v-if="toolName === 'Agent' && subagent"
+        v-if="subagent"
         class="agent-link-btn"
         :title="t('chat.toolGroup.openSubagentInNewTab')"
         @click.stop="$emit('openSubagent', subagent.file_path, subagent.label)"

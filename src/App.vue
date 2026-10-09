@@ -1480,8 +1480,7 @@ function handleOpenSubagent(path: string, label: string) {
 
   // 不限定工具名（Claude 为 Agent、DSH 为 subagent）：tool_use_id 命中 subagentMap 即视为委托调用
   const parentMessageIndex = activeHistoryChatView()?.messages.findIndex(m =>
-    m.role === 'assistant' &&
-    m.content_parts.some(p => p.type === 'tool_use' && p.tool_use_id && getActiveSubagentMap()[p.tool_use_id]?.file_path === path)
+    m.content_parts.some(p => (p.type === 'tool_use' || p.type === 'tool_result') && p.tool_use_id && getActiveSubagentMap()[p.tool_use_id]?.file_path === path)
   );
 
   openHistoryTab(path, currentTab.encodedDir || "", {

@@ -104,15 +104,44 @@ pub(crate) fn session_dir_candidates(session_dir: &Path) -> Vec<std::path::PathB
 /// `.zstd`/`.zst` 后缀走 zstd 解压，其余按明文 JSONL 读取；逐行保留完整 JSON 行。
 pub(crate) fn read_session_lines(path: &str) -> AppResult<Vec<String>> {
     let file = File::open(path)?;
-    let reader: Box<dyn BufRead> = if is_zstd_path(Path::new(path)) {
+    let mut reader: Box<dyn BufRead> = if is_zstd_path(Path::new(path)) {
         Box::new(BufReader::new(zstd::stream::read::Decoder::new(file)?))
     } else {
         Box::new(BufReader::new(file))
     };
 
     let mut lines = Vec::new();
-    for line in reader.lines() {
-        lines.push(line?);
+    let mut buffer = Vec::new();
+
+    loop {
+        buffer.clear();
+        match reader.read_until(b'\n', &mut buffer) {
+            Ok(0) => break,
+            Ok(_) => {
+                while buffer.last() == Some(&b'\n') || buffer.last() == Some(&b'\r') {
+                    buffer.pop();
+                }
+                match String::from_utf8(buffer.clone()) {
+                    Ok(line) => lines.push(line),
+                    Err(e) => {
+                        tracing::warn!("skipping non-UTF-8 DSH line in '{}': {e}", path);
+                    }
+                }
+            }
+            // 遭遇尾部断帧（例如 DSH 进程崩溃/强退导致的截断 zstd 帧）：
+            // 前置完整记录依然有效，保留已读行并记录警告日志，避免丢弃整条会话
+            Err(e) if !lines.is_empty() => {
+                tracing::warn!(
+                    "DSH session '{}' ended with read error (retaining {} valid lines): {e}",
+                    path,
+                    lines.len()
+                );
+                break;
+            }
+            Err(e) => {
+                return Err(e.into());
+            }
+        }
     }
     Ok(lines)
 }
@@ -732,12 +761,19 @@ fn handle_assistant_message(entry: &Value, state: &mut ParseState) {
 /// 记录 `subagent` 工具调用的 description（父级为委托起的名字），
 /// 供 `"started subagent <id>"` 结果行建 subagent_map 时作 label。
 fn record_subagent_call_desc(state: &mut ParseState, name: &str, arguments_raw: &str, call_id: &str) {
-    if name != "subagent" {
+    if !name.starts_with("subagent") && name != "workflow" {
         return;
     }
     let desc = serde_json::from_str::<Value>(arguments_raw)
         .ok()
-        .and_then(|args| args.get("description").and_then(Value::as_str).map(str::to_string))
+        .and_then(|args| {
+            args.get("description")
+                .or_else(|| args.get("prompt"))
+                .or_else(|| args.get("task"))
+                .or_else(|| args.get("instructions"))
+                .and_then(Value::as_str)
+                .map(str::to_string)
+        })
         .filter(|d| !d.trim().is_empty());
     if let Some(desc) = desc {
         state.subagent_call_descs.insert(call_id.to_string(), desc);
@@ -815,18 +851,27 @@ fn handle_tool_result(entry: &Value, state: &mut ParseState) {
     );
 }
 
-/// 若 result 文本是 `"started subagent <子会话id>"`，把该 tool_use_id 映射到
-/// 同项目下的子会话文件（zstd 优先；不存在则跳过），label 取调用的 description。
+/// 若 result 文本是 `"started subagent <子会话id>"` 或包含子代理 session/childId，
+/// 把该 tool_use_id 映射到子会话文件（支持各代际与兄弟项目穿透检索），label 取调用的 description。
 fn maybe_map_subagent_session(state: &mut ParseState, call_id: &str, result_text: &str) {
     if state.subagent_map.contains_key(call_id) {
         return;
     }
-    let Some(child_id) = result_text
+    let child_id = result_text
         .trim()
         .strip_prefix("started subagent ")
         .and_then(|rest| rest.split_whitespace().next())
         .filter(|id| !id.is_empty())
-    else {
+        .map(str::to_string)
+        .or_else(|| {
+            let val = serde_json::from_str::<Value>(result_text.trim()).ok()?;
+            val.get("childId")
+                .or_else(|| val.get("agentId"))
+                .or_else(|| val.get("sessionId"))
+                .and_then(Value::as_str)
+                .map(str::to_string)
+        });
+    let Some(child_id) = child_id else {
         return;
     };
     let Some(session_path) = state.session_file_path.as_ref() else {
@@ -836,11 +881,46 @@ fn maybe_map_subagent_session(state: &mut ParseState, call_id: &str, result_text
     let Some(project_dir) = session_path.parent().and_then(Path::parent) else {
         return;
     };
-    let child_dir = project_dir.join(child_id);
-    let child_file = ["session.jsonl.zstd", "session.jsonl"]
-        .iter()
-        .map(|name| child_dir.join(name))
-        .find(|path| path.is_file());
+    let child_dir = project_dir.join(&child_id);
+    let mut child_file = session_dir_candidates(&child_dir)
+        .into_iter()
+        .next()
+        .or_else(|| {
+            ["session.jsonl.zstd", "session.jsonl", "session.zst"]
+                .iter()
+                .map(|name| child_dir.join(name))
+                .find(|path| path.is_file())
+        });
+
+    // 穿透检索兄弟项目目录：解决分叉会话或跨项目挂载时子会话落盘在不同子目录的问题
+    if child_file.is_none() {
+        if let Some(sessions_root) = project_dir.parent() {
+            if let Ok(entries) = std::fs::read_dir(sessions_root) {
+                for entry in entries.flatten() {
+                    let sibling_proj = entry.path();
+                    if sibling_proj.is_dir() && sibling_proj != project_dir {
+                        let cand_dir = sibling_proj.join(&child_id);
+                        if cand_dir.is_dir() {
+                            let cand_file = session_dir_candidates(&cand_dir)
+                                .into_iter()
+                                .next()
+                                .or_else(|| {
+                                    ["session.jsonl.zstd", "session.jsonl", "session.zst"]
+                                        .iter()
+                                        .map(|name| cand_dir.join(name))
+                                        .find(|path| path.is_file())
+                                });
+                            if cand_file.is_some() {
+                                child_file = cand_file;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     let Some(child_file) = child_file else {
         return;
     };
@@ -2279,5 +2359,92 @@ mod tests {
             "session.jsonl.zstd"
         );
         assert_eq!(candidates.len(), 2);
+    }
+
+    #[test]
+    fn torn_final_zstd_frame_keeps_complete_records() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("session.v4.jsonl.zstd");
+
+        let header = "{\"type\":\"session\",\"version\":4,\"id\":\"sess-torn\",\"cwd\":\"/tmp/p\",\"createdAt\":1700000000000}\n";
+        let prompt = "{\"type\":\"user/message\",\"seq\":1,\"time\":1000,\"data\":{\"content\":[{\"type\":\"text\",\"text\":\"kept prompt\"}]}}\n";
+        let lost = "{\"type\":\"user/message\",\"seq\":2,\"time\":1001,\"data\":{\"content\":[{\"type\":\"text\",\"text\":\"lost prompt\"}]}}\n";
+
+        // 第一帧：完整的 header + prompt
+        let frame1 = zstd::stream::encode_all((header.to_string() + prompt).as_bytes(), 3).unwrap();
+        // 第二帧：写入中断的截断帧
+        let frame2 = zstd::stream::encode_all(lost.as_bytes(), 3).unwrap();
+        let cut_len = (frame2.len() / 2).max(1);
+
+        let mut file_bytes = frame1;
+        file_bytes.extend_from_slice(&frame2[..cut_len]);
+
+        std::fs::write(&path, &file_bytes).unwrap();
+
+        let lines = read_session_lines(path.to_str().unwrap()).expect("torn log must still parse prefix");
+        assert_eq!(lines.len(), 2);
+        let parsed = parse_rows(lines).unwrap();
+        assert_eq!(parsed.len(), 1);
+        match &parsed[0].content_parts[0] {
+            ContentPart::Text { text } => assert_eq!(text, "kept prompt"),
+            other => panic!("expected Text part, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn started_subagent_result_finds_v4_generation_child() {
+        let dir = tempfile::tempdir().unwrap();
+        let project = dir.path().join("--tmp-proj--");
+        let parent_dir = project.join("session-parent");
+        let child_dir = project.join("sub-v4-uuid");
+        std::fs::create_dir_all(&parent_dir).unwrap();
+        std::fs::create_dir_all(&child_dir).unwrap();
+
+        let child_file = child_dir.join("session.v4.jsonl.zstd");
+        std::fs::write(&child_file, b"placeholder").unwrap();
+        let parent_file = parent_dir.join("session.jsonl");
+        std::fs::write(
+            &parent_file,
+            concat!(
+                "{\"type\":\"session\",\"version\":4,\"id\":\"session-parent\",\"cwd\":\"/tmp/proj\",\"createdAt\":1700000000000}\n",
+                "{\"type\":\"assistant/message\",\"seq\":1,\"time\":1,\"data\":{\"message\":{\"content\":[{\"type\":\"tool-call\",\"id\":\"toolu_v4\",\"name\":\"subagent\",\"arguments\":\"{\\\"description\\\":\\\"V4 Worker\\\"}\"}]}}}\n",
+                "{\"type\":\"tool/result\",\"seq\":2,\"time\":2,\"data\":{\"message\":{\"source\":{\"kind\":\"tool\",\"callId\":\"toolu_v4\"},\"content\":[{\"type\":\"tool-result\",\"toolCallId\":\"toolu_v4\",\"content\":[{\"type\":\"text\",\"text\":\"started subagent sub-v4-uuid\"}],\"isError\":false}]}}}\n",
+            ),
+        )
+        .unwrap();
+
+        let result = parse_dsh_session_file_with_offset(parent_file.to_str().unwrap()).unwrap();
+        let info = result.subagent_map.get("toolu_v4").expect("应命中 v4 代际子会话");
+        assert_eq!(info.file_path, child_file.to_string_lossy());
+        assert_eq!(info.label, "V4 Worker");
+    }
+
+    #[test]
+    fn started_subagent_result_finds_child_in_sibling_project() {
+        let dir = tempfile::tempdir().unwrap();
+        let parent_proj = dir.path().join("proj-a");
+        let sibling_proj = dir.path().join("proj-b");
+        let parent_dir = parent_proj.join("session-parent");
+        let child_dir = sibling_proj.join("sub-cross-uuid");
+        std::fs::create_dir_all(&parent_dir).unwrap();
+        std::fs::create_dir_all(&child_dir).unwrap();
+
+        let child_file = child_dir.join("session.jsonl.zstd");
+        std::fs::write(&child_file, b"placeholder").unwrap();
+        let parent_file = parent_dir.join("session.jsonl");
+        std::fs::write(
+            &parent_file,
+            concat!(
+                "{\"type\":\"session\",\"version\":0,\"id\":\"session-parent\",\"cwd\":\"/tmp/proj\",\"createdAt\":1700000000000}\n",
+                "{\"type\":\"assistant/message\",\"seq\":1,\"time\":1,\"data\":{\"message\":{\"content\":[{\"type\":\"tool-call\",\"id\":\"toolu_cross\",\"name\":\"subagent\",\"arguments\":\"{\\\"description\\\":\\\"Cross Worker\\\"}\"}]}}}\n",
+                "{\"type\":\"tool/result\",\"seq\":2,\"time\":2,\"data\":{\"message\":{\"source\":{\"kind\":\"tool\",\"callId\":\"toolu_cross\"},\"content\":[{\"type\":\"tool-result\",\"toolCallId\":\"toolu_cross\",\"content\":[{\"type\":\"text\",\"text\":\"started subagent sub-cross-uuid\"}],\"isError\":false}]}}}\n",
+            ),
+        )
+        .unwrap();
+
+        let result = parse_dsh_session_file_with_offset(parent_file.to_str().unwrap()).unwrap();
+        let info = result.subagent_map.get("toolu_cross").expect("应跨项目穿透定位子会话");
+        assert_eq!(info.file_path, child_file.to_string_lossy());
+        assert_eq!(info.label, "Cross Worker");
     }
 }
