@@ -22,9 +22,19 @@
   <a href="https://github.com/huangy7/seshbuddy/releases/latest"><img src="https://img.shields.io/github/v/release/huangy7/seshbuddy?style=flat-square&label=latest" alt="Latest release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/huangy7/seshbuddy?style=flat-square" alt="License"></a>
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=flat-square" alt="Platform">
-  <a href="https://github.com/huangy7/seshbuddy/releases"><img src="https://img.shields.io/github/downloads/huangy7/seshbuddy/total?style=flat-square&color=success" alt="Downloads"></a>
+  <a href="https://github.com/huangy7/seshbuddy/releases"><img src="https://img.shields.io/badge/downloads-134-success?style=flat-square" alt="Downloads"></a>
   <img src="https://komarev.com/ghpvc/?username=huangy7-seshbuddy&label=Views&color=0071e3&style=flat-square" alt="Views">
 </p>
+
+<details>
+<summary align="center"><b>Client Distribution & Download Statistics (134 Downloads)</b></summary>
+<br>
+<p align="center">
+  <b>Windows</b> (x64 Setup / MSI): <b>69</b> (51.5%)<br>
+  <b>macOS</b> (Apple Silicon / Intel): <b>59</b> (44.0%)<br>
+  <b>Linux</b> (AppImage / DEB / RPM): <b>6</b> (4.5%)
+</p>
+</details>
 
 <p align="center">
   <img src="assets/screenshot-main.png" alt="SeshBuddy browsing sessions from seven CLIs in one tree" width="880">
