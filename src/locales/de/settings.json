@@ -81,6 +81,11 @@
   "dataIndex": {
     "globalIndex": "Globaler Index",
     "cliIndex": "CLI-Index",
+    "sessionListVisibility": "Sitzungslistenanzeige",
+    "showArchivedSessions": "Archivierte Sitzungen anzeigen",
+    "showArchivedSessionsDesc": "Sitzungen, deren Quelldateien bereinigt wurden und aus dem lokalen Archiv gelesen werden können",
+    "showSnapshotSessions": "Snapshot-Sitzungen anzeigen",
+    "showSnapshotSessionsDesc": "Sitzungen, deren Quelldateien noch vorhanden sind und über lokale Archiv-Snapshots verfügen",
     "archive": "Sitzungsarchiv",
     "cache": "Cache & Wartung",
     "blockedFolders": "Blockierte Ordner"

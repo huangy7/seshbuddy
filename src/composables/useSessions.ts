@@ -217,6 +217,24 @@ const projects = computed<AggregatedProjectInfo[]>(() =>
   aggregateProjectItems(projectsStream.items.value)
 );
 const searchQuery = ref("");
+const showArchivedSessions = ref(
+  localStorage.getItem("seshbuddy-show-archived-sessions") !== "false"
+);
+const showSnapshotSessions = ref(
+  localStorage.getItem("seshbuddy-show-snapshot-sessions") !== "false"
+);
+
+function setShowArchivedSessions(value: boolean) {
+  showArchivedSessions.value = value;
+  localStorage.setItem("seshbuddy-show-archived-sessions", String(value));
+  if (!value) clearSessionSelection();
+}
+
+function setShowSnapshotSessions(value: boolean) {
+  showSnapshotSessions.value = value;
+  localStorage.setItem("seshbuddy-show-snapshot-sessions", String(value));
+  if (!value) clearSessionSelection();
+}
 const selectedSessionPath = ref<string | null>(null);
 const selectedProjectDir = ref<string | null>(null);
 const activeSessionIdentity = ref<SessionIdentity | null>(null);
@@ -582,12 +600,40 @@ watch(
 
 const { isBlocked } = useBlockedFolders();
 
+const hasSessionsHiddenByVisibility = computed(() => {
+  if (showArchivedSessions.value && showSnapshotSessions.value) return false;
+  const q = searchQuery.value.toLowerCase().trim();
+  return projects.value.some((project) => {
+    if (isBlocked(project.original_path ?? "")) return false;
+    const projectMatches = (project.original_path ?? "").toLowerCase().includes(q);
+    return project.sessions.some((session) => {
+      const hidden = session.is_archived
+        ? !showArchivedSessions.value
+        : session.has_archive_snapshot && !showSnapshotSessions.value;
+      return hidden && (!q || projectMatches || sessionMatchesQuery(session, q));
+    });
+  });
+});
+
 const filteredProjects = computed(() => {
   const q = searchQuery.value.toLowerCase().trim();
   let result = projects.value;
 
   // Filter out blocked projects
   result = result.filter((p) => !isBlocked(p.original_path ?? ""));
+
+  if (!showArchivedSessions.value || !showSnapshotSessions.value) {
+    result = result
+      .map((p) => ({
+        ...p,
+        sessions: p.sessions.filter((s) => {
+          if (s.is_archived) return showArchivedSessions.value;
+          if (s.has_archive_snapshot) return showSnapshotSessions.value;
+          return true;
+        }),
+      }))
+      .filter((p) => p.sessions.length > 0);
+  }
 
   if (q) {
     result = result
@@ -1684,6 +1730,11 @@ export function useSessions() {
     selectedSessionPath,
     selectedProjectDir,
     filteredProjects,
+    hasSessionsHiddenByVisibility,
+    showArchivedSessions,
+    showSnapshotSessions,
+    setShowArchivedSessions,
+    setShowSnapshotSessions,
     totalSessionCount,
     skipPermissions,
     setSkipPermissions,

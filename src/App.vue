@@ -87,6 +87,9 @@ const {
   searchQuery,
   selectedSessionPath,
   filteredProjects,
+  hasSessionsHiddenByVisibility,
+  showArchivedSessions,
+  showSnapshotSessions,
   totalSessionCount,
   currentCli,
   currentCliId,
@@ -365,7 +368,7 @@ const showSettings = ref(false);
 const showUsage = ref(false);
 const showApiDebug = ref(false);
 const apiDebugDialogRef = ref<any>(null);
-const settingsInitialTab = ref<"general" | "api" | "about">("general");
+const settingsInitialTab = ref<"general" | "dataSources" | "data" | "api" | "about">("general");
 const settingsDialogRef = ref<any>(null);
 const settingsInitialCliId = ref<CliId>();
 const usageInitialCliId = ref<CliId>();
@@ -380,7 +383,7 @@ function activeFeatureEntryCliId(): CliId | undefined {
 }
 
 function openSettings(
-  tab: "general" | "api" | "about" = "general",
+  tab: "general" | "dataSources" | "data" | "api" | "about" = "general",
   entryCliId: CliId | undefined = activeFeatureEntryCliId(),
 ) {
   settingsInitialTab.value = tab;
@@ -389,6 +392,12 @@ function openSettings(
     settingsDialogRef.value.restoreFromMinimized();
   }
   showSettings.value = true;
+}
+
+async function openVisibilitySettings() {
+  openSettings("data");
+  await nextTick();
+  await settingsDialogRef.value?.focusVisibilitySettings();
 }
 
 function openUsageDashboard(entryCliId: CliId | undefined = activeFeatureEntryCliId()) {
@@ -1287,6 +1296,14 @@ const selectedSessionIdentity = computed<SessionIdentity | null>(() => {
     : null;
 });
 
+const selectedSessionHiddenByVisibility = computed(() => {
+  const session = selectedSession.value?.session;
+  if (!session) return false;
+  return session.is_archived
+    ? !showArchivedSessions.value
+    : session.has_archive_snapshot && !showSnapshotSessions.value;
+});
+
 const activeHistoryProjectRoot = computed(() => {
   const tab = activeOpenTab.value;
   if (!tab) return null;
@@ -1963,6 +1980,8 @@ onBeforeUnmount(() => {
           ref="historyPanelRef"
           :projects="filteredProjects"
           :selectedSessionIdentity="selectedSessionIdentity"
+          :selectedSessionHiddenByVisibility="selectedSessionHiddenByVisibility"
+          :hasSessionsHiddenByVisibility="hasSessionsHiddenByVisibility"
           :selectedSessionIdentities="selectedSessionIdentities"
           :contextMenuSessionIdentity="contextMenuSessionIdentity"
           :searchQuery="searchQuery"
@@ -1994,6 +2013,7 @@ onBeforeUnmount(() => {
           @rangeSelect="onRangeSelect"
           @clearSelection="clearSessionSelection"
           @selectProjectSessions="selectProjectSessions"
+          @openVisibilitySettings="openVisibilitySettings"
         />
         <FavoritesPanel
           v-else-if="activeActivityTab === 'favorites'"

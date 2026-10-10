@@ -3,6 +3,7 @@ import { mount } from "@vue/test-utils";
 import HistoryPanel from "./HistoryPanel.vue";
 import { CLI_DEFINITIONS, type CliId, type CliOption } from "../types/cli";
 import type { ProjectInfo } from "../types/session";
+import { t } from "../i18n";
 
 const cliOptions: CliOption[] = (["claude", "codex"] as CliId[]).map((id) => ({
   ...CLI_DEFINITIONS[id],
@@ -119,5 +120,19 @@ describe("HistoryPanel tree grouping toggle", () => {
 
     expect(providerBtn.attributes("aria-checked")).toBe("true");
     expect(providerBtn.classes()).toContain("active");
+  });
+
+  it("opens display settings from the locate control when the selected session is hidden", async () => {
+    const wrapper = mountPanel({
+      projects: [],
+      selectedSessionIdentity: { cliId: "claude", filePath: "/archive/old.jsonl" },
+      selectedSessionHiddenByVisibility: true,
+    });
+    const locateButton = wrapper.findAll(".tree-actions .toolbar-btn")[0];
+
+    expect(locateButton.attributes("title")).toBe(t("session.historyPanel.locateHiddenByVisibility"));
+    expect(locateButton.attributes("disabled")).toBeUndefined();
+    await locateButton.trigger("click");
+    expect(wrapper.emitted("openVisibilitySettings")).toHaveLength(1);
   });
 });
