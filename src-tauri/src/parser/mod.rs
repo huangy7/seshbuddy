@@ -1,5 +1,6 @@
 //! 多 CLI 会话解析。按 CLI 拆分到独立模块，本模块负责种类判定与薄分派。
 
+pub(crate) mod aider;
 pub(crate) mod antigravity;
 pub(crate) mod batch;
 pub(crate) mod claude;

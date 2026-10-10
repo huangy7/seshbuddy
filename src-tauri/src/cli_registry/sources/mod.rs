@@ -1,3 +1,4 @@
+mod aider;
 mod antigravity;
 mod claude;
 mod codex;
@@ -8,6 +9,7 @@ mod opencode;
 mod pi;
 mod workbuddy;
 
+pub(crate) use aider::AiderSource;
 pub(crate) use antigravity::AntigravitySource;
 pub(crate) use claude::ClaudeSource;
 pub(crate) use codex::CodexSource;
