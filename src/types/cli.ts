@@ -9,7 +9,7 @@ import { t } from "../i18n";
  *
  * 与 Rust 侧的一致性由 `enumParity` 的 parity 测试钉住（判据取自 `CliKind::id()`）。
  */
-export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "cursor", "pi", "aider", "kimi"] as const;
+export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "cursor", "pi", "aider", "kimi", "goose"] as const;
 
 export type CliId = (typeof CLI_IDS)[number];
 
@@ -120,6 +120,10 @@ function defaultCliDataDir(id: CliId): string {
       win: "%USERPROFILE%\\.kimi-code",
       unix: "~/.kimi-code",
     },
+    goose: {
+      win: "%USERPROFILE%\\.local\\share\\goose",
+      unix: "~/.local/share/goose",
+    },
   };
   return IS_WINDOWS ? dirs[id].win : dirs[id].unix;
 }
@@ -140,6 +144,7 @@ cursor: "projects",
     pi: "sessions",
     aider: "chats",
     kimi: "sessions",
+    goose: "sessions",
   };
   return subdir[id] ? `${base}${sep}${subdir[id]}${sep}` : base;
 }
@@ -343,6 +348,24 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     supportsApiProfiles: false,
     supportsApiLogs: false,
     supportsDelete: true,
+  },
+  goose: {
+    id: "goose",
+    name: "Goose",
+    command: "goose",
+    dataSourcePath: defaultCliDataSource("goose"),
+    dataDirPath: defaultCliDataDir("goose"),
+    installHintKey: "cli.installHint.goose",
+    permissionLabelKey: "cli.permissionLabel.goose",
+    permissionHintKey: "cli.permissionHint.goose",
+    supportsNewSession: true,
+    supportsResumeSession: true,
+    supportsContextMenu: false,
+    supportsInPlaceFork: false,
+    supportsUsageStats: true,
+    supportsApiProfiles: false,
+    supportsApiLogs: false,
+    supportsDelete: false,
   },
 };
 

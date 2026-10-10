@@ -21,7 +21,8 @@
     "cursor": "Cursor Agent CLI が見つかりません。先にインストールし、`agent` コマンドが PATH に含まれていることを確認してください。",
     "pi": "Pi CLI が見つかりません。先にインストールし、`pi` コマンドが PATH に含まれていることを確認してください。",
     "aider": "Aider CLI が見つかりません。先にインストールし、`aider` コマンドが PATH に含まれていることを確認してください。",
-    "kimi": "Kimi CLI が見つかりません。先にインストールし、`kimi` コマンドが PATH に含まれていることを確認してください。"
+    "kimi": "Kimi CLI が見つかりません。先にインストールし、`kimi` コマンドが PATH に含まれていることを確認してください。",
+    "goose": "Goose CLI が見つかりません。先にインストールし、`goose` コマンドが PATH に含まれていることを確認してください。"
   },
   "permissionLabel": {
     "claude": "権限チェックをスキップ",
@@ -33,7 +34,8 @@
     "cursor": "",
     "pi": "",
     "aider": "",
-    "kimi": ""
+    "kimi": "",
+    "goose": ""
   },
   "permissionHint": {
     "claude": "有効にすると、新規または再開したセッションに自動で --dangerously-skip-permissions が付与されます。",
@@ -45,7 +47,8 @@
     "cursor": "Cursor Agent のセッション再開は権限フラグを使用しません。",
     "pi": "Pi CLI は --session で再開され、追加の権限フラグは関係しません。",
     "aider": "Aider のセッション復元はコマンドラインで履歴を復元し、個別の権限フラグは関係しません。",
-    "kimi": "Kimi CLI の起動には追加の権限フラグは関係しません。"
+    "kimi": "Kimi CLI の起動には追加の権限フラグは関係しません。",
+    "goose": "Goose のセッション再開はターミナルで直接行われ、権限フラグは関係しません。"
   },
   "installDsh": "DSH をインストール"
 }

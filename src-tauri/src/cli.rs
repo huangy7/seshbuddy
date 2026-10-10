@@ -37,7 +37,7 @@ macro_rules! cli_kinds {
     };
 }
 
-cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity, Opencode, Cursor, Pi, Aider, Kimi);
+cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity, Opencode, Cursor, Pi, Aider, Kimi, Goose);
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CliStatus {
@@ -70,6 +70,7 @@ Self::Cursor => "cursor",
             Self::Pi => "pi",
             Self::Aider => "aider",
             Self::Kimi => "kimi",
+            Self::Goose => "goose",
         }
     }
 

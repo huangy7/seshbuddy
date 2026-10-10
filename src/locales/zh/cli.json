@@ -21,7 +21,8 @@
     "cursor": "未检测到 Cursor Agent CLI，请先安装并确保 `agent` 命令已加入 PATH。",
     "pi": "未检测到 Pi CLI，请先安装并确保 `pi` 命令已加入 PATH。",
     "aider": "未检测到 Aider CLI，请先安装并确保 `aider` 命令已加入 PATH。",
-    "kimi": "未检测到 Kimi CLI，请先安装并确保 `kimi` 命令已加入 PATH。"
+    "kimi": "未检测到 Kimi CLI，请先安装并确保 `kimi` 命令已加入 PATH。",
+    "goose": "未检测到 Goose CLI，请先安装并确保 `goose` 命令已加入 PATH。"
   },
   "permissionLabel": {
     "claude": "跳过权限检查",
@@ -33,7 +34,8 @@
     "cursor": "",
     "pi": "",
     "aider": "",
-    "kimi": ""
+    "kimi": "",
+    "goose": ""
   },
   "permissionHint": {
     "claude": "启用后，新建或恢复会话时会自动附带 --dangerously-skip-permissions。",
@@ -45,7 +47,8 @@
     "cursor": "Cursor Agent 会话恢复暂不涉及权限参数。",
     "pi": "Pi CLI 恢复通过 --session 启动，不涉及额外权限参数。",
     "aider": "Aider 恢复会话直接通过命令行恢复历史，不涉及独立权限参数。",
-    "kimi": "Kimi CLI 启动不涉及额外权限参数。"
+    "kimi": "Kimi CLI 启动不涉及额外权限参数。",
+    "goose": "Goose 会话直接在终端启动，不涉及权限参数。"
   },
   "installDsh": "安装 DSH"
 }

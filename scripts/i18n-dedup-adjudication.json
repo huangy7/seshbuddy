@@ -43,6 +43,9 @@
   "cli.permissionLabel.kimi": {
     "action": "keep",
     "reason": "四语全为空串：同上，本键是 Kimi 的权限标签占位，与 cli.permissionLabel.dsh / workbuddy / opencode 的「空」各自独立。空值组不是合并目标——合并两个空串不减少任何文案，却把两个 CLI 的配置耦合成一个键。"
+  "cli.permissionLabel.goose": {
+    "action": "keep",
+    "reason": "四语全为空串：同上，本键是 Goose 的权限标签占位，与 cli.permissionLabel.dsh / workbuddy / opencode 的「空」各自独立。空值组不是合并目标——合并两个空串不减少任何文案，却把两个 CLI 的配置耦合成一个键。"
   },
   "common.sessionAnalytics.cumulativeLegend": {
     "action": "keep",

@@ -9,6 +9,7 @@ pub(crate) mod codex;
 pub(crate) mod cursor;
 pub(crate) mod dsh;
 pub(crate) mod gemini;
+pub(crate) mod goose;
 pub(crate) mod kimi;
 #[cfg(test)]
 mod parse_bench;
