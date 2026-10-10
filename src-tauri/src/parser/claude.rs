@@ -275,8 +275,27 @@ pub(crate) fn parse_jsonl_line(
                     message.content().and_then(crate::parser::claude_entry::first_tool_use_id)
                 {
                     if let (Some(parent), Some(stem)) = (file_path.parent(), file_path.file_stem()) {
-                        let subagent_file = parent.join(stem).join("subagents").join(format!("agent-{}.jsonl", agent_id));
-                        if subagent_file.exists() {
+                        let direct_file = parent.join(stem).join("subagents").join(format!("agent-{}.jsonl", agent_id));
+                        let subagent_file = if direct_file.exists() {
+                            Some(direct_file)
+                        } else {
+                            // 穿透检索兄弟会话目录：解决 fork 会话继承了父会话的子代理调用，
+                            // 但子代理物理文件保存在原父会话 subagents 目录下的跨分支关联问题
+                            let mut found = None;
+                            if let Ok(entries) = std::fs::read_dir(parent) {
+                                for entry in entries.flatten() {
+                                    if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
+                                        let candidate = entry.path().join("subagents").join(format!("agent-{}.jsonl", agent_id));
+                                        if candidate.exists() {
+                                            found = Some(candidate);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            found
+                        };
+                        if let Some(subagent_file) = subagent_file {
                             // agentId 可能短于 6 字节，直接切片会 panic
                             let short = agent_id.get(..6).unwrap_or(agent_id);
                             map.insert(tool_use_id, SubagentInfo {
@@ -364,8 +383,25 @@ pub(crate) fn parse_jsonl_line_legacy(
                     if let Some(first) = content.first() {
                         if let Some(tool_use_id) = first.get("tool_use_id").and_then(|v| v.as_str()) {
                             if let (Some(parent), Some(stem)) = (file_path.parent(), file_path.file_stem()) {
-                                let subagent_file = parent.join(stem).join("subagents").join(format!("agent-{}.jsonl", agent_id));
-                                if subagent_file.exists() {
+                                let direct_file = parent.join(stem).join("subagents").join(format!("agent-{}.jsonl", agent_id));
+                                let subagent_file = if direct_file.exists() {
+                                    Some(direct_file)
+                                } else {
+                                    let mut found = None;
+                                    if let Ok(entries) = std::fs::read_dir(parent) {
+                                        for entry in entries.flatten() {
+                                            if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
+                                                let candidate = entry.path().join("subagents").join(format!("agent-{}.jsonl", agent_id));
+                                                if candidate.exists() {
+                                                    found = Some(candidate);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    found
+                                };
+                                if let Some(subagent_file) = subagent_file {
                                     // 此处刻意保留改造前的 `&agent_id[..6]`（agentId 短于 6 字节会 panic），
                                     // 让本函数保持「纯金标准」；生产路径已改为安全截取，见 parse_jsonl_line
                                     map.insert(tool_use_id.to_string(), SubagentInfo {
@@ -1876,6 +1912,36 @@ mod tests {
             );
             assert!(typed_map.is_empty(), "不该登记 subagent：{line}");
         }
+
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn subagent_registration_resolves_from_sibling_directory_in_fork() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!("seshbuddy-subagent-fork-{unique}"));
+        // 原始父会话目录及子代理文件
+        let orig_stem = "sess-orig";
+        let subagents = dir.join(orig_stem).join("subagents");
+        fs::create_dir_all(&subagents).unwrap();
+        let subagent_file = subagents.join("agent-forksub123.jsonl");
+        fs::write(&subagent_file, "{}\n").unwrap();
+
+        // Fork 出来的分叉会话文件
+        let fork_file = dir.join("sess-fork.jsonl");
+        fs::write(&fork_file, "").unwrap();
+
+        let line = r#"{"type":"user","toolUseResult":{"agentId":"forksub123"},"message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t_fork","content":"done"}]}}"#;
+        let mut typed_map = HashMap::new();
+        let res = parse_jsonl_line(line, false, Some(&mut typed_map), Some(fork_file.as_path()));
+        assert!(res.is_some());
+        assert_eq!(typed_map.len(), 1);
+        let info = typed_map.get("t_fork").expect("应在兄弟会话目录下找到子代理文件");
+        assert_eq!(info.file_path, subagent_file.to_string_lossy());
+        assert_eq!(info.label, "Subagent forksu");
 
         let _ = fs::remove_dir_all(&dir);
     }
