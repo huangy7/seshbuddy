@@ -39,7 +39,7 @@ const gradIds = {
   agF11: `cb-ag-f11-${avatarUid}`,
 };
 
-type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "generic";
+type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "cursor" | "generic";
 
 const brand = computed<ProviderBrand>(() => {
   if (props.cliId) {
@@ -51,6 +51,7 @@ const brand = computed<ProviderBrand>(() => {
     if (c === "dsh") return "dsh";
     if (c === "antigravity" || c === "agy") return "antigravity";
     if (c === "opencode") return "opencode";
+    if (c === "cursor") return "cursor";
   }
   if (!props.model) return "generic";
   const m = props.model.toLowerCase();
@@ -60,6 +61,7 @@ const brand = computed<ProviderBrand>(() => {
   if (m.includes("gemini") || m.includes("google")) return "gemini";
   if (m.includes("dsh") || m.includes("deepseek")) return "dsh";
   if (m.includes("workbuddy")) return "workbuddy";
+  if (m.includes("cursor")) return "cursor";
   return "generic";
 });
 
@@ -76,6 +78,8 @@ const avatarTitle = computed(() => {
 // ─── 官方品牌矢量路径（viewBox 0 0 24 24，workbuddy 为 0 0 1024 1024）───
 // OpenCode 官方标记：一个方框挖空（evenodd 让内圈成为洞），故单路径即可。
 const OPENCODE_PATH = "M16 6H8v12h8V6zm4 16H4V2h16v20z";
+const CURSOR_PATH =
+  "M22.106 5.68L12.5.135a.998.998 0 00-.998 0L1.893 5.68a.84.84 0 00-.419.726v11.186c0 .3.16.577.42.727l9.607 5.547a.999.999 0 00.998 0l9.608-5.547a.84.84 0 00.42-.727V6.407a.84.84 0 00-.42-.726zm-.603 1.176L12.228 22.92c-.063.108-.228.064-.228-.061V12.34a.59.59 0 00-.295-.51l-9.11-5.26c-.107-.062-.063-.228.062-.228h18.55c.264 0 .428.286.296.514z";
 const ANTIGRAVITY_PATH =
   "M21.751 22.607c1.34 1.005 3.35.335 1.508-1.508C17.73 15.74 18.904 1 12.037 1 5.17 1 6.342 15.74.815 21.1c-2.01 2.009.167 2.511 1.507 1.506 5.192-3.517 4.857-9.714 9.715-9.714 4.857 0 4.522 6.197 9.714 9.715z";
 const CLAUDE_PATH =
@@ -312,6 +316,16 @@ const WB_PILL2_PATH =
       aria-hidden="true"
     >
       <path :d="OPENCODE_PATH" fill="#22d3ee" />
+    </svg>
+
+    <!-- Cursor 官方标（蓝）：等轴立体块 -->
+    <svg
+      v-else-if="brand === 'cursor'"
+      class="avatar-svg brand-svg"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path :d="CURSOR_PATH" fill="#38bdf8" />
     </svg>
 
     <!-- Generic AI Sparkle -->

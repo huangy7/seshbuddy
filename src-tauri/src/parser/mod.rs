@@ -5,6 +5,7 @@ pub(crate) mod batch;
 pub(crate) mod claude;
 pub(crate) mod claude_entry;
 pub(crate) mod codex;
+pub(crate) mod cursor;
 pub(crate) mod dsh;
 pub(crate) mod gemini;
 #[cfg(test)]
