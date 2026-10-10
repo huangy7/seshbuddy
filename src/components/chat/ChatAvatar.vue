@@ -39,7 +39,7 @@ const gradIds = {
   agF11: `cb-ag-f11-${avatarUid}`,
 };
 
-type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "cursor" | "pi" | "aider" | "generic";
+type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "cursor" | "pi" | "aider" | "kimi" | "generic";
 
 const brand = computed<ProviderBrand>(() => {
   if (props.cliId) {
@@ -54,6 +54,7 @@ const brand = computed<ProviderBrand>(() => {
 if (c === "cursor") return "cursor";
     if (c === "pi") return "pi";
     if (c === "aider") return "aider";
+    if (c === "kimi") return "kimi";
   }
   if (!props.model) return "generic";
   const m = props.model.toLowerCase();
@@ -66,6 +67,7 @@ if (c === "cursor") return "cursor";
 if (m.includes("cursor")) return "cursor";
   if (m.includes("pi")) return "pi";
   if (m.includes("aider")) return "aider";
+  if (m.includes("kimi") || m.includes("moonshot")) return "kimi";
   return "generic";
 });
 
@@ -84,6 +86,8 @@ const avatarTitle = computed(() => {
 const OPENCODE_PATH = "M16 6H8v12h8V6zm4 16H4V2h16v20z";
 const CURSOR_PATH =
   "M22.106 5.68L12.5.135a.998.998 0 00-.998 0L1.893 5.68a.84.84 0 00-.419.726v11.186c0 .3.16.577.42.727l9.607 5.547a.999.999 0 00.998 0l9.608-5.547a.84.84 0 00.42-.727V6.407a.84.84 0 00-.42-.726zm-.603 1.176L12.228 22.92c-.063.108-.228.064-.228-.061V12.34a.59.59 0 00-.295-.51l-9.11-5.26c-.107-.062-.063-.228.062-.228h18.55c.264 0 .428.286.296.514z";
+const KIMI_PATH =
+  "M12 2C12 7.523 7.523 12 2 12C7.523 12 12 16.477 12 22C12 16.477 16.477 12 22 12C16.477 12 12 7.523 12 2Z";
 const ANTIGRAVITY_PATH =
   "M21.751 22.607c1.34 1.005 3.35.335 1.508-1.508C17.73 15.74 18.904 1 12.037 1 5.17 1 6.342 15.74.815 21.1c-2.01 2.009.167 2.511 1.507 1.506 5.192-3.517 4.857-9.714 9.715-9.714 4.857 0 4.522 6.197 9.714 9.715z";
 const CLAUDE_PATH =
@@ -359,6 +363,17 @@ const WB_PILL2_PATH =
       <rect width="24" height="24" rx="5" fill="#121820" />
       <path d="M6 7.5L11 12l-5 4.5" fill="none" stroke="#14b014" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
       <line x1="13" y1="16.5" x2="18" y2="16.5" stroke="#14b014" stroke-width="2.2" stroke-linecap="round" />
+    </svg>
+
+    <!-- Kimi 官方标（Moonshot 蓝星） -->
+    <svg
+      v-else-if="brand === 'kimi'"
+      class="avatar-svg brand-svg"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path :d="KIMI_PATH" fill="#1783FF" />
+      <circle cx="12" cy="12" r="2.5" fill="#FFFFFF" fill-opacity="0.85" />
     </svg>
 
     <!-- Generic AI Sparkle -->

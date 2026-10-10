@@ -20,7 +20,8 @@
     "opencode": "OpenCode CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `opencode` im PATH liegt.",
     "cursor": "Cursor Agent CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `agent` im PATH liegt.",
     "pi": "Pi CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `pi` im PATH liegt.",
-    "aider": "Aider CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `aider` im PATH liegt."
+    "aider": "Aider CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `aider` im PATH liegt.",
+    "kimi": "Kimi CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `kimi` im PATH liegt."
   },
   "permissionLabel": {
     "claude": "Berechtigungsprüfungen überspringen",
@@ -31,7 +32,8 @@
     "opencode": "",
     "cursor": "",
     "pi": "",
-    "aider": ""
+    "aider": "",
+    "kimi": ""
   },
   "permissionHint": {
     "claude": "Wenn aktiviert, fügen neue oder fortgesetzte Sitzungen automatisch --dangerously-skip-permissions hinzu.",
@@ -42,7 +44,8 @@
     "opencode": "OpenCode-Sitzungen werden schreibgeschützt angezeigt; Berechtigungs-Flags spielen keine Rolle.",
     "cursor": "Cursor Agent-Sitzungen verwenden derzeit keine Berechtigungs-Flags.",
     "pi": "Pi CLI wird über --session fortgesetzt; es sind keine zusätzlichen Berechtigungs-Flags erforderlich.",
-    "aider": "Aider-Sitzungen stellen den Chatverlauf über die Befehlszeile wieder her; separate Berechtigungs-Flags spielen keine Rolle."
+    "aider": "Aider-Sitzungen stellen den Chatverlauf über die Befehlszeile wieder her; separate Berechtigungs-Flags spielen keine Rolle.",
+    "kimi": "Der Start von Kimi CLI beinhaltet keine zusätzlichen Berechtigungs-Flags."
   },
   "installDsh": "DSH installieren"
 }

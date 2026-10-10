@@ -1482,7 +1482,7 @@
                 [],
                 |row| row.get(0),
             )
-            .expect("统计 session 行数")
+.expect("统计顶层 session 行数")
         };
         assert!(expected > 0, "库存在却没有任何会话，无法验证端到端路径");
 
