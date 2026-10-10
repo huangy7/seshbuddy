@@ -37,7 +37,7 @@ macro_rules! cli_kinds {
     };
 }
 
-cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity, Opencode);
+cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity, Opencode, Aider);
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CliStatus {
@@ -66,6 +66,7 @@ impl CliKind {
             Self::Dsh => "dsh",
             Self::Antigravity => "antigravity",
             Self::Opencode => "opencode",
+            Self::Aider => "aider",
         }
     }
 

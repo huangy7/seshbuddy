@@ -31,6 +31,10 @@
     "action": "keep",
     "reason": "四语全为空串：同上，本键是 OpenCode 的权限标签占位，与 cli.permissionLabel.dsh / workbuddy 的「空」各自独立。空值组不是合并目标——合并两个空串不减少任何文案，却把两个 CLI 的配置耦合成一个键。"
   },
+  "cli.permissionLabel.aider": {
+    "action": "keep",
+    "reason": "四语全为空串：同上，本键是 Aider 的权限标签占位，与 cli.permissionLabel.dsh / workbuddy / opencode 的「空」各自独立。空值组不是合并目标——合并两个空串不减少任何文案，却把两个 CLI 的配置耦合成一个键。"
+  },
   "common.sessionAnalytics.cumulativeLegend": {
     "action": "keep",
     "reason": "取值相同是巧合：本键是会话分析弹窗的图例「累计」，assistant.input.cumulative 是输入框旁的用量标记。两条不同的源文案。"

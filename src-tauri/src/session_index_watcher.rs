@@ -277,6 +277,7 @@ mod tests {
             CliKind::WorkBuddy,
             CliKind::Dsh,
             CliKind::Antigravity,
+            CliKind::Aider,
         ] {
             assert!(watches_filesystem(kind), "{kind:?} 是文件型源，必须装配监听");
         }

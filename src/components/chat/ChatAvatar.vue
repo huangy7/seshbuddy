@@ -39,7 +39,7 @@ const gradIds = {
   agF11: `cb-ag-f11-${avatarUid}`,
 };
 
-type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "generic";
+type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "aider" | "generic";
 
 const brand = computed<ProviderBrand>(() => {
   if (props.cliId) {
@@ -51,6 +51,7 @@ const brand = computed<ProviderBrand>(() => {
     if (c === "dsh") return "dsh";
     if (c === "antigravity" || c === "agy") return "antigravity";
     if (c === "opencode") return "opencode";
+    if (c === "aider") return "aider";
   }
   if (!props.model) return "generic";
   const m = props.model.toLowerCase();
@@ -60,6 +61,7 @@ const brand = computed<ProviderBrand>(() => {
   if (m.includes("gemini") || m.includes("google")) return "gemini";
   if (m.includes("dsh") || m.includes("deepseek")) return "dsh";
   if (m.includes("workbuddy")) return "workbuddy";
+  if (m.includes("aider")) return "aider";
   return "generic";
 });
 
@@ -314,6 +316,18 @@ const WB_PILL2_PATH =
       <path :d="OPENCODE_PATH" fill="#22d3ee" />
     </svg>
 
+    <!-- Aider 官方复古绿色终端标（Phosphor Green） -->
+    <svg
+      v-else-if="brand === 'aider'"
+      class="avatar-svg brand-svg brand-svg-fill"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <rect width="24" height="24" rx="5" fill="#121820" />
+      <path d="M6 7.5L11 12l-5 4.5" fill="none" stroke="#14b014" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+      <line x1="13" y1="16.5" x2="18" y2="16.5" stroke="#14b014" stroke-width="2.2" stroke-linecap="round" />
+    </svg>
+
     <!-- Generic AI Sparkle -->
     <svg
       v-else
@@ -363,8 +377,9 @@ const WB_PILL2_PATH =
 }
 
 .brand-codex,
-.brand-workbuddy {
-  /* 这两款图标自带满血圆角方块底色，铺满容器 */
+.brand-workbuddy,
+.brand-aider {
+  /* 这些图标自带满血圆角方块底色，铺满容器 */
   border-radius: 10px;
 }
 
