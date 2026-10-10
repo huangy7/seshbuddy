@@ -11,6 +11,23 @@ export interface ChangelogEntry {
 /** 更新日志按版本倒序排列；About 页默认展示最近若干条，可展开查看更早版本 */
 export const changelog: ChangelogEntry[] = [
   {
+    version: "0.1.2",
+    date: "2026-10-10",
+    changeKeys: [
+      "app.changelog.v0_1_2.multicli",
+      "app.changelog.v0_1_2.dshFaultTolerance",
+      "app.changelog.v0_1_2.sessionPreferences",
+      "app.changelog.v0_1_2.dialogFixes",
+    ],
+  },
+  {
+    version: "0.1.1",
+    date: "2026-10-07",
+    changeKeys: [
+      "app.changelog.v0_1_1.opencode",
+    ],
+  },
+  {
     version: "0.1.0",
     date: "2026-09-18",
     changeKeys: [

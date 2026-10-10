@@ -147,6 +147,15 @@
     "unknownComponent": "未知"
   },
   "changelog": {
+    "v0_1_2": {
+      "multicli": "CLI 生态大幅扩展：新增 Cursor、Pi、Aider、Kimi、Goose、Grok 六款 CLI 会话浏览、解析与恢复启动",
+      "dshFaultTolerance": "DSH 稳定性增强：完善断帧恢复容错与子代理跨分叉关联寻址",
+      "sessionPreferences": "会话列表视图偏好：支持已归档与已快照会话展示切换及直达引导",
+      "dialogFixes": "交互体验优化：修复多 CLI 下新建会话弹窗排版溢出与恢复会话 API 配置选择缺失"
+    },
+    "v0_1_1": {
+      "opencode": "接入 OpenCode 支持：原生接入 SQLite 数据库存储架构，支持会话直读、子任务归集与全文检索"
+    },
     "v0_1_0": {
       "multicli": "多 CLI 会话浏览：六种 CLI 的会话收在一棵树里",
       "fulltextSearch": "全文检索：本地索引覆盖提问、回复、工具调用与代码块",

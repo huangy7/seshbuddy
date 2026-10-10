@@ -147,6 +147,15 @@
     "unknownComponent": "unbekannt"
   },
   "changelog": {
+    "v0_1_2": {
+      "multicli": "Erweitertes CLI-Ökosystem: Unterstützung für Sitzungs-Browsing, Parsing und Wiederaufnahme für Cursor, Pi, Aider, Kimi, Goose und Grok.",
+      "dshFaultTolerance": "DSH-Stabilität: verbesserte Fehlertoleranz bei Frame-Abbrüchen und Subagenten-Auflösung über Forks hinweg.",
+      "sessionPreferences": "Sitzungslisten-Ansichtsoptionen: Anzeige von archivierten und Snapshot-Sitzungen umschalten mit Sprungführung.",
+      "dialogFixes": "Interaktionsverbesserungen: horizontalen Überlauf im Dialog für neue Sitzungen bei vielen CLIs behoben und API-Profilauswahl bei Wiederaufnahme ergänzt."
+    },
+    "v0_1_1": {
+      "opencode": "OpenCode-Unterstützung: native SQLite-Datenbankintegration für direktes Lesen von Sitzungen, Teilaufgaben-Bündelung und Volltextsuche."
+    },
     "v0_1_0": {
       "multicli": "Multi-CLI-Sitzungsbrowser: Sitzungen von sechs CLIs in einem Baum.",
       "fulltextSearch": "Volltextsuche: lokaler Index über Prompts, Antworten, Tool-Aufrufe und Codeblöcke.",

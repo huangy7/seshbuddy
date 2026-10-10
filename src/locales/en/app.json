@@ -147,6 +147,15 @@
     "unknownComponent": "unknown"
   },
   "changelog": {
+    "v0_1_2": {
+      "multicli": "Expanded CLI ecosystem: added session browsing, parsing and resumption for Cursor, Pi, Aider, Kimi, Goose and Grok.",
+      "dshFaultTolerance": "DSH robustness: improved broken-frame fault tolerance and cross-fork subagent resolution.",
+      "sessionPreferences": "Session list view preferences: toggle display for archived and snapshot sessions with jump guidance.",
+      "dialogFixes": "Interaction improvements: fixed horizontal overflow in new session dialog with multiple CLIs and restored API profile selection on resume."
+    },
+    "v0_1_1": {
+      "opencode": "OpenCode support: native SQLite database integration for direct session reading, subtask grouping and full-text search."
+    },
     "v0_1_0": {
       "multicli": "Multi-CLI session browser: sessions from six CLIs in one tree.",
       "fulltextSearch": "Full-text search: a local index over prompts, replies, tool calls and code blocks.",
