@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import IndexSettings from "./IndexSettings.vue";
 import ArchiveRetentionSettings from "./ArchiveRetentionSettings.vue";
 import ArchivedSessionsSettings from "./ArchivedSessionsSettings.vue";
 import CacheMaintenanceSettings from "./CacheMaintenanceSettings.vue";
 import BlockedFoldersSettings from "./BlockedFoldersSettings.vue";
+import ToggleSwitch from "./ToggleSwitch.vue";
+import { useSessions } from "../composables/useSessions";
 import type { SessionIdentity } from "../types/session";
 import type { CliId } from "../types/cli";
 import { t } from "../i18n";
@@ -20,6 +22,20 @@ const emit = defineEmits<{
 // 页内唯一 CLI 上下文：IndexSettings 负责兜底解析与持久化，
 // 归档列表跟随同一状态
 const activeCliId = ref<CliId | undefined>(props.initialCliId);
+const {
+  showArchivedSessions,
+  showSnapshotSessions,
+  setShowArchivedSessions,
+  setShowSnapshotSessions,
+} = useSessions();
+const showArchived = computed({
+  get: () => showArchivedSessions.value,
+  set: setShowArchivedSessions,
+});
+const showSnapshots = computed({
+  get: () => showSnapshotSessions.value,
+  set: setShowSnapshotSessions,
+});
 </script>
 
 <template>
@@ -46,6 +62,27 @@ const activeCliId = ref<CliId | undefined>(props.initialCliId);
           @open-search="emit('openSearch')"
           @close-settings="emit('closeSettings')"
         />
+      </div>
+    </div>
+
+    <div class="settings-section" data-visibility-settings>
+      <h3 class="section-title">{{ t("settings.dataIndex.sessionListVisibility") }}</h3>
+      <div class="settings-card">
+        <div class="visibility-row">
+          <div class="visibility-copy">
+            <span class="visibility-title">{{ t("settings.dataIndex.showArchivedSessions") }}</span>
+            <span class="visibility-description">{{ t("settings.dataIndex.showArchivedSessionsDesc") }}</span>
+          </div>
+          <ToggleSwitch v-model="showArchived" :aria-label="t('settings.dataIndex.showArchivedSessions')" />
+        </div>
+        <div class="card-divider" />
+        <div class="visibility-row">
+          <div class="visibility-copy">
+            <span class="visibility-title">{{ t("settings.dataIndex.showSnapshotSessions") }}</span>
+            <span class="visibility-description">{{ t("settings.dataIndex.showSnapshotSessionsDesc") }}</span>
+          </div>
+          <ToggleSwitch v-model="showSnapshots" :aria-label="t('settings.dataIndex.showSnapshotSessions')" />
+        </div>
       </div>
     </div>
 
@@ -108,5 +145,27 @@ const activeCliId = ref<CliId | undefined>(props.initialCliId);
 }
 .card-divider {
   border-top: 1px solid var(--color-border);
+}
+.visibility-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+.visibility-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.visibility-title {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+.visibility-description {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 </style>

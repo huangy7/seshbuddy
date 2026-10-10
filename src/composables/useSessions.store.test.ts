@@ -19,13 +19,14 @@ const mocks = vi.hoisted(() => ({
   searchDone: undefined as ReturnType<typeof ref<any>> | undefined,
 }));
 
+const storage = new Map<string, string>();
 vi.stubGlobal("localStorage", {
-  getItem: () => null,
-  setItem: () => {},
-  removeItem: () => {},
-  clear: () => {},
-  key: () => null,
-  length: 0,
+  getItem: (key: string) => storage.get(key) ?? null,
+  setItem: (key: string, value: string) => storage.set(key, value),
+  removeItem: (key: string) => storage.delete(key),
+  clear: () => storage.clear(),
+  key: (index: number) => [...storage.keys()][index] ?? null,
+  get length() { return storage.size; },
 });
 
 vi.mock("@tauri-apps/api/core", () => ({ invoke: mocks.invoke }));
@@ -72,6 +73,8 @@ const {
   CONTEXT_MENU_REGISTERED_KEY,
   CONTEXT_MENU_OUTCOME_KEY,
 } = await import("./useSessions");
+const { mount } = await import("@vue/test-utils");
+const DataIndexSettings = (await import("../components/DataIndexSettings.vue")).default;
 const store = useSessions();
 
 function session(cliId: "claude" | "codex", filePath = "/same/session.jsonl"): SessionInfo {
@@ -137,6 +140,9 @@ beforeEach(() => {
   store.selectedSessionIdentities.value = [];
   store.clearActiveSession();
   store.searchQuery.value = "";
+  store.showArchivedSessions.value = true;
+  store.showSnapshotSessions.value = true;
+  storage.clear();
 
   mocks.invoke.mockImplementation(async (command: string, args?: Record<string, any>) => {
     if (command === "list_cli_statuses") {
@@ -166,6 +172,93 @@ beforeEach(() => {
 });
 
 describe("useSessions store wiring", () => {
+  it("offers visibility recovery only when hidden sessions match the current list search", () => {
+    const archived = { ...session("claude", "/archive/old.jsonl"), is_archived: true };
+    mocks.projectItems!.value = [
+      { encoded_dir: "archive", original_path: "/archive", session: archived },
+    ];
+    store.setShowArchivedSessions(false);
+
+    expect(store.filteredProjects.value).toEqual([]);
+    expect(store.hasSessionsHiddenByVisibility.value).toBe(true);
+
+    store.searchQuery.value = "unrelated";
+    expect(store.hasSessionsHiddenByVisibility.value).toBe(false);
+
+    store.searchQuery.value = "archive";
+    expect(store.hasSessionsHiddenByVisibility.value).toBe(true);
+  });
+
+  it("changes history visibility immediately from the two settings switches", async () => {
+    const archived = { ...session("claude", "/archive/old.jsonl"), is_archived: true };
+    const snapshot = { ...session("claude", "/workspace/snapshot.jsonl"), has_archive_snapshot: true };
+    mocks.projectItems!.value = [
+      { encoded_dir: "archive", original_path: "/archive", session: archived },
+      { encoded_dir: "workspace", original_path: "/workspace", session: snapshot },
+    ];
+    const wrapper = mount(DataIndexSettings, {
+      global: {
+        stubs: {
+          IndexSettings: true,
+          ArchiveRetentionSettings: true,
+          ArchivedSessionsSettings: true,
+          CacheMaintenanceSettings: true,
+          BlockedFoldersSettings: true,
+        },
+      },
+    });
+
+    const archivedSwitch = wrapper.get(`[role="switch"][aria-label="${t("settings.dataIndex.showArchivedSessions")}"]`);
+    const snapshotSwitch = wrapper.get(`[role="switch"][aria-label="${t("settings.dataIndex.showSnapshotSessions")}"]`);
+    await archivedSwitch.trigger("click");
+    expect(store.filteredProjects.value.map((p) => p.original_path)).toEqual(["/workspace"]);
+    await snapshotSwitch.trigger("click");
+    expect(store.filteredProjects.value).toEqual([]);
+    expect(localStorage.getItem("seshbuddy-show-archived-sessions")).toBe("false");
+    expect(localStorage.getItem("seshbuddy-show-snapshot-sessions")).toBe("false");
+  });
+
+  it("independently hides archived and snapshot sessions from the history list", () => {
+    const live = session("claude", "/workspace/live.jsonl");
+    const snapshot = { ...session("claude", "/workspace/snapshot.jsonl"), has_archive_snapshot: true };
+    const archived = { ...session("codex", "/archive/old.jsonl"), has_archive_snapshot: true, is_archived: true };
+    mocks.projectItems!.value = [
+      { encoded_dir: "workspace", original_path: "/workspace", session: live },
+      { encoded_dir: "workspace", original_path: "/workspace", session: snapshot },
+      { encoded_dir: "archive", original_path: "/archive", session: archived },
+    ];
+
+    expect(store.filteredProjects.value.flatMap((p) => p.sessions.map((s) => s.file_path))).toEqual([
+      "/workspace/live.jsonl", "/workspace/snapshot.jsonl", "/archive/old.jsonl",
+    ]);
+
+    store.setShowArchivedSessions(false);
+    expect(store.filteredProjects.value.map((p) => p.original_path)).toEqual(["/workspace"]);
+    expect(store.filteredProjects.value[0].sessions.map((s) => s.file_path)).toEqual([
+      "/workspace/live.jsonl", "/workspace/snapshot.jsonl",
+    ]);
+
+    store.setShowSnapshotSessions(false);
+    expect(store.filteredProjects.value[0].sessions.map((s) => s.file_path)).toEqual([
+      "/workspace/live.jsonl",
+    ]);
+
+    store.setShowArchivedSessions(true);
+    expect(store.filteredProjects.value.map((p) => p.original_path)).toEqual(["/workspace", "/archive"]);
+    expect(store.filteredProjects.value[1].sessions.map((s) => s.file_path)).toEqual(["/archive/old.jsonl"]);
+  });
+
+  it("persists list visibility and clears batch selection when hiding sessions", () => {
+    store.selectedSessionIdentities.value = [{ cliId: "claude", filePath: "/same/session.jsonl" }];
+
+    store.setShowArchivedSessions(false);
+    store.setShowSnapshotSessions(false);
+
+    expect(store.selectedSessionIdentities.value).toEqual([]);
+    expect(localStorage.getItem("seshbuddy-show-archived-sessions")).toBe("false");
+    expect(localStorage.getItem("seshbuddy-show-snapshot-sessions")).toBe("false");
+  });
+
   it("passes visible CLI IDs to project refresh and ignores hidden CLI update events", async () => {
     await store.refresh("snapshot");
     expect(mocks.projectRefresh).toHaveBeenLastCalledWith(

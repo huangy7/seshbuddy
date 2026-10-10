@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import SvgIcon from "./icons/SvgIcon.vue";
 import GeneralSettings from "./GeneralSettings.vue";
 import DataSourceSettings from "./DataSourceSettings.vue";
@@ -40,6 +40,7 @@ const activeTab = ref<SettingsTab>(props.initialTab);
 const maximized = ref(false);
 const minimized = ref(false);
 const sidebarCollapsed = ref(false);
+const settingsBodyRef = ref<HTMLElement | null>(null);
 const { cliOptions } = useSessions();
 const { hasAvailableUpdate } = useUpdater();
 
@@ -69,8 +70,19 @@ function restoreFromMinimized() {
   minimized.value = false;
 }
 
+async function focusVisibilitySettings() {
+  minimized.value = false;
+  switchTab("data");
+  await nextTick();
+  settingsBodyRef.value?.querySelector<HTMLElement>("[data-visibility-settings]")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
 defineExpose({
-  restoreFromMinimized
+  restoreFromMinimized,
+  focusVisibilitySettings,
 });
 
 watch(
@@ -164,7 +176,7 @@ function getIcon(tabId: SettingsTab) {
             </div>
           </div>
 
-          <div class="settings-body">
+          <div ref="settingsBodyRef" class="settings-body">
             <div v-if="mountedTabs.general" v-show="activeTab === 'general'" class="settings-tab-panel">
               <GeneralSettings
                 :initial-cli-id="props.initialCliId"

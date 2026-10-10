@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import SessionTree from "./SessionTree.vue";
 import type { AggregatedProjectInfo, SessionIdentity, SessionInfo } from "../types/session";
-import { setLocale } from "../i18n";
+import { setLocale, t } from "../i18n";
 
 function session(cliId: "claude" | "codex", id: string, time: string): SessionInfo {
   return {
@@ -63,6 +63,20 @@ function mountTree(props: Record<string, unknown> = {}) {
 describe("SessionTree grouping modes", () => {
   beforeAll(() => {
     HTMLElement.prototype.scrollIntoView = vi.fn();
+  });
+
+  it("renders empty hint when there are no visible projects", () => {
+    const wrapper = mountTree({ projects: [] });
+    expect(wrapper.find(".empty-hint").text()).toBe(t("session.sessionTree.emptyNoVisibleSessions"));
+  });
+
+  it("offers display settings when the empty list contains sessions hidden by visibility", async () => {
+    const wrapper = mountTree({ projects: [], hasSessionsHiddenByVisibility: true });
+    const button = wrapper.get(".empty-hint button");
+    expect(button.text()).toBe(t("session.sessionTree.adjustVisibilitySettings"));
+
+    await button.trigger("click");
+    expect(wrapper.emitted("openVisibilitySettings")).toHaveLength(1);
   });
 
   it("renders 2-level tree in directory mode", async () => {

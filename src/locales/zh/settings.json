@@ -81,6 +81,11 @@
   "dataIndex": {
     "globalIndex": "全局索引",
     "cliIndex": "CLI 索引",
+    "sessionListVisibility": "会话列表显示",
+    "showArchivedSessions": "显示已归档会话",
+    "showArchivedSessionsDesc": "源文件已清理、可从本地归档读取的会话",
+    "showSnapshotSessions": "显示已快照会话",
+    "showSnapshotSessionsDesc": "源文件仍在、已有本地归档快照的会话",
     "archive": "会话归档",
     "cache": "缓存与维护",
     "blockedFolders": "屏蔽文件夹"

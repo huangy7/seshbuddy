@@ -81,6 +81,11 @@
   "dataIndex": {
     "globalIndex": "Global index",
     "cliIndex": "CLI index",
+    "sessionListVisibility": "Conversation List Display",
+    "showArchivedSessions": "Show archived sessions",
+    "showArchivedSessionsDesc": "Sessions whose source files have been cleaned up and can be read from local archive",
+    "showSnapshotSessions": "Show snapshot sessions",
+    "showSnapshotSessionsDesc": "Sessions whose source files still exist and have local archive snapshots",
     "archive": "Session archive",
     "cache": "Cache & maintenance",
     "blockedFolders": "Blocked folders"

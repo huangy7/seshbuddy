@@ -9,6 +9,8 @@ const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
   currentCliId: undefined as ReturnType<typeof ref<CliId>> | undefined,
   visibleCliIds: undefined as ReturnType<typeof ref<CliId[]>> | undefined,
+  showArchivedSessions: undefined as ReturnType<typeof ref<boolean>> | undefined,
+  showSnapshotSessions: undefined as ReturnType<typeof ref<boolean>> | undefined,
   setCliDataDirOverride: vi.fn(async () => undefined),
   setSkipPermissions: vi.fn(),
   registerContextMenu: vi.fn(async () => undefined),
@@ -43,10 +45,16 @@ vi.mock("../composables/useSessions", async () => {
   const { ref } = await vi.importActual<typeof import("vue")>("vue");
   mocks.currentCliId = ref<CliId>("claude");
   mocks.visibleCliIds = ref<CliId[]>(["claude"]);
+  mocks.showArchivedSessions = ref(true);
+  mocks.showSnapshotSessions = ref(true);
   return {
     useSessions: () => ({
       currentCliId: mocks.currentCliId,
       visibleCliIds: mocks.visibleCliIds,
+      showArchivedSessions: mocks.showArchivedSessions,
+      showSnapshotSessions: mocks.showSnapshotSessions,
+      setShowArchivedSessions: (value: boolean) => { mocks.showArchivedSessions!.value = value; },
+      setShowSnapshotSessions: (value: boolean) => { mocks.showSnapshotSessions!.value = value; },
       cliOptions: ref(cliOptions),
       cliPathConfigs: ref({ claude: null, codex: null, gemini: null, workbuddy: null, dsh: null }),
       skipPermissions: ref(true),
@@ -71,6 +79,8 @@ beforeEach(() => {
   mocks.setCliDataDirOverride.mockClear();
   mocks.currentCliId!.value = "claude";
   mocks.visibleCliIds!.value = ["claude"];
+  mocks.showArchivedSessions!.value = true;
+  mocks.showSnapshotSessions!.value = true;
   mocks.invoke.mockImplementation(async (command: string) => {
     if (command === "list_archived_sessions") return [];
     if (command === "get_archive_retention_days") return 60;
