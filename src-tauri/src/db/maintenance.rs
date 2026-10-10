@@ -269,7 +269,7 @@ mod tests {
             .collect();
         assert_eq!(
             outside,
-vec!["workbuddy", "dsh", "antigravity", "opencode", "cursor", "pi", "aider", "kimi"],
+vec!["workbuddy", "dsh", "antigravity", "opencode", "cursor", "pi", "aider", "kimi", "goose"],
             "已验证范围之外的 CLI 集合变了：新 CLI 必须在此显式表态"
         );
     }

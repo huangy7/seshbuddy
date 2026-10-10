@@ -21,7 +21,8 @@
     "cursor": "Cursor Agent CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `agent` im PATH liegt.",
     "pi": "Pi CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `pi` im PATH liegt.",
     "aider": "Aider CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `aider` im PATH liegt.",
-    "kimi": "Kimi CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `kimi` im PATH liegt."
+    "kimi": "Kimi CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `kimi` im PATH liegt.",
+    "goose": "Goose CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `goose` im PATH liegt."
   },
   "permissionLabel": {
     "claude": "Berechtigungsprüfungen überspringen",
@@ -33,7 +34,8 @@
     "cursor": "",
     "pi": "",
     "aider": "",
-    "kimi": ""
+    "kimi": "",
+    "goose": ""
   },
   "permissionHint": {
     "claude": "Wenn aktiviert, fügen neue oder fortgesetzte Sitzungen automatisch --dangerously-skip-permissions hinzu.",
@@ -45,7 +47,8 @@
     "cursor": "Cursor Agent-Sitzungen verwenden derzeit keine Berechtigungs-Flags.",
     "pi": "Pi CLI wird über --session fortgesetzt; es sind keine zusätzlichen Berechtigungs-Flags erforderlich.",
     "aider": "Aider-Sitzungen stellen den Chatverlauf über die Befehlszeile wieder her; separate Berechtigungs-Flags spielen keine Rolle.",
-    "kimi": "Der Start von Kimi CLI beinhaltet keine zusätzlichen Berechtigungs-Flags."
+    "kimi": "Der Start von Kimi CLI beinhaltet keine zusätzlichen Berechtigungs-Flags.",
+    "goose": "Goose-Sitzungen werden direkt im Terminal fortgesetzt; Berechtigungs-Flags spielen keine Rolle."
   },
   "installDsh": "DSH installieren"
 }

@@ -11,7 +11,7 @@ use super::descriptor::CliDescriptor;
 use super::source::CliSource;
 use super::sources::{
     AiderSource, AntigravitySource, ClaudeSource, CodexSource, CursorSource, DshSource, GeminiSource,
-    KimiSource, OpencodeSource, PiSource, WorkBuddySource,
+    GooseSource, KimiSource, OpencodeSource, PiSource, WorkBuddySource,
 };
 
 /// 按枚举取源。穷尽 `match`：新增变体而不在此登记，编译不过。
@@ -28,6 +28,7 @@ pub(crate) fn source_for(kind: CliKind) -> &'static dyn CliSource {
         CliKind::Pi => &PiSource,
         CliKind::Aider => &AiderSource,
         CliKind::Kimi => &KimiSource,
+        CliKind::Goose => &GooseSource,
     }
 }
 
@@ -68,6 +69,8 @@ mod tests {
             ("/Users/x/.cursor/projects/p/agent-transcripts/s/s.jsonl", CliKind::Cursor),
             ("/Users/x/.aider/chats/a.md", CliKind::Aider),
             ("/Users/x/.kimi-code/sessions/wd_1/ses_123/agents/main/wire.jsonl", CliKind::Kimi),
+            ("cli://goose/ses_goose_1", CliKind::Goose),
+            ("/Users/x/.local/share/goose/sessions/sessions.db", CliKind::Goose),
             // 边界案例：`antigravity-cli-tools` 只是名字里带了同一串字符，
             // 并不是 Antigravity 的数据目录。若排除方按裸子串否决，这条路径会
             // 「无人认领」而静默落到兜底项 —— 归属必须仍留在 Gemini。
