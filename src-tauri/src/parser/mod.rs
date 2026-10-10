@@ -10,6 +10,7 @@ pub(crate) mod dsh;
 pub(crate) mod gemini;
 #[cfg(test)]
 mod parse_bench;
+pub(crate) mod pi;
 pub(crate) mod shared;
 pub(crate) mod workbuddy;
 

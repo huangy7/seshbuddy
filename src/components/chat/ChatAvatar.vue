@@ -39,7 +39,7 @@ const gradIds = {
   agF11: `cb-ag-f11-${avatarUid}`,
 };
 
-type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "cursor" | "generic";
+type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "cursor" | "pi" | "generic";
 
 const brand = computed<ProviderBrand>(() => {
   if (props.cliId) {
@@ -51,7 +51,8 @@ const brand = computed<ProviderBrand>(() => {
     if (c === "dsh") return "dsh";
     if (c === "antigravity" || c === "agy") return "antigravity";
     if (c === "opencode") return "opencode";
-    if (c === "cursor") return "cursor";
+if (c === "cursor") return "cursor";
+    if (c === "pi") return "pi";
   }
   if (!props.model) return "generic";
   const m = props.model.toLowerCase();
@@ -61,7 +62,8 @@ const brand = computed<ProviderBrand>(() => {
   if (m.includes("gemini") || m.includes("google")) return "gemini";
   if (m.includes("dsh") || m.includes("deepseek")) return "dsh";
   if (m.includes("workbuddy")) return "workbuddy";
-  if (m.includes("cursor")) return "cursor";
+if (m.includes("cursor")) return "cursor";
+  if (m.includes("pi")) return "pi";
   return "generic";
 });
 
@@ -326,6 +328,23 @@ const WB_PILL2_PATH =
       aria-hidden="true"
     >
       <path :d="CURSOR_PATH" fill="#38bdf8" />
+    </svg>
+
+    <!-- Pi 官方标（紫色 π） -->
+    <svg
+      v-else-if="brand === 'pi'"
+      class="avatar-svg brand-svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#a855f7"
+      stroke-width="2.2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 7h16" />
+      <path d="M9 7v12" />
+      <path d="M15 7v10c0 1.1.9 2 2 2h1" />
     </svg>
 
     <!-- Generic AI Sparkle -->
