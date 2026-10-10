@@ -22,7 +22,11 @@
     "pi": "Pi CLI not found. Install it first and make sure the `pi` command is on PATH.",
     "aider": "Aider CLI not found. Install it first and make sure the `aider` command is on PATH.",
     "kimi": "Kimi CLI not found. Install it first and make sure the `kimi` command is on PATH.",
-    "goose": "Goose CLI not found. Install it first and make sure the `goose` command is on PATH."
+    "goose": "Goose CLI not found. Install it first and make sure the `goose` command is on PATH.",
+    "grok": {
+      "windows": "Grok CLI not found. Install it first and make sure `grok` is available.",
+      "unix": "Grok CLI not found. Install it first and make sure the `grok` command is on PATH."
+    }
   },
   "permissionLabel": {
     "claude": "Skip permission checks",
@@ -35,7 +39,8 @@
     "pi": "",
     "aider": "",
     "kimi": "",
-    "goose": ""
+    "goose": "",
+    "grok": ""
   },
   "permissionHint": {
     "claude": "When enabled, new or resumed sessions automatically include --dangerously-skip-permissions.",
@@ -48,7 +53,8 @@
     "pi": "Pi CLI resumes via --session; no extra permission flags are involved.",
     "aider": "Aider restores chat history via command line; no separate permission flags are involved.",
     "kimi": "Kimi CLI startup does not involve additional permission flags.",
-    "goose": "Goose sessions resume directly in the terminal; no permission flags are involved."
+    "goose": "Goose sessions resume directly in the terminal; no permission flags are involved.",
+    "grok": "Grok session resume does not involve additional permission flags."
   },
   "installDsh": "Install DSH"
 }

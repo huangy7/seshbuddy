@@ -36,6 +36,7 @@ mod tests {
                 CliKind::Antigravity,
                 CliKind::Opencode,
                 CliKind::Goose,
+                CliKind::Grok,
             ],
             "有用量统计能力的 CLI 集合变了"
         );
