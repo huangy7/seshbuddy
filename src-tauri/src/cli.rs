@@ -37,7 +37,7 @@ macro_rules! cli_kinds {
     };
 }
 
-cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity, Opencode, Cursor);
+cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity, Opencode, Cursor, Pi);
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CliStatus {
@@ -66,7 +66,8 @@ impl CliKind {
             Self::Dsh => "dsh",
             Self::Antigravity => "antigravity",
             Self::Opencode => "opencode",
-            Self::Cursor => "cursor",
+Self::Cursor => "cursor",
+            Self::Pi => "pi",
         }
     }
 
@@ -1329,7 +1330,12 @@ mod tests {
                 home.join(".gemini").join("antigravity-cli"),
                 "brain",
             ),
-            (CliKind::Cursor, home.join(".cursor"), "projects"),
+(CliKind::Cursor, home.join(".cursor"), "projects"),
+            (
+                CliKind::Pi,
+                home.join(".pi").join("agent"),
+                "sessions",
+            ),
         ];
 
         for (kind, expected_default_dir, sessions_subdir) in cases {

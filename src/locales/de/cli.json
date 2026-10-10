@@ -18,7 +18,8 @@
       "unix": "Antigravity CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `agy` im PATH liegt."
     },
     "opencode": "OpenCode CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `opencode` im PATH liegt.",
-    "cursor": "Cursor Agent CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `agent` im PATH liegt."
+    "cursor": "Cursor Agent CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `agent` im PATH liegt.",
+    "pi": "Pi CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `pi` im PATH liegt."
   },
   "permissionLabel": {
     "claude": "Berechtigungsprüfungen überspringen",
@@ -27,7 +28,8 @@
     "workbuddy": "",
     "dsh": "",
     "opencode": "",
-    "cursor": ""
+    "cursor": "",
+    "pi": ""
   },
   "permissionHint": {
     "claude": "Wenn aktiviert, fügen neue oder fortgesetzte Sitzungen automatisch --dangerously-skip-permissions hinzu.",
@@ -36,7 +38,8 @@
     "workbuddy": "WorkBuddy wird durch Öffnen der WorkBuddy-App fortgesetzt; Berechtigungs-Flags spielen keine Rolle.",
     "dsh": "DSH-Sitzungen liegen im Web und können nicht in einem lokalen Terminal fortgesetzt werden.",
     "opencode": "OpenCode-Sitzungen werden schreibgeschützt angezeigt; Berechtigungs-Flags spielen keine Rolle.",
-    "cursor": "Cursor Agent-Sitzungen verwenden derzeit keine Berechtigungs-Flags."
+    "cursor": "Cursor Agent-Sitzungen verwenden derzeit keine Berechtigungs-Flags.",
+    "pi": "Pi CLI wird über --session fortgesetzt; es sind keine zusätzlichen Berechtigungs-Flags erforderlich."
   },
   "installDsh": "DSH installieren"
 }

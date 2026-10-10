@@ -42,7 +42,8 @@ const cliIcon = computed(() => {
   if (props.leaf.cliKind === "codex") return "cpu";
   if (props.leaf.cliKind === "gemini") return "sparkles";
   if (props.leaf.cliKind === "claude") return "terminal";
-  if (props.leaf.cliKind === "cursor") return "cursor";
+if (props.leaf.cliKind === "cursor") return "cursor";
+  if (props.leaf.cliKind === "pi") return "pi";
   return "terminal";
 });
 

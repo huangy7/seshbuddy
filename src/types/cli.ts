@@ -9,7 +9,7 @@ import { t } from "../i18n";
  *
  * 与 Rust 侧的一致性由 `enumParity` 的 parity 测试钉住（判据取自 `CliKind::id()`）。
  */
-export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "cursor"] as const;
+export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "cursor", "pi"] as const;
 
 export type CliId = (typeof CLI_IDS)[number];
 
@@ -107,7 +107,11 @@ function defaultCliDataDir(id: CliId): string {
       win: "%USERPROFILE%\\.local\\share\\opencode",
       unix: "~/.local/share/opencode",
     },
-    cursor: { win: "%USERPROFILE%\\.cursor", unix: "~/.cursor" },
+cursor: { win: "%USERPROFILE%\\.cursor", unix: "~/.cursor" },
+    pi: {
+      win: "%USERPROFILE%\\.pi\\agent",
+      unix: "~/.pi/agent",
+    },
   };
   return IS_WINDOWS ? dirs[id].win : dirs[id].unix;
 }
@@ -124,7 +128,8 @@ function defaultCliDataSource(id: CliId): string {
     antigravity: "brain",
     // 库型源没有会话子目录：会话是数据目录下 SQLite 库里的行，数据源就是数据目录本身。
     opencode: "",
-    cursor: "projects",
+cursor: "projects",
+    pi: "sessions",
   };
   return subdir[id] ? `${base}${sep}${subdir[id]}${sep}` : base;
 }
@@ -266,6 +271,24 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     installHintKey: "cli.installHint.cursor",
     permissionLabelKey: "cli.permissionLabel.cursor",
     permissionHintKey: "cli.permissionHint.cursor",
+    supportsNewSession: true,
+    supportsResumeSession: true,
+    supportsContextMenu: false,
+    supportsInPlaceFork: false,
+    supportsUsageStats: false,
+    supportsApiProfiles: false,
+    supportsApiLogs: false,
+    supportsDelete: true,
+  },
+  pi: {
+    id: "pi",
+    name: "Pi",
+    command: "pi",
+    dataSourcePath: defaultCliDataSource("pi"),
+    dataDirPath: defaultCliDataDir("pi"),
+    installHintKey: "cli.installHint.pi",
+    permissionLabelKey: "cli.permissionLabel.pi",
+    permissionHintKey: "cli.permissionHint.pi",
     supportsNewSession: true,
     supportsResumeSession: true,
     supportsContextMenu: false,

@@ -18,7 +18,8 @@
       "unix": "未检测到 Antigravity CLI，请先安装并确保 `agy` 命令已加入 PATH。"
     },
     "opencode": "未检测到 OpenCode CLI，请先安装并确保 `opencode` 命令已加入 PATH。",
-    "cursor": "未检测到 Cursor Agent CLI，请先安装并确保 `agent` 命令已加入 PATH。"
+    "cursor": "未检测到 Cursor Agent CLI，请先安装并确保 `agent` 命令已加入 PATH。",
+    "pi": "未检测到 Pi CLI，请先安装并确保 `pi` 命令已加入 PATH。"
   },
   "permissionLabel": {
     "claude": "跳过权限检查",
@@ -27,7 +28,8 @@
     "workbuddy": "",
     "dsh": "",
     "opencode": "",
-    "cursor": ""
+    "cursor": "",
+    "pi": ""
   },
   "permissionHint": {
     "claude": "启用后，新建或恢复会话时会自动附带 --dangerously-skip-permissions。",
@@ -36,7 +38,8 @@
     "workbuddy": "WorkBuddy 会话恢复直接跳转 WorkBuddy 应用，不涉及权限参数。",
     "dsh": "DSH 为 Web 端会话，不支持本地终端恢复。",
     "opencode": "OpenCode 会话为只读浏览，不涉及权限参数。",
-    "cursor": "Cursor Agent 会话恢复暂不涉及权限参数。"
+    "cursor": "Cursor Agent 会话恢复暂不涉及权限参数。",
+    "pi": "Pi CLI 恢复通过 --session 启动，不涉及额外权限参数。"
   },
   "installDsh": "安装 DSH"
 }
