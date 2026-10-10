@@ -20,7 +20,8 @@
     "opencode": "OpenCode CLI not found. Install it first and make sure the `opencode` command is on PATH.",
     "cursor": "Cursor Agent CLI not found. Install it first and make sure the `agent` command is on PATH.",
     "pi": "Pi CLI not found. Install it first and make sure the `pi` command is on PATH.",
-    "aider": "Aider CLI not found. Install it first and make sure the `aider` command is on PATH."
+    "aider": "Aider CLI not found. Install it first and make sure the `aider` command is on PATH.",
+    "kimi": "Kimi CLI not found. Install it first and make sure the `kimi` command is on PATH."
   },
   "permissionLabel": {
     "claude": "Skip permission checks",
@@ -31,7 +32,8 @@
     "opencode": "",
     "cursor": "",
     "pi": "",
-    "aider": ""
+    "aider": "",
+    "kimi": ""
   },
   "permissionHint": {
     "claude": "When enabled, new or resumed sessions automatically include --dangerously-skip-permissions.",
@@ -42,7 +44,8 @@
     "opencode": "OpenCode sessions are browsed read-only; no permission flags are involved.",
     "cursor": "Cursor Agent sessions currently do not use permission bypass flags.",
     "pi": "Pi CLI resumes via --session; no extra permission flags are involved.",
-    "aider": "Aider restores chat history via command line; no separate permission flags are involved."
+    "aider": "Aider restores chat history via command line; no separate permission flags are involved.",
+    "kimi": "Kimi CLI startup does not involve additional permission flags."
   },
   "installDsh": "Install DSH"
 }

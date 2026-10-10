@@ -9,7 +9,7 @@ import { t } from "../i18n";
  *
  * 与 Rust 侧的一致性由 `enumParity` 的 parity 测试钉住（判据取自 `CliKind::id()`）。
  */
-export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "cursor", "pi", "aider"] as const;
+export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "cursor", "pi", "aider", "kimi"] as const;
 
 export type CliId = (typeof CLI_IDS)[number];
 
@@ -116,6 +116,10 @@ function defaultCliDataDir(id: CliId): string {
       win: "%USERPROFILE%\\.aider",
       unix: "~/.aider",
     },
+    kimi: {
+      win: "%USERPROFILE%\\.kimi-code",
+      unix: "~/.kimi-code",
+    },
   };
   return IS_WINDOWS ? dirs[id].win : dirs[id].unix;
 }
@@ -135,6 +139,7 @@ function defaultCliDataSource(id: CliId): string {
 cursor: "projects",
     pi: "sessions",
     aider: "chats",
+    kimi: "sessions",
   };
   return subdir[id] ? `${base}${sep}${subdir[id]}${sep}` : base;
 }
@@ -312,6 +317,24 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     installHintKey: "cli.installHint.aider",
     permissionLabelKey: "cli.permissionLabel.aider",
     permissionHintKey: "cli.permissionHint.aider",
+    supportsNewSession: true,
+    supportsResumeSession: true,
+    supportsContextMenu: false,
+    supportsInPlaceFork: false,
+    supportsUsageStats: false,
+    supportsApiProfiles: false,
+    supportsApiLogs: false,
+    supportsDelete: true,
+  },
+  kimi: {
+    id: "kimi",
+    name: "Kimi",
+    command: "kimi",
+    dataSourcePath: defaultCliDataSource("kimi"),
+    dataDirPath: defaultCliDataDir("kimi"),
+    installHintKey: "cli.installHint.kimi",
+    permissionLabelKey: "cli.permissionLabel.kimi",
+    permissionHintKey: "cli.permissionHint.kimi",
     supportsNewSession: true,
     supportsResumeSession: true,
     supportsContextMenu: false,

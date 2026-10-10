@@ -281,6 +281,7 @@ const cliStatuses = ref<Record<CliId, CliRuntime>>({
 cursor: { hasSessions: false, hasBinary: false },
   pi: { hasSessions: false, hasBinary: false },
   aider: { hasSessions: false, hasBinary: false },
+  kimi: { hasSessions: false, hasBinary: false },
 });
 const cliSessionCounts = ref<Partial<Record<CliId, number>>>({});
 const cliPathConfigs = ref<Record<CliId, CliPathConfig | null>>({
@@ -294,6 +295,7 @@ const cliPathConfigs = ref<Record<CliId, CliPathConfig | null>>({
 cursor: null,
   pi: null,
   aider: null,
+  kimi: null,
 });
 
 const currentCli = computed<ResolvedCliDefinition>(() =>
@@ -680,6 +682,7 @@ async function loadCliStatuses() {
 cursor: { hasSessions: false, hasBinary: false },
   pi: { hasSessions: false, hasBinary: false },
   aider: { hasSessions: false, hasBinary: false },
+  kimi: { hasSessions: false, hasBinary: false },
     };
     for (const status of statuses) {
       if (isCliId(status.id)) {
@@ -709,6 +712,7 @@ async function loadCliPathConfigs() {
 cursor: null,
   pi: null,
   aider: null,
+  kimi: null,
     };
     for (const config of configs) {
       if (isCliId(config.id)) {
