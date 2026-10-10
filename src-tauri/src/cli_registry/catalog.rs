@@ -11,7 +11,7 @@ use super::descriptor::CliDescriptor;
 use super::source::CliSource;
 use super::sources::{
     AntigravitySource, ClaudeSource, CodexSource, DshSource, GeminiSource, OpencodeSource,
-    WorkBuddySource,
+    PiSource, WorkBuddySource,
 };
 
 /// 按枚举取源。穷尽 `match`：新增变体而不在此登记，编译不过。
@@ -24,6 +24,7 @@ pub(crate) fn source_for(kind: CliKind) -> &'static dyn CliSource {
         CliKind::Dsh => &DshSource,
         CliKind::Antigravity => &AntigravitySource,
         CliKind::Opencode => &OpencodeSource,
+        CliKind::Pi => &PiSource,
     }
 }
 
@@ -58,6 +59,7 @@ mod tests {
             ("/Users/x/.workbuddy/projects/p/a.jsonl", CliKind::WorkBuddy),
             ("/Users/x/.dsh/sessions/a/session.jsonl", CliKind::Dsh),
             ("/Users/x/.gemini/antigravity-cli/brain/s1/transcript.jsonl", CliKind::Antigravity),
+            ("/Users/x/.pi/agent/sessions/a.jsonl", CliKind::Pi),
             // 库型源：会话身份是 `cli://opencode/<id>` 虚拟键，不是文件路径。
             ("cli://opencode/ses_x", CliKind::Opencode),
             // 边界案例：`antigravity-cli-tools` 只是名字里带了同一串字符，
@@ -66,6 +68,7 @@ mod tests {
             ("/Users/x/.gemini/tmp/antigravity-cli-tools/chats/s1.jsonl", CliKind::Gemini),
             (r"C:\Users\x\.codex\sessions\a.jsonl", CliKind::Codex),
             (r"C:\Users\x\.gemini\antigravity-cli\brain\s1\transcript.jsonl", CliKind::Antigravity),
+            (r"C:\Users\x\.pi\agent\sessions\a.jsonl", CliKind::Pi),
         ]
     }
 

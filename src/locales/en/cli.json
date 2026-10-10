@@ -17,7 +17,8 @@
       "windows": "Antigravity CLI not found. Install it first and make sure `agy` is available.",
       "unix": "Antigravity CLI not found. Install it first and make sure the `agy` command is on PATH."
     },
-    "opencode": "OpenCode CLI not found. Install it first and make sure the `opencode` command is on PATH."
+    "opencode": "OpenCode CLI not found. Install it first and make sure the `opencode` command is on PATH.",
+    "pi": "Pi CLI not found. Install it first and make sure the `pi` command is on PATH."
   },
   "permissionLabel": {
     "claude": "Skip permission checks",
@@ -25,7 +26,8 @@
     "gemini": "YOLO mode",
     "workbuddy": "",
     "dsh": "",
-    "opencode": ""
+    "opencode": "",
+    "pi": ""
   },
   "permissionHint": {
     "claude": "When enabled, new or resumed sessions automatically include --dangerously-skip-permissions.",
@@ -33,7 +35,8 @@
     "gemini": "When enabled, Gemini automatically includes -y (YOLO mode), skipping all tool confirmations.",
     "workbuddy": "WorkBuddy resumes by opening the WorkBuddy app; no permission flags are involved.",
     "dsh": "DSH sessions live on the web and cannot be resumed in a local terminal.",
-    "opencode": "OpenCode sessions are browsed read-only; no permission flags are involved."
+    "opencode": "OpenCode sessions are browsed read-only; no permission flags are involved.",
+    "pi": "Pi CLI resumes via --session; no extra permission flags are involved."
   },
   "installDsh": "Install DSH"
 }
