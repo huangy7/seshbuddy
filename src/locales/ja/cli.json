@@ -17,7 +17,8 @@
       "windows": "Antigravity CLI が見つかりません。先にインストールし、`agy` が利用できることを確認してください。",
       "unix": "Antigravity CLI が見つかりません。先にインストールし、`agy` コマンドが PATH に含まれていることを確認してください。"
     },
-    "opencode": "OpenCode CLI が見つかりません。先にインストールし、`opencode` コマンドが PATH に含まれていることを確認してください。"
+    "opencode": "OpenCode CLI が見つかりません。先にインストールし、`opencode` コマンドが PATH に含まれていることを確認してください。",
+    "cursor": "Cursor Agent CLI が見つかりません。先にインストールし、`agent` コマンドが PATH に含まれていることを確認してください。"
   },
   "permissionLabel": {
     "claude": "権限チェックをスキップ",
@@ -25,7 +26,8 @@
     "gemini": "YOLO モード",
     "workbuddy": "",
     "dsh": "",
-    "opencode": ""
+    "opencode": "",
+    "cursor": ""
   },
   "permissionHint": {
     "claude": "有効にすると、新規または再開したセッションに自動で --dangerously-skip-permissions が付与されます。",
@@ -33,7 +35,8 @@
     "gemini": "有効にすると、Gemini は自動で -y（YOLO モード）を付与し、すべてのツール確認をスキップします。",
     "workbuddy": "WorkBuddy の再開は WorkBuddy アプリを開くだけで、権限フラグは関係しません。",
     "dsh": "DSH は Web 上のセッションであり、ローカルターミナルでは再開できません。",
-    "opencode": "OpenCode のセッションは読み取り専用で閲覧され、権限フラグは関係しません。"
+    "opencode": "OpenCode のセッションは読み取り専用で閲覧され、権限フラグは関係しません。",
+    "cursor": "Cursor Agent のセッション再開は権限フラグを使用しません。"
   },
   "installDsh": "DSH をインストール"
 }

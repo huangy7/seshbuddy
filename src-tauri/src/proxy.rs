@@ -325,6 +325,7 @@ mod proxy_pid_tests {
             (CliKind::WorkBuddy, 18086),
             (CliKind::Dsh, 18088),
             (CliKind::Antigravity, 18088),
+            (CliKind::Cursor, 18088),
         ];
         for (kind, port) in expected {
             assert_eq!(
