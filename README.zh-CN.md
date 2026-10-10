@@ -27,16 +27,16 @@
 </p>
 
 <p align="center">
-  <img src="assets/screenshot-main.png" alt="SeshBuddy 在一棵树里浏览七个 CLI 的会话" width="880">
+  <img src="assets/screenshot-main.png" alt="SeshBuddy 在一棵树里浏览多个 CLI 的会话" width="880">
 </p>
 
-SeshBuddy 是一个原生的桌面工作台，用来管理你和 AI 编码代理一起写下的会话。它直接读取 Claude Code、Codex、Gemini、Antigravity、WorkBuddy、DSH 与 OpenCode 已经写在磁盘上的会话数据与日志，在本地建立索引，把浏览、检索、归档与检视集中到一处——外加一个本地反向代理，让你看清 agent 究竟往网络上发了什么。
+SeshBuddy 是一个原生的桌面工作台，用来管理你和 AI 编码代理一起写下的会话。它直接读取 Claude Code、Codex、Gemini、Antigravity、WorkBuddy、DSH、OpenCode 与 Cursor 已经写在磁盘上的会话数据与日志，在本地建立索引，把浏览、检索、归档与检视集中到一处——外加一个本地反向代理，让你看清 agent 究竟往网络上发了什么。
 
 ## 核心功能
 
 | 功能 | 说明 |
 | :--- | :--- |
-| **多 CLI 会话浏览** | 在一棵树里浏览、整理、收藏与归档 **Claude Code / Codex / Gemini / Antigravity / WorkBuddy / DSH / OpenCode** 的历史会话。 |
+| **多 CLI 会话浏览** | 在一棵树里浏览、整理、收藏与归档 **Claude Code / Codex / Gemini / Antigravity / WorkBuddy / DSH / OpenCode / Cursor** 的历史会话。 |
 | **统一全文检索** | 基于本地 **Tantivy** 索引，覆盖每一条提问、回复、工具调用与代码块；会话标题匹配也并入同一结果集。 |
 | **API 反向代理与流量检视** | `seshbuddy-proxy` 位于 CLI 与厂商端点之间（支持 **Claude Code** 与 **Codex**），可查看请求 / 响应体、耗时与 token 用量。一键开启，一键还原原始端点。 |
 | **Monaco 编辑器与 Git Diff** | 并排差异视图加语法高亮，不用离开应用就能看清 agent 改了什么。 |
