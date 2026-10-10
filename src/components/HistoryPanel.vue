@@ -18,6 +18,8 @@ const props = withDefaults(
   defineProps<{
     projects: ProjectInfo[];
     selectedSessionIdentity: SessionIdentity | null;
+    selectedSessionHiddenByVisibility?: boolean;
+    hasSessionsHiddenByVisibility?: boolean;
     selectedSessionIdentities: SessionIdentity[];
     contextMenuSessionIdentity?: SessionIdentity | null;
     searchQuery: string;
@@ -95,6 +97,7 @@ const emit = defineEmits<{
   clearSelection: [];
   selectProjectSessions: [projectKey: string];
   retryCli: [cliId: CliId];
+  openVisibilitySettings: [];
 }>();
 
 function cliFilterItems(): HTMLButtonElement[] {
@@ -174,6 +177,20 @@ function restoreAllCliSources() {
 
 const { blockedFolders, unblockFolder } = useBlockedFolders();
 const showBlockedSection = ref(false);
+
+const locateTitle = computed(() => {
+  if (sessionTreeRef.value?.canLocateSession) return t("session.historyPanel.locateCurrent");
+  if (props.selectedSessionHiddenByVisibility) return t("session.historyPanel.locateHiddenByVisibility");
+  return t("session.historyPanel.noActiveSession");
+});
+
+function onLocateClick() {
+  if (sessionTreeRef.value?.canLocateSession) {
+    sessionTreeRef.value.locateCurrentSession();
+  } else if (props.selectedSessionHiddenByVisibility) {
+    emit("openVisibilitySettings");
+  }
+}
 </script>
 
 <template>
@@ -287,9 +304,10 @@ const showBlockedSection = ref(false);
       <div class="tree-actions">
         <button
           class="toolbar-btn"
-          :title="sessionTreeRef?.canLocateSession ? t('session.historyPanel.locateCurrent') : t('session.historyPanel.noActiveSession')"
-          :disabled="!sessionTreeRef?.canLocateSession"
-          @click="sessionTreeRef?.locateCurrentSession()"
+          :title="locateTitle"
+          :aria-label="locateTitle"
+          :disabled="!sessionTreeRef?.canLocateSession && !selectedSessionHiddenByVisibility"
+          @click="onLocateClick"
         >
           <SvgIcon name="crosshair" :size="13" />
         </button>
@@ -330,6 +348,8 @@ const showBlockedSection = ref(false);
       ref="sessionTreeRef"
       :projects="projects"
       :selectedSessionIdentity="selectedSessionIdentity"
+      :selectedSessionHiddenByVisibility="selectedSessionHiddenByVisibility"
+      :hasSessionsHiddenByVisibility="hasSessionsHiddenByVisibility"
       :selectedSessionIdentities="selectedSessionIdentities"
       :contextMenuSessionIdentity="contextMenuSessionIdentity"
       :searchQuery="searchQuery"
@@ -350,6 +370,7 @@ const showBlockedSection = ref(false);
       @rangeSelect="(startIdentity: SessionIdentity, endIdentity: SessionIdentity) => emit('rangeSelect', startIdentity, endIdentity)"
       @clearSelection="emit('clearSelection')"
       @selectProjectSessions="emit('selectProjectSessions', $event)"
+      @openVisibilitySettings="emit('openVisibilitySettings')"
     />
 
     <div v-if="blockedFolders.length > 0" class="blocked-section">

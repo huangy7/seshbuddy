@@ -25,6 +25,7 @@ const props = withDefaults(
     showLoadingIndicator: boolean;
     bootstrapping?: boolean;
     hasCompletedInitialScan?: boolean;
+    hasSessionsHiddenByVisibility?: boolean;
     projectAllSelected: (projectKey: string) => boolean;
     grouping?: TreeGrouping;
   }>(),
@@ -44,6 +45,7 @@ const emit = defineEmits<{
   rangeSelect: [startIdentity: SessionIdentity, endIdentity: SessionIdentity];
   clearSelection: [];
   selectProjectSessions: [projectKey: string];
+  openVisibilitySettings: [];
 }>();
 
 // Inline rename state
@@ -477,7 +479,13 @@ function onToggleSession(session: SessionInfo, event: MouseEvent) {
       </div>
 
       <div v-else-if="showEmptyHint" key="empty" class="empty-hint">
-        {{ projects.length > 0 ? t('session.sessionTree.emptyAllBlocked') : t('session.sessionTree.emptyNoData') }}
+        <span>{{ t('session.sessionTree.emptyNoVisibleSessions') }}</span>
+        <button
+          v-if="hasSessionsHiddenByVisibility"
+          type="button"
+          class="empty-settings-link"
+          @click="emit('openVisibilitySettings')"
+        >{{ t('session.sessionTree.adjustVisibilitySettings') }}</button>
       </div>
 
       <!-- Provider Grouping Mode -->
@@ -764,6 +772,23 @@ function onToggleSession(session: SessionInfo, event: MouseEvent) {
   text-align: center;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+}
+.empty-settings-link {
+  display: block;
+  margin: var(--space-2) auto 0;
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.empty-settings-link:hover {
+  text-decoration: underline;
+}
+.empty-settings-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 .tree-content-container {
   display: flex;

@@ -81,6 +81,11 @@
   "dataIndex": {
     "globalIndex": "グローバルインデックス",
     "cliIndex": "CLI インデックス",
+    "sessionListVisibility": "セッションリスト表示",
+    "showArchivedSessions": "アーカイブ済みセッションを表示",
+    "showArchivedSessionsDesc": "元ファイルが削除され、ローカルアーカイブから読み取り可能なセッション",
+    "showSnapshotSessions": "スナップショット済みセッションを表示",
+    "showSnapshotSessionsDesc": "元ファイルが残り、ローカルアーカイブスナップショットが存在するセッション",
     "archive": "セッションのアーカイブ",
     "cache": "キャッシュとメンテナンス",
     "blockedFolders": "ブロックしたフォルダー"
