@@ -39,7 +39,7 @@ const gradIds = {
   agF11: `cb-ag-f11-${avatarUid}`,
 };
 
-type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "generic";
+type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "kimi" | "generic";
 
 const brand = computed<ProviderBrand>(() => {
   if (props.cliId) {
@@ -51,6 +51,7 @@ const brand = computed<ProviderBrand>(() => {
     if (c === "dsh") return "dsh";
     if (c === "antigravity" || c === "agy") return "antigravity";
     if (c === "opencode") return "opencode";
+    if (c === "kimi") return "kimi";
   }
   if (!props.model) return "generic";
   const m = props.model.toLowerCase();
@@ -60,6 +61,7 @@ const brand = computed<ProviderBrand>(() => {
   if (m.includes("gemini") || m.includes("google")) return "gemini";
   if (m.includes("dsh") || m.includes("deepseek")) return "dsh";
   if (m.includes("workbuddy")) return "workbuddy";
+  if (m.includes("kimi") || m.includes("moonshot")) return "kimi";
   return "generic";
 });
 
@@ -76,6 +78,8 @@ const avatarTitle = computed(() => {
 // ─── 官方品牌矢量路径（viewBox 0 0 24 24，workbuddy 为 0 0 1024 1024）───
 // OpenCode 官方标记：一个方框挖空（evenodd 让内圈成为洞），故单路径即可。
 const OPENCODE_PATH = "M16 6H8v12h8V6zm4 16H4V2h16v20z";
+const KIMI_PATH =
+  "M12 2C12 7.523 7.523 12 2 12C7.523 12 12 16.477 12 22C12 16.477 16.477 12 22 12C16.477 12 12 7.523 12 2Z";
 const ANTIGRAVITY_PATH =
   "M21.751 22.607c1.34 1.005 3.35.335 1.508-1.508C17.73 15.74 18.904 1 12.037 1 5.17 1 6.342 15.74.815 21.1c-2.01 2.009.167 2.511 1.507 1.506 5.192-3.517 4.857-9.714 9.715-9.714 4.857 0 4.522 6.197 9.714 9.715z";
 const CLAUDE_PATH =
@@ -312,6 +316,17 @@ const WB_PILL2_PATH =
       aria-hidden="true"
     >
       <path :d="OPENCODE_PATH" fill="#22d3ee" />
+    </svg>
+
+    <!-- Kimi 官方标（Moonshot 蓝星） -->
+    <svg
+      v-else-if="brand === 'kimi'"
+      class="avatar-svg brand-svg"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path :d="KIMI_PATH" fill="#1783FF" />
+      <circle cx="12" cy="12" r="2.5" fill="#FFFFFF" fill-opacity="0.85" />
     </svg>
 
     <!-- Generic AI Sparkle -->

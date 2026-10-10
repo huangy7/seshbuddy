@@ -17,7 +17,8 @@
       "windows": "Antigravity CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass `agy` verfügbar ist.",
       "unix": "Antigravity CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `agy` im PATH liegt."
     },
-    "opencode": "OpenCode CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `opencode` im PATH liegt."
+    "opencode": "OpenCode CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `opencode` im PATH liegt.",
+    "kimi": "Kimi CLI wurde nicht gefunden. Bitte zuerst installieren und sicherstellen, dass der Befehl `kimi` im PATH liegt."
   },
   "permissionLabel": {
     "claude": "Berechtigungsprüfungen überspringen",
@@ -25,7 +26,8 @@
     "gemini": "YOLO-Modus",
     "workbuddy": "",
     "dsh": "",
-    "opencode": ""
+    "opencode": "",
+    "kimi": ""
   },
   "permissionHint": {
     "claude": "Wenn aktiviert, fügen neue oder fortgesetzte Sitzungen automatisch --dangerously-skip-permissions hinzu.",
@@ -33,7 +35,8 @@
     "gemini": "Wenn aktiviert, fügt Gemini automatisch -y (YOLO-Modus) hinzu und überspringt alle Werkzeugbestätigungen.",
     "workbuddy": "WorkBuddy wird durch Öffnen der WorkBuddy-App fortgesetzt; Berechtigungs-Flags spielen keine Rolle.",
     "dsh": "DSH-Sitzungen liegen im Web und können nicht in einem lokalen Terminal fortgesetzt werden.",
-    "opencode": "OpenCode-Sitzungen werden schreibgeschützt angezeigt; Berechtigungs-Flags spielen keine Rolle."
+    "opencode": "OpenCode-Sitzungen werden schreibgeschützt angezeigt; Berechtigungs-Flags spielen keine Rolle.",
+    "kimi": "Der Start von Kimi CLI beinhaltet keine zusätzlichen Berechtigungs-Flags."
   },
   "installDsh": "DSH installieren"
 }
