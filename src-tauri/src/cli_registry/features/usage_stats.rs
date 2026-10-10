@@ -34,7 +34,8 @@ mod tests {
                 CliKind::Gemini,
                 CliKind::Dsh,
                 CliKind::Antigravity,
-                CliKind::Opencode
+                CliKind::Opencode,
+                CliKind::Grok,
             ],
             "有用量统计能力的 CLI 集合变了"
         );

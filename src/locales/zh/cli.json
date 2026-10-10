@@ -17,7 +17,11 @@
       "windows": "未检测到 Antigravity CLI，请先安装并确保 `agy` 可用。",
       "unix": "未检测到 Antigravity CLI，请先安装并确保 `agy` 命令已加入 PATH。"
     },
-    "opencode": "未检测到 OpenCode CLI，请先安装并确保 `opencode` 命令已加入 PATH。"
+    "opencode": "未检测到 OpenCode CLI，请先安装并确保 `opencode` 命令已加入 PATH。",
+    "grok": {
+      "windows": "未检测到 Grok CLI，请先安装并确保 `grok` 可用。",
+      "unix": "未检测到 Grok CLI，请先安装并确保 `grok` 命令已加入 PATH。"
+    }
   },
   "permissionLabel": {
     "claude": "跳过权限检查",
@@ -25,7 +29,8 @@
     "gemini": "YOLO 模式",
     "workbuddy": "",
     "dsh": "",
-    "opencode": ""
+    "opencode": "",
+    "grok": ""
   },
   "permissionHint": {
     "claude": "启用后，新建或恢复会话时会自动附带 --dangerously-skip-permissions。",
@@ -33,7 +38,8 @@
     "gemini": "启用后，Gemini 会自动附带 -y（YOLO 模式），跳过所有工具确认。",
     "workbuddy": "WorkBuddy 会话恢复直接跳转 WorkBuddy 应用，不涉及权限参数。",
     "dsh": "DSH 为 Web 端会话，不支持本地终端恢复。",
-    "opencode": "OpenCode 会话为只读浏览，不涉及权限参数。"
+    "opencode": "OpenCode 会话为只读浏览，不涉及权限参数。",
+    "grok": "Grok 会话恢复不涉及额外权限参数。"
   },
   "installDsh": "安装 DSH"
 }

@@ -9,7 +9,7 @@ import { t } from "../i18n";
  *
  * 与 Rust 侧的一致性由 `enumParity` 的 parity 测试钉住（判据取自 `CliKind::id()`）。
  */
-export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode"] as const;
+export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "grok"] as const;
 
 export type CliId = (typeof CLI_IDS)[number];
 
@@ -107,6 +107,7 @@ function defaultCliDataDir(id: CliId): string {
       win: "%USERPROFILE%\\.local\\share\\opencode",
       unix: "~/.local/share/opencode",
     },
+    grok: { win: "%USERPROFILE%\\.grok", unix: "~/.grok" },
   };
   return IS_WINDOWS ? dirs[id].win : dirs[id].unix;
 }
@@ -123,6 +124,7 @@ function defaultCliDataSource(id: CliId): string {
     antigravity: "brain",
     // 库型源没有会话子目录：会话是数据目录下 SQLite 库里的行，数据源就是数据目录本身。
     opencode: "",
+    grok: "sessions",
   };
   return subdir[id] ? `${base}${sep}${subdir[id]}${sep}` : base;
 }
@@ -254,6 +256,24 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     supportsApiProfiles: false,
     supportsApiLogs: false,
     supportsDelete: false,
+  },
+  grok: {
+    id: "grok",
+    name: "Grok",
+    command: "grok",
+    dataSourcePath: defaultCliDataSource("grok"),
+    dataDirPath: defaultCliDataDir("grok"),
+    installHintKey: "cli.installHint.grok",
+    permissionLabelKey: "cli.permissionLabel.grok",
+    permissionHintKey: "cli.permissionHint.grok",
+    supportsNewSession: true,
+    supportsResumeSession: true,
+    supportsContextMenu: false,
+    supportsInPlaceFork: false,
+    supportsUsageStats: true,
+    supportsApiProfiles: false,
+    supportsApiLogs: false,
+    supportsDelete: true,
   },
 };
 

@@ -10,8 +10,8 @@ use crate::cli::CliKind;
 use super::descriptor::CliDescriptor;
 use super::source::CliSource;
 use super::sources::{
-    AntigravitySource, ClaudeSource, CodexSource, DshSource, GeminiSource, OpencodeSource,
-    WorkBuddySource,
+    AntigravitySource, ClaudeSource, CodexSource, DshSource, GeminiSource, GrokSource,
+    OpencodeSource, WorkBuddySource,
 };
 
 /// 按枚举取源。穷尽 `match`：新增变体而不在此登记，编译不过。
@@ -24,6 +24,7 @@ pub(crate) fn source_for(kind: CliKind) -> &'static dyn CliSource {
         CliKind::Dsh => &DshSource,
         CliKind::Antigravity => &AntigravitySource,
         CliKind::Opencode => &OpencodeSource,
+        CliKind::Grok => &GrokSource,
     }
 }
 
@@ -64,6 +65,8 @@ mod tests {
             // 并不是 Antigravity 的数据目录。若排除方按裸子串否决，这条路径会
             // 「无人认领」而静默落到兜底项 —— 归属必须仍留在 Gemini。
             ("/Users/x/.gemini/tmp/antigravity-cli-tools/chats/s1.jsonl", CliKind::Gemini),
+            ("/Users/x/.grok/sessions/p/s1/chat_history.jsonl", CliKind::Grok),
+            (r"C:\Users\x\.grok\sessions\p\s1\chat_history.jsonl", CliKind::Grok),
             (r"C:\Users\x\.codex\sessions\a.jsonl", CliKind::Codex),
             (r"C:\Users\x\.gemini\antigravity-cli\brain\s1\transcript.jsonl", CliKind::Antigravity),
         ]

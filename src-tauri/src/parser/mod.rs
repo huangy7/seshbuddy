@@ -7,6 +7,7 @@ pub(crate) mod claude_entry;
 pub(crate) mod codex;
 pub(crate) mod dsh;
 pub(crate) mod gemini;
+pub(crate) mod grok;
 #[cfg(test)]
 mod parse_bench;
 pub(crate) mod shared;
@@ -134,6 +135,10 @@ mod result_string_class_error_shape {
             (
                 "antigravity",
                 format!("{base}/.gemini/antigravity-cli/brain/s1/transcript.jsonl"),
+            ),
+            (
+                "grok",
+                format!("{base}/.grok/sessions/p/s1/chat_history.jsonl"),
             ),
         ]
     }
@@ -334,6 +339,9 @@ mod dispatch_tests {
     fn antigravity_line() -> &'static str {
         r#"{"step_index":1,"source":"USER_EXPLICIT","type":"USER_INPUT","status":"DONE","created_at":"2026-08-30T12:00:00Z","content":"<USER_REQUEST>hello agy</USER_REQUEST>"}"#
     }
+    fn grok_line() -> &'static str {
+        r#"{"role":"user","content":"hello grok"}"#
+    }
 
     #[test]
     fn parse_content_by_kind_parses_each_format() {
@@ -342,6 +350,7 @@ mod dispatch_tests {
         assert_eq!(parse_session_content_by_kind("/Users/x/.gemini/tmp/a.jsonl", gemini_line()).len(), 1);
         assert_eq!(parse_session_content_by_kind("/Users/x/.workbuddy/projects/p/a.jsonl", workbuddy_line()).len(), 1);
         assert_eq!(parse_session_content_by_kind("/Users/x/.gemini/antigravity-cli/brain/s1/transcript.jsonl", antigravity_line()).len(), 1);
+        assert_eq!(parse_session_content_by_kind("/Users/x/.grok/sessions/p/s1/chat_history.jsonl", grok_line()).len(), 1);
     }
 
     #[test]
@@ -407,6 +416,40 @@ mod dispatch_tests {
         let metadata =
             source_for(kind_for_path(file_path)).metadata_only(file_path).expect("metadata");
         assert_eq!(metadata.session_id, "agy-sess-1");
+    }
+
+    #[test]
+    fn grok_dispatch_arms_route_to_real_implementations() {
+        let dir = tempfile::tempdir().unwrap();
+        let session_dir = dir
+            .path()
+            .join(".grok")
+            .join("sessions")
+            .join("%2FUsers%2Fx%2Fproj")
+            .join("grok-sess-1");
+        std::fs::create_dir_all(&session_dir).unwrap();
+        let summary_content = r#"{"id":"grok-sess-1","cwd":"/Users/x/proj","generated_title":"Grok Chat"}"#;
+        std::fs::write(session_dir.join("summary.json"), summary_content).unwrap();
+        let path = session_dir.join("chat_history.jsonl");
+        let content = concat!(
+            "{\"role\":\"user\",\"content\":\"hello grok dispatch\"}\n",
+            "{\"role\":\"assistant\",\"content\":\"hi from grok\"}\n",
+        );
+        std::fs::write(&path, content).unwrap();
+        let file_path = path.to_str().unwrap();
+
+        assert_eq!(read_session_id(file_path).as_deref(), Some("grok-sess-1"));
+        assert_eq!(read_project_path(file_path).as_deref(), Some("/Users/x/proj"));
+        assert_eq!(read_first_user_message(file_path).as_deref(), Some("hello grok dispatch"));
+
+        let docs = scan_session_search_docs_from_bytes(file_path, content.as_bytes()).unwrap();
+        assert_eq!(docs.len(), 2);
+        assert!(docs[0].search_text.contains("hello grok dispatch"));
+
+        let metadata =
+            source_for(kind_for_path(file_path)).metadata_only(file_path).expect("metadata");
+        assert_eq!(metadata.session_id, "grok-sess-1");
+        assert_eq!(metadata.project_path.as_deref(), Some("/Users/x/proj"));
     }
 
     /// 项目路径的出口不变量：**空白不是路径**。

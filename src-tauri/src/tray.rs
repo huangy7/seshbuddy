@@ -363,6 +363,7 @@ mod tests {
             (CliKind::WorkBuddy, "WorkBuddy"),
             (CliKind::Dsh, "DSH"),
             (CliKind::Antigravity, "Antigravity"),
+            (CliKind::Grok, "Grok"),
         ];
         for (kind, label) in expected {
             assert_eq!(

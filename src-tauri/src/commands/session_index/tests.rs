@@ -1477,8 +1477,12 @@
                 rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
             )
             .expect("只读打开真实 OpenCode 库");
-            conn.query_row("SELECT count(*) FROM session", [], |row| row.get(0))
-                .expect("统计 session 行数")
+            conn.query_row(
+                "SELECT count(*) FROM session WHERE parent_id IS NULL",
+                [],
+                |row| row.get(0),
+            )
+            .expect("统计顶级 session 行数")
         };
         assert!(expected > 0, "库存在却没有任何会话，无法验证端到端路径");
 
