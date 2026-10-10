@@ -244,7 +244,8 @@ async function onCopyCommand() {
 
 <style scoped>
 .dialog {
-  width: 420px;
+  width: 480px;
+  max-width: calc(100vw - var(--space-8));
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
@@ -302,12 +303,14 @@ async function onCopyCommand() {
 }
 .cli-options {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-1);
 }
 .cli-option {
   display: flex;
   align-items: center;
+  white-space: nowrap;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-3);
   font-size: var(--text-sm);

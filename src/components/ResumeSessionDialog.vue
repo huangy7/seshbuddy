@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { invokeApp } from "../utils/invokeApp";
 import SvgIcon from "./icons/SvgIcon.vue";
 import ElegantSelect from "./common/ElegantSelect.vue";
@@ -10,7 +10,7 @@ import { t } from "../i18n";
 type LaunchMode = "agent" | "terminal";
 
 const props = defineProps<{
-  profiles: string[];
+  profiles?: string[];
   cliId: string;
   isArchived?: boolean;
   /** 对话框标题与主按钮文案，默认“恢复会话” */
@@ -27,6 +27,7 @@ const { skipPermissions } = useSessions();
 
 const launchMode = ref<LaunchMode>("agent");
 const selectedProfile = ref<string | null>(null);
+const profileNames = ref<string[]>(props.profiles && props.profiles.length > 0 ? [...props.profiles] : []);
 const copyFeedback = ref(false);
 const copyFailed = ref(false);
 // 本次启动的权限开关：默认跟随全局设置（设置 → 通用），仅作用于本次，不写回
@@ -37,34 +38,57 @@ const permissionLabel = computed(() => {
   return selected ? cliPermissionLabel(selected) : "";
 });
 
+async function loadProfiles() {
+  if (props.cliId !== "claude") return;
+  try {
+    const names = await invokeApp<string[]>("list_profiles", { cliId: "claude" });
+    if (Array.isArray(names) && names.length > 0) {
+      profileNames.value = names;
+    }
+    const active = await invokeApp<string>("get_active_profile", { cliId: "claude" });
+    if (active && profileNames.value.includes(active)) {
+      selectedProfile.value = active;
+    } else if (profileNames.value.length > 0 && !selectedProfile.value) {
+      selectedProfile.value = profileNames.value[0];
+    }
+  } catch {
+    if (profileNames.value.length > 0 && !selectedProfile.value) {
+      selectedProfile.value = profileNames.value[0];
+    }
+  }
+}
+
 // API 配置选择仅对 Claude 开放（与新建会话弹窗一致），其他 CLI 不显示也不应用
 const showProfileSelector = computed(
-  () => props.cliId === "claude" && props.profiles.length >= 2
+  () => props.cliId === "claude" && profileNames.value.length >= 2
 );
 
 const profileOptions = computed(() =>
-  props.profiles.map((name) => ({
+  profileNames.value.map((name) => ({
     value: name,
     label: name,
     icon: "settings",
   }))
 );
 
-// Auto-select first profile
-if (props.profiles.length > 0) {
-  selectedProfile.value = props.profiles[0];
-}
-
-// 优先选中当前启用的 API 配置（与新建会话弹窗保持一致），失败时保持第一个
-if (props.cliId === "claude") {
-  invokeApp<string>("get_active_profile", { cliId: "claude" })
-    .then((active) => {
-      if (active && props.profiles.includes(active)) {
-        selectedProfile.value = active;
+watch(
+  () => props.profiles,
+  (newProfiles) => {
+    if (newProfiles && newProfiles.length > 0) {
+      profileNames.value = [...newProfiles];
+      if (!selectedProfile.value || !newProfiles.includes(selectedProfile.value)) {
+        selectedProfile.value = newProfiles[0];
       }
-    })
-    .catch(() => {});
-}
+    }
+  }
+);
+
+onMounted(() => {
+  if (props.profiles && props.profiles.length > 0) {
+    selectedProfile.value = props.profiles[0];
+  }
+  void loadProfiles();
+});
 
 function onResume() {
   const profile = showProfileSelector.value ? selectedProfile.value : null;
@@ -156,7 +180,8 @@ function onCopyCommand() {
 
 <style scoped>
 .dialog {
-  width: 400px;
+  width: 440px;
+  max-width: calc(100vw - var(--space-8));
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
@@ -196,12 +221,14 @@ function onCopyCommand() {
 }
 .launch-options {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-1);
 }
 .launch-option {
   display: flex;
   align-items: center;
+  white-space: nowrap;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-3);
   font-size: var(--text-sm);
