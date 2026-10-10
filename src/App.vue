@@ -1077,6 +1077,7 @@ function onContextMenuSession(
                   return;
                 }
                 contextMenuTargetSession.value = { filePath, sessionId, projectPath, cliId };
+                void loadClaudeProfiles();
                 showContextMenuResumeDialog.value = true;
               },
             },
@@ -2434,7 +2435,7 @@ onBeforeUnmount(() => {
       ref="settingsDialogRef"
       :initial-tab="settingsInitialTab"
       :initial-cli-id="settingsInitialCliId"
-      @close="showSettings = false"
+      @close="showSettings = false; void loadClaudeProfiles();"
       @registerMenu="registerContextMenu"
       @unregisterMenu="unregisterContextMenu"
       @openSession="onOpenSessionFromSettings"
