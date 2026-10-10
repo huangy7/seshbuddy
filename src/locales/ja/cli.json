@@ -17,7 +17,8 @@
       "windows": "Antigravity CLI が見つかりません。先にインストールし、`agy` が利用できることを確認してください。",
       "unix": "Antigravity CLI が見つかりません。先にインストールし、`agy` コマンドが PATH に含まれていることを確認してください。"
     },
-    "opencode": "OpenCode CLI が見つかりません。先にインストールし、`opencode` コマンドが PATH に含まれていることを確認してください。"
+    "opencode": "OpenCode CLI が見つかりません。先にインストールし、`opencode` コマンドが PATH に含まれていることを確認してください。",
+    "goose": "Goose CLI が見つかりません。先にインストールし、`goose` コマンドが PATH に含まれていることを確認してください。"
   },
   "permissionLabel": {
     "claude": "権限チェックをスキップ",
@@ -25,15 +26,17 @@
     "gemini": "YOLO モード",
     "workbuddy": "",
     "dsh": "",
-    "opencode": ""
+    "opencode": "",
+    "goose": ""
   },
   "permissionHint": {
     "claude": "有効にすると、新規または再開したセッションに自動で --dangerously-skip-permissions が付与されます。",
     "codex": "有効にすると、Codex は自動で --dangerously-bypass-approvals-and-sandbox を付与し、最も緩い権限で起動します。",
     "gemini": "有効にすると、Gemini は自動で -y（YOLO モード）を付与し、すべてのツール確認をスキップします。",
     "workbuddy": "WorkBuddy の再開は WorkBuddy アプリを開くだけで、権限フラグは関係しません。",
-    "dsh": "DSH は Web 上のセッションであり、ローカルターミナルでは再開できません。",
-    "opencode": "OpenCode のセッションは読み取り専用で閲覧され、権限フラグは関係しません。"
+    "dsh": "DSH は Web 上のセッションであり、ローカルターミナルでは再开できません。",
+    "opencode": "OpenCode のセッションは読み取り専用で閲覧され、権限フラグは関係しません。",
+    "goose": "Goose のセッション再開はターミナルで直接行われ、権限フラグは関係しません。"
   },
   "installDsh": "DSH をインストール"
 }

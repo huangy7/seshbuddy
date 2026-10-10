@@ -669,10 +669,10 @@ mod tests {
         }
     }
 
-    /// 上面那道门不得误伤六个文件型源：缺失文件仍按「跳过已不存在」计成功。
+    /// 上面那道门不得误伤文件型源：缺失文件仍按「跳过已不存在」计成功。
     #[test]
     fn file_backed_sources_still_delete() {
-        for kind in CliKind::ALL.iter().copied().filter(|k| *k != CliKind::Opencode) {
+        for kind in CliKind::ALL.iter().copied().filter(|k| crate::cli_registry::source_for(*k).can_delete()) {
             assert!(
                 trash_session(kind, "/definitely/not/here.jsonl").is_ok(),
                 "{kind:?} 的删除被误判为失败"

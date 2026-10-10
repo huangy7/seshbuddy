@@ -9,7 +9,7 @@ import { t } from "../i18n";
  *
  * 与 Rust 侧的一致性由 `enumParity` 的 parity 测试钉住（判据取自 `CliKind::id()`）。
  */
-export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode"] as const;
+export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "goose"] as const;
 
 export type CliId = (typeof CLI_IDS)[number];
 
@@ -107,6 +107,10 @@ function defaultCliDataDir(id: CliId): string {
       win: "%USERPROFILE%\\.local\\share\\opencode",
       unix: "~/.local/share/opencode",
     },
+    goose: {
+      win: "%USERPROFILE%\\.local\\share\\goose",
+      unix: "~/.local/share/goose",
+    },
   };
   return IS_WINDOWS ? dirs[id].win : dirs[id].unix;
 }
@@ -123,6 +127,7 @@ function defaultCliDataSource(id: CliId): string {
     antigravity: "brain",
     // 库型源没有会话子目录：会话是数据目录下 SQLite 库里的行，数据源就是数据目录本身。
     opencode: "",
+    goose: "sessions",
   };
   return subdir[id] ? `${base}${sep}${subdir[id]}${sep}` : base;
 }
@@ -246,6 +251,24 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     permissionLabelKey: "cli.permissionLabel.opencode",
     permissionHintKey: "cli.permissionHint.opencode",
     // 库型源：会话行在库里，但启动是命令行（新建裸启、恢复带 `-s <id>`）；用量在 session 表里。
+    supportsNewSession: true,
+    supportsResumeSession: true,
+    supportsContextMenu: false,
+    supportsInPlaceFork: false,
+    supportsUsageStats: true,
+    supportsApiProfiles: false,
+    supportsApiLogs: false,
+    supportsDelete: false,
+  },
+  goose: {
+    id: "goose",
+    name: "Goose",
+    command: "goose",
+    dataSourcePath: defaultCliDataSource("goose"),
+    dataDirPath: defaultCliDataDir("goose"),
+    installHintKey: "cli.installHint.goose",
+    permissionLabelKey: "cli.permissionLabel.goose",
+    permissionHintKey: "cli.permissionHint.goose",
     supportsNewSession: true,
     supportsResumeSession: true,
     supportsContextMenu: false,

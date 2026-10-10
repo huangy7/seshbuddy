@@ -7,6 +7,7 @@ pub(crate) mod claude_entry;
 pub(crate) mod codex;
 pub(crate) mod dsh;
 pub(crate) mod gemini;
+pub(crate) mod goose;
 #[cfg(test)]
 mod parse_bench;
 pub(crate) mod shared;
