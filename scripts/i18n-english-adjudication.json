@@ -868,9 +868,22 @@
       "verdict": "keep",
       "reason": "身份值（厂商名/模型名）"
     },
+    "Grok": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
     "Goose": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
     "Kimi": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
     "Aider": {
+      "verdict": "keep",
+      "reason": "身份值（厂商名/模型名）"
+    },
     "Pi": {
       "verdict": "keep",
       "reason": "身份值（厂商名/模型名）"

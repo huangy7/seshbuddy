@@ -39,7 +39,7 @@ const gradIds = {
   agF11: `cb-ag-f11-${avatarUid}`,
 };
 
-type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "cursor" | "pi" | "aider" | "kimi" | "goose" | "generic";
+type ProviderBrand = "claude" | "codex" | "gemini" | "workbuddy" | "dsh" | "antigravity" | "opencode" | "cursor" | "pi" | "aider" | "kimi" | "goose" | "grok" | "generic";
 
 const brand = computed<ProviderBrand>(() => {
   if (props.cliId) {
@@ -56,6 +56,7 @@ if (c === "cursor") return "cursor";
     if (c === "aider") return "aider";
     if (c === "kimi") return "kimi";
     if (c === "goose") return "goose";
+    if (c === "grok") return "grok";
   }
   if (!props.model) return "generic";
   const m = props.model.toLowerCase();
@@ -70,6 +71,7 @@ if (m.includes("cursor")) return "cursor";
   if (m.includes("aider")) return "aider";
   if (m.includes("kimi") || m.includes("moonshot")) return "kimi";
   if (m.includes("goose")) return "goose";
+  if (m.includes("grok") || m.includes("xai")) return "grok";
   return "generic";
 });
 
@@ -84,6 +86,9 @@ const avatarTitle = computed(() => {
 });
 
 // ─── 官方品牌矢量路径（viewBox 0 0 24 24，workbuddy 为 0 0 1024 1024）───
+// Grok 官方标记：单色折线矢量
+const GROK_PATH =
+  "M9.27 15.29l7.978-5.897c.391-.29.95-.177 1.137.272.98 2.369.542 5.215-1.41 7.169-1.951 1.954-4.667 2.382-7.149 1.406l-2.711 1.257c3.889 2.661 8.611 2.003 11.562-.953 2.341-2.344 3.066-5.539 2.388-8.42l.006.007c-.983-4.232.242-5.924 2.75-9.383.06-.082.12-.164.179-.248l-3.301 3.305v-.01L9.267 15.292M7.623 16.723c-2.792-2.67-2.31-6.801.071-9.184 1.761-1.763 4.647-2.483 7.166-1.425l2.705-1.25a7.808 7.808 0 00-1.829-1A8.975 8.975 0 005.984 5.83c-2.533 2.536-3.33 6.436-1.962 9.764 1.022 2.487-.653 4.246-2.34 6.022-.599.63-1.199 1.259-1.682 1.925l7.62-6.815";
 // OpenCode 官方标记：一个方框挖空（evenodd 让内圈成为洞），故单路径即可。
 const OPENCODE_PATH = "M16 6H8v12h8V6zm4 16H4V2h16v20z";
 const CURSOR_PATH =
@@ -391,6 +396,16 @@ const WB_PILL2_PATH =
       <path :d="GOOSE_PATH" fill="#0da678" />
     </svg>
 
+    <!-- Grok 官方标（单色矢量，自适应黑/白） -->
+    <svg
+      v-else-if="brand === 'grok'"
+      class="avatar-svg brand-svg"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path :d="GROK_PATH" fill="currentColor" />
+    </svg>
+
     <!-- Generic AI Sparkle -->
     <svg
       v-else
@@ -437,6 +452,15 @@ const WB_PILL2_PATH =
 /* assistant 品牌头像：容器透明、无描边投影，展示官方彩色标本身 */
 .role-assistant {
   background: transparent;
+}
+
+.brand-grok {
+  color: #27272a;
+}
+
+:root.dark .brand-grok,
+[data-theme="dark"] .brand-grok {
+  color: #f4f4f5;
 }
 
 .brand-codex,

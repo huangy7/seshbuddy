@@ -37,7 +37,7 @@ macro_rules! cli_kinds {
     };
 }
 
-cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity, Opencode, Cursor, Pi, Aider, Kimi, Goose);
+cli_kinds!(Claude, Codex, Gemini, WorkBuddy, Dsh, Antigravity, Opencode, Cursor, Pi, Aider, Kimi, Goose, Grok);
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CliStatus {
@@ -71,6 +71,7 @@ Self::Cursor => "cursor",
             Self::Aider => "aider",
             Self::Kimi => "kimi",
             Self::Goose => "goose",
+            Self::Grok => "grok",
         }
     }
 
@@ -1123,9 +1124,21 @@ mod tests {
         let configs = list_cli_path_configs().expect("不应因库型源没有会话目录而整体失败");
         let ids: Vec<&str> = configs.iter().map(|config| config.id.as_str()).collect();
         assert!(!ids.contains(&"opencode"), "库型源没有会话目录，不该出现在路径配置里：{ids:?}");
-        for expected in ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity"] {
+        for expected in ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "grok"] {
             assert!(ids.contains(&expected), "文件型源 {expected} 的路径配置被库型源短路了：{ids:?}");
         }
+    }
+
+    #[test]
+    fn grok_default_data_dir_is_home_grok() {
+        let dir = default_data_dir(CliKind::Grok).unwrap();
+        assert!(dir.ends_with(".grok"));
+    }
+
+    #[test]
+    fn grok_sessions_dir_is_sessions_subdir() {
+        let dir = sessions_dir(CliKind::Grok).unwrap();
+        assert_eq!(dir.file_name().unwrap().to_str(), Some("sessions"));
     }
 
     #[test]
@@ -1195,7 +1208,7 @@ mod tests {
     /// 该契约由 `features` 的 `dsh_launch_is_explicitly_unsupported_on_both_paths` 钉住。
     #[test]
     fn launch_args_match_the_previous_implementation() {
-        let cases: [(CliKind, Option<&str>, bool, Option<&str>, &[&str]); 9] = [
+        let cases: [(CliKind, Option<&str>, bool, Option<&str>, &[&str]); 11] = [
             (CliKind::Claude, Some("sid"), false, None, &["--resume", "sid"]),
             (
                 CliKind::Claude,
@@ -1224,6 +1237,8 @@ mod tests {
                 &["--conversation", "sid", "--dangerously-skip-permissions"],
             ),
             (CliKind::Antigravity, None, true, None, &["--dangerously-skip-permissions"]),
+            (CliKind::Grok, Some("sid"), false, None, &["--resume", "sid"]),
+            (CliKind::Grok, None, false, None, &[]),
         ];
 
         for (kind, session_id, skip_permissions, settings_file, expected) in cases {
@@ -1322,7 +1337,7 @@ mod tests {
             home.join(".gemini").join("antigravity-cli")
         );
 
-        let cases: [(CliKind, PathBuf, &str); 7] = [
+        let cases: [(CliKind, PathBuf, &str); 8] = [
             (CliKind::Claude, home.join(".claude"), "projects"),
             (CliKind::Codex, home.join(".codex"), "sessions"),
             (CliKind::Gemini, home.join(".gemini"), "tmp"),
@@ -1333,7 +1348,7 @@ mod tests {
                 home.join(".gemini").join("antigravity-cli"),
                 "brain",
             ),
-(CliKind::Cursor, home.join(".cursor"), "projects"),
+            (CliKind::Cursor, home.join(".cursor"), "projects"),
             (
                 CliKind::Pi,
                 home.join(".pi").join("agent"),

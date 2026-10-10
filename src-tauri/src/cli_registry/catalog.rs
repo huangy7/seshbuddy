@@ -11,7 +11,7 @@ use super::descriptor::CliDescriptor;
 use super::source::CliSource;
 use super::sources::{
     AiderSource, AntigravitySource, ClaudeSource, CodexSource, CursorSource, DshSource, GeminiSource,
-    GooseSource, KimiSource, OpencodeSource, PiSource, WorkBuddySource,
+    GooseSource, GrokSource, KimiSource, OpencodeSource, PiSource, WorkBuddySource,
 };
 
 /// 按枚举取源。穷尽 `match`：新增变体而不在此登记，编译不过。
@@ -29,6 +29,7 @@ pub(crate) fn source_for(kind: CliKind) -> &'static dyn CliSource {
         CliKind::Aider => &AiderSource,
         CliKind::Kimi => &KimiSource,
         CliKind::Goose => &GooseSource,
+        CliKind::Grok => &GrokSource,
     }
 }
 
@@ -75,6 +76,8 @@ mod tests {
             // 并不是 Antigravity 的数据目录。若排除方按裸子串否决，这条路径会
             // 「无人认领」而静默落到兜底项 —— 归属必须仍留在 Gemini。
             ("/Users/x/.gemini/tmp/antigravity-cli-tools/chats/s1.jsonl", CliKind::Gemini),
+            ("/Users/x/.grok/sessions/p/s1/chat_history.jsonl", CliKind::Grok),
+            (r"C:\Users\x\.grok\sessions\p\s1\chat_history.jsonl", CliKind::Grok),
             (r"C:\Users\x\.codex\sessions\a.jsonl", CliKind::Codex),
             (r"C:\Users\x\.gemini\antigravity-cli\brain\s1\transcript.jsonl", CliKind::Antigravity),
 (r"C:\Users\x\.cursor\projects\p\agent-transcripts\s\s.jsonl", CliKind::Cursor),
