@@ -21,7 +21,7 @@ mod tests {
             .collect();
         assert_eq!(
             without,
-vec!["dsh", "antigravity", "opencode", "cursor", "pi"],
+vec!["dsh", "antigravity", "opencode", "cursor", "pi", "aider"],
             "「暂无提取格式」的 CLI 集合变了：新 CLI 必须在此显式表态"
         );
     }
@@ -44,6 +44,7 @@ vec!["dsh", "antigravity", "opencode", "cursor", "pi"],
             (CliKind::Opencode, None),
 (CliKind::Cursor, None),
             (CliKind::Pi, None),
+            (CliKind::Aider, None),
         ];
         for (kind, format) in expected {
             assert_eq!(

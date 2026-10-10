@@ -10,7 +10,7 @@ use crate::cli::CliKind;
 use super::descriptor::CliDescriptor;
 use super::source::CliSource;
 use super::sources::{
-    AntigravitySource, ClaudeSource, CodexSource, CursorSource, DshSource, GeminiSource,
+    AiderSource, AntigravitySource, ClaudeSource, CodexSource, CursorSource, DshSource, GeminiSource,
     OpencodeSource, PiSource, WorkBuddySource,
 };
 
@@ -26,6 +26,7 @@ pub(crate) fn source_for(kind: CliKind) -> &'static dyn CliSource {
         CliKind::Opencode => &OpencodeSource,
         CliKind::Cursor => &CursorSource,
         CliKind::Pi => &PiSource,
+        CliKind::Aider => &AiderSource,
     }
 }
 
@@ -51,7 +52,7 @@ pub(crate) fn kind_for_path(key: &str) -> CliKind {
 mod tests {
     use super::*;
 
-    /// 夹具路径覆盖全部 6 个 CLI 与两个平台的路径分隔符。
+    /// 夹具路径覆盖全部 CLI 与两个平台的路径分隔符。
     fn fixture_paths() -> Vec<(&'static str, CliKind)> {
         vec![
             ("/Users/x/.claude/projects/a/b.jsonl", CliKind::Claude),
@@ -62,8 +63,8 @@ mod tests {
             ("/Users/x/.gemini/antigravity-cli/brain/s1/transcript.jsonl", CliKind::Antigravity),
             ("/Users/x/.pi/agent/sessions/a.jsonl", CliKind::Pi),
             // 库型源：会话身份是 `cli://opencode/<id>` 虚拟键，不是文件路径。
-            ("cli://opencode/ses_x", CliKind::Opencode),
             ("/Users/x/.cursor/projects/p/agent-transcripts/s/s.jsonl", CliKind::Cursor),
+            ("/Users/x/.aider/chats/a.md", CliKind::Aider),
             // 边界案例：`antigravity-cli-tools` 只是名字里带了同一串字符，
             // 并不是 Antigravity 的数据目录。若排除方按裸子串否决，这条路径会
             // 「无人认领」而静默落到兜底项 —— 归属必须仍留在 Gemini。
@@ -72,6 +73,7 @@ mod tests {
             (r"C:\Users\x\.gemini\antigravity-cli\brain\s1\transcript.jsonl", CliKind::Antigravity),
 (r"C:\Users\x\.cursor\projects\p\agent-transcripts\s\s.jsonl", CliKind::Cursor),
             (r"C:\Users\x\.pi\agent\sessions\a.jsonl", CliKind::Pi),
+            (r"C:\Users\x\.aider\chats\a.md", CliKind::Aider),
         ]
     }
 

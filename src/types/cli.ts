@@ -9,7 +9,7 @@ import { t } from "../i18n";
  *
  * 与 Rust 侧的一致性由 `enumParity` 的 parity 测试钉住（判据取自 `CliKind::id()`）。
  */
-export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "cursor", "pi"] as const;
+export const CLI_IDS = ["claude", "codex", "gemini", "workbuddy", "dsh", "antigravity", "opencode", "cursor", "pi", "aider"] as const;
 
 export type CliId = (typeof CLI_IDS)[number];
 
@@ -107,10 +107,14 @@ function defaultCliDataDir(id: CliId): string {
       win: "%USERPROFILE%\\.local\\share\\opencode",
       unix: "~/.local/share/opencode",
     },
-cursor: { win: "%USERPROFILE%\\.cursor", unix: "~/.cursor" },
+    cursor: { win: "%USERPROFILE%\\.cursor", unix: "~/.cursor" },
     pi: {
       win: "%USERPROFILE%\\.pi\\agent",
       unix: "~/.pi/agent",
+    },
+    aider: {
+      win: "%USERPROFILE%\\.aider",
+      unix: "~/.aider",
     },
   };
   return IS_WINDOWS ? dirs[id].win : dirs[id].unix;
@@ -130,6 +134,7 @@ function defaultCliDataSource(id: CliId): string {
     opencode: "",
 cursor: "projects",
     pi: "sessions",
+    aider: "chats",
   };
   return subdir[id] ? `${base}${sep}${subdir[id]}${sep}` : base;
 }
@@ -289,6 +294,24 @@ export const CLI_DEFINITIONS: Record<CliId, CliDefinition> = {
     installHintKey: "cli.installHint.pi",
     permissionLabelKey: "cli.permissionLabel.pi",
     permissionHintKey: "cli.permissionHint.pi",
+    supportsNewSession: true,
+    supportsResumeSession: true,
+    supportsContextMenu: false,
+    supportsInPlaceFork: false,
+    supportsUsageStats: false,
+    supportsApiProfiles: false,
+    supportsApiLogs: false,
+    supportsDelete: true,
+  },
+  aider: {
+    id: "aider",
+    name: "Aider",
+    command: "aider",
+    dataSourcePath: defaultCliDataSource("aider"),
+    dataDirPath: defaultCliDataDir("aider"),
+    installHintKey: "cli.installHint.aider",
+    permissionLabelKey: "cli.permissionLabel.aider",
+    permissionHintKey: "cli.permissionHint.aider",
     supportsNewSession: true,
     supportsResumeSession: true,
     supportsContextMenu: false,
