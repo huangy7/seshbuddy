@@ -500,9 +500,22 @@ function exportSelected(format: "txt" | "markdown" | "json" | "jsonl") {
   toggleSelectionMode();
 }
 
-async function exportSelectedAsImage() {
-  const sorted = Array.from(selectedIndexes.value).sort((a, b) => a - b);
-  if (sorted.length === 0) return;
+function getExportBackgroundColor(): string {
+  const bodyBg = getComputedStyle(document.body).backgroundColor;
+  if (bodyBg && bodyBg !== 'transparent' && bodyBg !== 'rgba(0, 0, 0, 0)') {
+    return bodyBg;
+  }
+  const themeBg = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
+  if (themeBg && themeBg !== 'transparent' && themeBg !== 'rgba(0, 0, 0, 0)') {
+    return themeBg;
+  }
+  const isDark = document.documentElement.classList.contains('dark') ||
+    document.documentElement.getAttribute('data-theme') === 'dark';
+  return isDark ? '#16181d' : '#ffffff';
+}
+
+async function exportMessagesAsImage(messageElements: HTMLElement[], defaultSuffix: string, onComplete?: () => void) {
+  if (!messageElements || messageElements.length === 0) return;
 
   document.body.style.cursor = 'wait';
 
@@ -514,13 +527,17 @@ async function exportSelectedAsImage() {
     const { save } = await import('@tauri-apps/plugin-dialog');
     const { writeFile } = await import('@tauri-apps/plugin-fs');
 
+    const bgColor = getExportBackgroundColor();
+
     container = document.createElement('div');
     container.className = 'chat-view';
-    container.style.backgroundColor = getComputedStyle(chatContainer.value!).getPropertyValue('background-color') || 'var(--color-bg)';
+    container.style.backgroundColor = bgColor;
     container.style.position = 'fixed';
     container.style.left = '0';
     container.style.top = '0';
-    container.style.width = chatContainer.value?.clientWidth + 'px';
+    container.style.pointerEvents = 'none';
+    const targetWidth = Math.min(chatContainer.value?.clientWidth || 800, 800);
+    container.style.width = targetWidth + 'px';
     container.style.height = 'auto';
     container.style.zIndex = '99997';
 
@@ -546,14 +563,16 @@ async function exportSelectedAsImage() {
 
     container.appendChild(messagesDiv);
 
-    const originalSelectedMessages = chatContainer.value?.querySelectorAll('.message.is-selected');
-    if (!originalSelectedMessages || originalSelectedMessages.length === 0) return;
-
-    originalSelectedMessages.forEach((msg) => {
+    messageElements.forEach((msg, idx) => {
       const clone = msg.cloneNode(true) as HTMLElement;
       const checkbox = clone.querySelector('.selection-checkbox-wrapper');
       if (checkbox) checkbox.remove();
       clone.classList.remove('is-selected', 'is-selectable');
+      // 截图移除多余的交互动作按钮（复制/书签/截图等），保持纯净美感
+      clone.querySelectorAll('.meta-actions').forEach((el) => el.remove());
+      if (idx === messageElements.length - 1) {
+        clone.style.marginBottom = '0';
+      }
       messagesDiv.appendChild(clone);
     });
 
@@ -599,7 +618,7 @@ async function exportSelectedAsImage() {
     `;
     document.body.appendChild(overlay);
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     const contentHeight = container.scrollHeight;
     const contentWidth = container.scrollWidth;
@@ -613,17 +632,19 @@ async function exportSelectedAsImage() {
       width: contentWidth,
       height: contentHeight,
       skipFonts: true,
-      backgroundColor: getComputedStyle(container).backgroundColor || '#ffffff',
+      backgroundColor: bgColor,
     });
 
     container.remove();
+    container = null;
     overlay.remove();
+    overlay = null;
 
     const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
     const binaryString = window.atob(base64Data);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      bytes[i] = binaryString.charCodeAt(i);
     }
 
     const { projects } = useSessions();
@@ -651,16 +672,30 @@ async function exportSelectedAsImage() {
     const now = new Date();
     const dateStr = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, "0")}${now.getDate().toString().padStart(2, "0")}_${now.getHours().toString().padStart(2, "0")}${now.getMinutes().toString().padStart(2, "0")}${now.getSeconds().toString().padStart(2, "0")}`;
 
-    const defaultPath = `${safeName}_${dateStr}_selected.png`;
+    const defaultPath = `${safeName}_${dateStr}_${defaultSuffix}.png`;
 
-    const savePath = await save({
-      filters: [{ name: t("common.chatView.pngImage"), extensions: ["png"] }],
-      defaultPath,
-    });
+    try {
+      const savePath = await save({
+        filters: [{ name: t("common.chatView.pngImage"), extensions: ["png"] }],
+        defaultPath,
+      });
 
-    if (savePath) {
-      await writeFile(savePath, bytes);
-      toggleSelectionMode();
+      if (savePath) {
+        await writeFile(savePath, bytes);
+        onComplete?.();
+      }
+    } catch {
+      // 降级支持 Web 端下载
+      const blob = new Blob([bytes], { type: "image/png" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = defaultPath;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      onComplete?.();
     }
   } catch (err) {
     console.error("Screenshot failed", err);
@@ -668,10 +703,38 @@ async function exportSelectedAsImage() {
     overlay?.remove();
     import('@tauri-apps/plugin-dialog').then(({ message }) => {
       message(renderAppError(err), { title: t("common.chatView.exportImageFailed"), kind: "error" });
-    });
+    }).catch(() => {});
   } finally {
     document.body.style.cursor = '';
   }
+}
+
+async function exportSelectedAsImage() {
+  const sorted = Array.from(selectedIndexes.value).sort((a, b) => a - b);
+  if (sorted.length === 0) return;
+
+  const originalSelectedMessages = chatContainer.value?.querySelectorAll('.message.is-selected');
+  if (!originalSelectedMessages || originalSelectedMessages.length === 0) return;
+
+  await exportMessagesAsImage(Array.from(originalSelectedMessages) as HTMLElement[], 'selected', () => {
+    toggleSelectionMode();
+  });
+}
+
+async function onExportSingleMessage(event: MouseEvent, msgIndex: number, role: 'user' | 'assistant') {
+  let targetEl: HTMLElement | null = null;
+  if (event.target) {
+    targetEl = (event.target as HTMLElement).closest('.message');
+  }
+  if (!targetEl && chatContainer.value) {
+    const selector = role === 'user'
+      ? `.message-user[data-msg-index="${msgIndex}"]`
+      : `.message-assistant[data-msg-index~="${msgIndex}"]`;
+    targetEl = chatContainer.value.querySelector<HTMLElement>(selector);
+  }
+  if (!targetEl) return;
+
+  await exportMessagesAsImage([targetEl], 'message');
 }
 
 const {
@@ -1224,6 +1287,7 @@ function formatBytes(bytes: number): string {
                     @toggle-bookmark="$emit('toggleBookmark', turn.userMessage.originalIndex)"
                     @fork-from-here="$emit('forkFromHere', turn.userMessage.msg.uuid!)"
                     @toggle-api-detail="toggleApiDetail(turn.userMessage.originalIndex, turn.userMessage.msg.timestamp)"
+                    @export-image="onExportSingleMessage($event, turn.userMessage.originalIndex, 'user')"
                   />
                   <div class="panel-slot">
                     <Transition name="api-detail-expand">
@@ -1364,6 +1428,7 @@ function formatBytes(bytes: number): string {
                     @toggle-bookmark="$emit('toggleBookmark', turn.assistantTurn.originalIndexes[0])"
                     @fork-from-here="$emit('forkFromHere', assistantTurnForkUuid(turn)!)"
                     @toggle-api-detail="toggleApiDetail(turn.assistantTurn.originalIndexes[0], turn.assistantTurn.timestamp)"
+                    @export-image="onExportSingleMessage($event, turn.assistantTurn.originalIndexes[0], 'assistant')"
                   />
                   <div class="panel-slot">
                     <Transition name="api-detail-expand">

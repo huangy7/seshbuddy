@@ -32,6 +32,7 @@
     "identityResolving": "Resolving session identity",
     "addBookmark": "Add bookmark",
     "removeBookmark": "Remove bookmark",
+    "screenshot": "Screenshot message",
     "viewApiRequest": "View API request"
   },
   "toolGroup": {

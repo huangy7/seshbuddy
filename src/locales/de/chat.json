@@ -32,6 +32,7 @@
     "identityResolving": "Sitzungsidentität wird ermittelt",
     "addBookmark": "Lesezeichen hinzufügen",
     "removeBookmark": "Lesezeichen entfernen",
+    "screenshot": "Nachricht als Screenshot erfassen",
     "viewApiRequest": "API-Anfrage anzeigen"
   },
   "toolGroup": {
