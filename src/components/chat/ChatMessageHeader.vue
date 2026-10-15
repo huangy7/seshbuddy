@@ -25,6 +25,7 @@ defineEmits<{
   toggleBookmark: [];
   toggleApiDetail: [];
   forkFromHere: [];
+  exportImage: [event: MouseEvent];
 }>();
 
 const inputTokens = computed(() => props.tokenUsage?.input_tokens ?? 0);
@@ -83,6 +84,13 @@ const tokenTooltip = computed(() => {
         @click.stop="$emit('forkFromHere')"
       >
         <SvgIcon name="fork" :size="13" />
+      </button>
+      <button
+        class="meta-btn screenshot-btn"
+        :title="t('chat.messageHeader.screenshot')"
+        @click.stop="$emit('exportImage', $event)"
+      >
+        <SvgIcon name="camera" :size="13" />
       </button>
       <button
         class="meta-btn bookmark-btn"

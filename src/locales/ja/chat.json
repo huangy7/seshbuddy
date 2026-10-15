@@ -32,6 +32,7 @@
     "identityResolving": "セッション識別子を解析しています",
     "addBookmark": "ブックマークを追加",
     "removeBookmark": "ブックマークを解除",
+    "screenshot": "メッセージを画像で保存",
     "viewApiRequest": "API リクエストを表示"
   },
   "toolGroup": {

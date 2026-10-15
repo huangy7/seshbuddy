@@ -32,6 +32,7 @@
     "identityResolving": "正在解析会话身份",
     "addBookmark": "添加书签",
     "removeBookmark": "取消书签",
+    "screenshot": "消息截图",
     "viewApiRequest": "查看 API 请求"
   },
   "toolGroup": {
