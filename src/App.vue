@@ -254,7 +254,6 @@ function registerTerminalRef(sessionId: string, el: InstanceType<typeof AgentTer
 
 const showNewSessionDialog = ref(false);
 const newSessionInitialPath = ref<string | null>(null);
-const claudeProfiles = ref<string[]>([]);
 const contextMenuTargetSession = ref<{
   filePath: string;
   sessionId: string;
@@ -279,15 +278,6 @@ const contextMenuTargetSessionIsArchived = computed(() => {
     .find((s) => s.file_path === filePath && s.cli_id === cliId);
   return match?.is_archived ?? false;
 });
-
-async function loadClaudeProfiles() {
-  try {
-    const names = await invokeApp<string[]>("list_profiles", { cliId: "claude" });
-    claudeProfiles.value = names;
-  } catch {
-    claudeProfiles.value = [];
-  }
-}
 
 function openNewSessionDialog(projectPath?: string) {
   const launchCli = getCliDefinition(launchCliId.value);
@@ -1086,7 +1076,6 @@ function onContextMenuSession(
                   return;
                 }
                 contextMenuTargetSession.value = { filePath, sessionId, projectPath, cliId };
-                void loadClaudeProfiles();
                 showContextMenuResumeDialog.value = true;
               },
             },
@@ -1764,7 +1753,6 @@ async function startSessionWork() {
   void invokeApp("refresh_tray_menu", { cliId: currentCliId.value }).catch((error) => {
     console.error("refresh_tray_menu failed:", error);
   });
-  void loadClaudeProfiles();
   void loadBookmarks();
   void loadFavorites().catch((error) => {
     console.error("read_favorite_entries failed:", error);
@@ -2216,7 +2204,6 @@ onBeforeUnmount(() => {
               :hasParentSession="!!tab.parentSessionPath"
               :isArchived="selectedSession?.session.is_archived"
               :hasArchiveSnapshot="selectedSession?.session.has_archive_snapshot"
-              :profiles="claudeProfiles"
               :cliId="cliIdOfTab(tab)"
               :isRefreshing="isCurrentSessionRefreshing"
               :favorite="isFavorite({ cliId: cliIdOfTab(tab), filePath: tab.sessionPath! })"
@@ -2454,7 +2441,7 @@ onBeforeUnmount(() => {
       ref="settingsDialogRef"
       :initial-tab="settingsInitialTab"
       :initial-cli-id="settingsInitialCliId"
-      @close="showSettings = false; void loadClaudeProfiles();"
+      @close="showSettings = false"
       @registerMenu="registerContextMenu"
       @unregisterMenu="unregisterContextMenu"
       @openSession="onOpenSessionFromSettings"
@@ -2502,7 +2489,6 @@ onBeforeUnmount(() => {
     />
     <ResumeSessionDialog
       v-if="showContextMenuResumeDialog && contextMenuTargetSession"
-      :profiles="claudeProfiles"
       :cliId="contextMenuTargetSession.cliId"
       :isArchived="contextMenuTargetSessionIsArchived"
       @close="showContextMenuResumeDialog = false"
@@ -2520,7 +2506,6 @@ onBeforeUnmount(() => {
     />
     <ResumeSessionDialog
       v-if="showForkDialog && forkTarget"
-      :profiles="claudeProfiles"
       :cliId="forkTarget.cliId"
       :title="t('app.dialog.forkSession')"
       @close="showForkDialog = false"

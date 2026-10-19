@@ -23,7 +23,6 @@ const props = defineProps<{
   hasParentSession?: boolean;
   isArchived?: boolean;
   hasArchiveSnapshot?: boolean;
-  profiles?: string[];
   cliId?: string;
   messages?: ChatMessage[] | (() => ChatMessage[]);
   isRefreshing?: boolean;
@@ -47,7 +46,6 @@ const emit = defineEmits<{
   openProxyTraffic: [];
 }>();
 
-const profiles = computed(() => props.profiles ?? []);
 const currentCliDef = computed(() =>
   props.cliId && isCliId(props.cliId) ? getCliDefinition(props.cliId) : null
 );
@@ -554,7 +552,6 @@ function handleRefresh() {
     <!-- Resume Session Dialog -->
     <ResumeSessionDialog
       v-if="showResumeDialog"
-      :profiles="profiles"
       :cliId="cliId ?? 'claude'"
       :isArchived="isArchived"
       @close="showResumeDialog = false"
